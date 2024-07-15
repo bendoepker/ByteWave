@@ -1,0 +1,47 @@
+ByteWave Overview
+
+Windows:
+	Menu Bar
+	Playlist
+	Mixer
+
+Menu Bar:
+	File:
+		New File
+		Open File
+		Save
+		Save As
+	Mixer:
+		Opens / Closes the mixer window
+
+Playlist:
+	Sorted by Channels (y axis) and Beats (x-axis)
+
+Mixer:
+	Contains:
+		Collection of Mixer Tracks
+		Global Track
+
+Mixer Tracks:
+	Inputs:
+		External:
+			Other Mixer Track
+			External Audio Device (Audio Interface / Microphone)
+		Internal:
+			Playlist Channel
+	Outputs:
+		2 Audio Buffers (Left & Right)
+	Output Routing:
+		Another Mixer Track
+		Global Track
+
+Global Track:
+	Inputs:
+		External:
+			Mixer Tracks
+		Internal:
+			None
+	Outputs:
+		2 Audio Buffers (Left & Right)
+	Output Routing:
+		Audio Output Device
