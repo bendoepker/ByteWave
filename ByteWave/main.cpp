@@ -3,40 +3,52 @@
 #include "MainWindow.h"
 
 #include "Audio/portaudio.h"
-#include "audioProcessing.h"
+#include "InternalAudio/audioIO.h"
 
-//#include <Windows.h>
-//#include <iostream>
+#include <Windows.h>
+#include <iostream>
 
+void HandlePaError(PaError);
+void QueryDevices(const PaDeviceInfo*);
 
 int main(int argc, char* argv[])
 {
 	int returnVal;
 	PaError err;
-
+	//Initialize Port Audio Library and Handle Errors
+	err = Pa_Initialize();
+	HandlePaError(err);
+	//Application Initialization
 	QApplication app(argc, argv);
 	MainWindow mw;
 	mw.showMaximized();
 
-	//Initialize Port Audio Library and Handle Errors
-	err = Pa_Initialize();
-	if (err != paNoError) goto Error;
+
 
 	//Begin Qt Event Loop
 	returnVal = app.exec();
 
-	err = Pa_Terminate();
-	if (err != paNoError) goto Error;
-
 	//Application Exit
+	err = Pa_Terminate();
+	HandlePaError(err);
 	return returnVal;
+}
 
-Error:
-	//Uncommenting this code will show a console with the error code (must Un-comment the includes for Windows.h)
-	//TODO: Add error handling pop-ups using Qt
-		//AllocConsole();
-		//freopen("CONOUT$", "w", stdout);
-		//std::cout << "Port Audio Error:" << Pa_GetErrorText(err) << std::endl;
-		//std::system("cmd");
-	return -1;
+/*
+
+	This function uses an unsafe function "freopen", TODO: change to a qt popup window
+
+*/
+void HandlePaError(PaError error)
+{
+	if (error != paNoError)
+	{
+		AllocConsole();
+		freopen("CONOUT$", "w", stdout);
+		std::cout << "Port Audio Error: " << Pa_GetErrorText(error) << std::endl;
+		std::cout << "Error Number: " << error << std::endl;
+		std::system("cmd");
+		exit(-1);
+	}
+	return;
 }

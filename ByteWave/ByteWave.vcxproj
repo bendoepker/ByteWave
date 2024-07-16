@@ -114,7 +114,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="audioProcessing.cpp" />
+    <ClCompile Include="Audio\iasiothiscallresolver.cpp" />
+    <ClCompile Include="InternalAudio\audioIO.cpp" />
     <ClCompile Include="Audio\asio.cpp" />
     <ClCompile Include="Audio\asiodrivers.cpp" />
     <ClCompile Include="Audio\asiolist.cpp" />
@@ -133,6 +134,7 @@
     <ClCompile Include="Audio\pa_win_util.c" />
     <ClCompile Include="Audio\pa_win_waveformat.c" />
     <ClCompile Include="Audio\pa_x86_plain_converters.c" />
+    <ClCompile Include="InternalAudio\MixerTrack.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
   </ItemGroup>
@@ -143,9 +145,10 @@
     <Text Include="Overview.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="audioProcessing.h" />
+    <ClInclude Include="InternalAudio\audioIO.h" />
     <ClInclude Include="Audio\pa_asio.h" />
     <ClInclude Include="Audio\portaudio.h" />
+    <ClInclude Include="InternalAudio\MixerTrack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

@@ -83,7 +83,13 @@
     <ClCompile Include="Audio\pa_win_util.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="audioProcessing.cpp">
+    <ClCompile Include="InternalAudio\audioIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InternalAudio\MixerTrack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\iasiothiscallresolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,7 +108,10 @@
     <ClInclude Include="Audio\pa_asio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="audioProcessing.h">
+    <ClInclude Include="InternalAudio\audioIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InternalAudio\MixerTrack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

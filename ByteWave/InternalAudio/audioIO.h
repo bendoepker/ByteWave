@@ -11,7 +11,7 @@ typedef struct
 	This is the callback function that is used by the PortAudio API
 
 */
-static int BWPACallback(const void* inputBuffer,
+int BWPACallback(const void* inputBuffer,
 						void* outputBuffer,
 						unsigned long framesPerBuffer,
 						const PaStreamCallbackTimeInfo*,

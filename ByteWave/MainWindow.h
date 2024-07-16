@@ -4,6 +4,7 @@
 #include <QtWidgets/qpushbutton.h>
 #include <QtWidgets/QMenuBar.h>
 #include <QtWidgets/qlabel.h>
+#include <QtWidgets/qtablewidget.h>
 
 namespace Ui {
 	class MainWindow;
@@ -16,14 +17,14 @@ class MainWindow : public QMainWindow
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
-	void HandlePushButton();
-	void HandlePushButtonReleased();
 	void setLabel1Text(int);
+	void FillTable();
 
 private:
 	QPushButton *upButton;
 	QLabel* label1;
 	QMenuBar *mainMenuBar;
+	QTableWidget* deviceInfoTable;
 	QMenu* fileMenu;
 	QMenu* saveAsMenu;
 	const int minWidth = 600;

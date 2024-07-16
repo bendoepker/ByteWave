@@ -45,3 +45,7 @@ Global Track:
 		2 Audio Buffers (Left & Right)
 	Output Routing:
 		Audio Output Device
+
+TODO:
+	Add function definition to the PA Audio Callback
+	Remove "goto Error" statements 

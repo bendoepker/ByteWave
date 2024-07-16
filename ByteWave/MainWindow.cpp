@@ -7,40 +7,48 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	this->setMinimumSize(QSize(minWidth, minHeight));
 
-	upButton = new QPushButton("Next Device", this);
-	upButton->setGeometry(QRect(QPoint(100, 100), QPoint(200, 150)));
-	connect(upButton, &QPushButton::pressed, this, &MainWindow::HandlePushButton);
-	connect(upButton, &QPushButton::released, this, &MainWindow::HandlePushButtonReleased);
-
 	mainMenuBar = new QMenuBar(this);
 	fileMenu = mainMenuBar->addMenu("File");
 	saveAsMenu = fileMenu->addMenu("Save As");
 
-	label1 = new QLabel("Hello", this);
-	label1->setGeometry(QRect(QPoint(500, 500), QPoint(800, 800)));
+	deviceInfoTable = new QTableWidget(this);
+	FillTable();
+	deviceInfoTable->move(QPoint(500, 500));
 }
 
 MainWindow::~MainWindow()
 {}
 
-void MainWindow::setLabel1Text(int text)
+void MainWindow::FillTable()
 {
-	label1->setText(QVariant(text).toString());
-}
+	int numDevices = Pa_GetDeviceCount();
+	deviceInfoTable->setFixedSize(QSize(500, 500));
+	deviceInfoTable->setColumnCount(4);
+	deviceInfoTable->setRowCount(numDevices);
+	QTableWidgetItem *device = new QTableWidgetItem();
+	QStringList HeaderList;
+	HeaderList << "Device Name" << "Sample Rate" << "Max Input Channels" << "Max Output Channels";
 
-/*
-	!! THIS CODE IS ERROR PRONE WHEN DEVICES ARE NOT PRESENT !!
-	!!                      REMOVE ASAP                      !!
-*/
-void MainWindow::HandlePushButton()
-{
-	const PaDeviceInfo *device = Pa_GetDeviceInfo(PaDeviceIndex(num));
+	deviceInfoTable->setHorizontalHeaderLabels(HeaderList);
 
-	label1->setText(QVariant(device->name).toString() + " " + QVariant(Pa_GetDeviceCount()).toString() + " " + QVariant(num).toString());
+	for (int i = 0; i < numDevices; i++){
+		QTableWidgetItem* deviceName = new QTableWidgetItem();
+		deviceName->setText(QVariant(Pa_GetDeviceInfo(i)->name).toString());
+		deviceInfoTable->setItem(i, 0, deviceName);
 
-	num < Pa_GetDeviceCount() - 1 ? num++ : num = 0;
-}
+		QTableWidgetItem* deviceSampleRate = new QTableWidgetItem();
+		deviceSampleRate->setText(QVariant(Pa_GetDeviceInfo(i)->defaultSampleRate).toString());
+		deviceInfoTable->setItem(i, 1, deviceSampleRate);
 
-void MainWindow::HandlePushButtonReleased()
-{
+		QTableWidgetItem* deviceMaxInput = new QTableWidgetItem();
+		deviceMaxInput->setText(QVariant(Pa_GetDeviceInfo(i)->maxInputChannels).toString());
+		deviceInfoTable->setItem(i, 2, deviceMaxInput);
+
+		QTableWidgetItem* deviceMaxOutput = new QTableWidgetItem();
+		deviceMaxOutput->setText(QVariant(Pa_GetDeviceInfo(i)->maxOutputChannels).toString());
+		deviceInfoTable->setItem(i, 3, deviceMaxOutput);
+
+	}
+
+	deviceInfoTable->resizeColumnsToContents();
 }
