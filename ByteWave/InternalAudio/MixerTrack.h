@@ -1,6 +1,40 @@
 #include "Audio/portaudio.h"
 #include "InternalAudio/audioIO.h"
 
+/*
+
++----------------------------------------------------------+
+|                                                          |
+|                     Mixer Input Buffer                   |
+|                                                          |
++----------------------------------------------------------+
+						     ||
+						     ||
+						     \/
++----------------------------------------------------------+
+|                                                          |
+|                      Audio Processes                     |
+|                                                          |
++----------------------------------------------------------+
+						     ||
+						     ||
+						     \/
++----------------------------------------------------------+
+|                                                          |
+|                    Mixer Output Buffer                   |
+|                                                          |
++----------------------------------------------------------+
+
+	Retrieve the audio buffer from the BWPACallback
+	Do Stuff (Process the audio)
+
+
+*/
+
+
+
+
+
 enum BWMixerType
 {
 	MT_PLAYLIST = 0, //Mixer track that only takes an input from the playlist

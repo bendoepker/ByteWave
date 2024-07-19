@@ -14,6 +14,6 @@ typedef struct
 int BWPACallback(const void* inputBuffer,
 						void* outputBuffer,
 						unsigned long framesPerBuffer,
-						const PaStreamCallbackTimeInfo*,
+						const PaStreamCallbackTimeInfo* timeInfo,
 						PaStreamCallbackFlags statusFlags,
 						void* userData);
