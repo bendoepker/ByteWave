@@ -9,32 +9,33 @@ Audio API Design
 
 ## Process-Trace Diagram
 
-> AudioProccesFunction
-> |
-> +---- Audio ----> BWAAPI +-> WASAPI
-> |                        |
-> |                        +-> ASIO
-> |                        |
-> |                        +-> CoreAudio
-> |                        |
-> |                        +-> PulseAudio
-> |                        |
-> |                        +-> PipeWire
-> |                        |
-> |                        +-> JACK
-> |
-> +---- Request ----> BWAAPI ----> Data ----> BWHandlers
->
-> WASAPI -----+----> Error ----> BWAAPI +-> BWErrorHandler
->             |
-> ASIO -------+
->             |
-> CoreAudio --+
->             |
-> PulseAudio -+
->             |
-> PipeWire ---+
->             |
-> JACK -------+
+```
+AudioProccesFunction
+|
++---- Audio ----> BWAAPI +-> WASAPI
+|                        |
+|                        +-> ASIO
+|                        |
+|                        +-> CoreAudio
+|                        |
+|                        +-> PulseAudio
+|                        |
+|                        +-> PipeWire
+|                        |
+|                        +-> JACK
+|
++---- Request ----> BWAAPI ----> Data ----> BWHandlers
 
+WASAPI -----+----> Error ----> BWAAPI +-> BWErrorHandler
+            |
+ASIO -------+
+            |
+CoreAudio --+
+            |
+PulseAudio -+
+            |
+PipeWire ---+
+            |
+JACK -------+
+```
 
