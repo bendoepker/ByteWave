@@ -6,8 +6,6 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("main.zig"),
         .target = b.host,
     });
-    exe.addIncludePath(b.path("./include"));
-    exe.addObjectFile(b.path("./lib/libportaudio.a"));
 
     b.installArtifact(exe);
 }
