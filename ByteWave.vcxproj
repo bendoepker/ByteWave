@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -154,6 +154,7 @@
     <ClCompile Include="lib\portaudio\pa_win_waveformat.c" />
     <ClCompile Include="lib\portaudio\pa_x86_plain_converters.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\parser\wav.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ASIOSDK2\common\asio.h" />
@@ -184,10 +185,12 @@
     <ClInclude Include="include\portaudio\pa_win_waveformat.h" />
     <ClInclude Include="include\portaudio\pa_x86_plain_converters.h" />
     <ClInclude Include="include\portaudio\portaudio.h" />
+    <ClInclude Include="src\parser\wav.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="include\ASIOSDK2\driver\asiosample\asiosample.def" />
+    <None Include="meson.build" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

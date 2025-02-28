@@ -75,6 +75,54 @@
     <ClCompile Include="lib\portaudio\pa_x86_plain_converters.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\common\asio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\common\asiodrvr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\common\combase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\common\debugmessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\common\dllentry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\common\register.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\driver\asiosample\asiosmpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\driver\asiosample\macnanosecs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\driver\asiosample\mactimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\driver\asiosample\makesamp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\driver\asiosample\wintimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\host\ASIOConvertSamples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\host\asiodrivers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\host\pc\asiolist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\ASIOSDK2\host\sample\hostsample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\wav.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\asiosdk\asio.h">
@@ -86,44 +134,90 @@
     <ClInclude Include="include\asiosdk\asiolist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_allocation.h">
+    <ClInclude Include="include\ASIOSDK2\common\asio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_asio.h">
+    <ClInclude Include="include\ASIOSDK2\common\asiodrvr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_converters.h">
+    <ClInclude Include="include\ASIOSDK2\common\asiosys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_cpuload.h">
+    <ClInclude Include="include\ASIOSDK2\common\combase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_dither.h">
+    <ClInclude Include="include\ASIOSDK2\common\iasiodrv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_process.h">
+    <ClInclude Include="include\ASIOSDK2\common\wxdebug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_ringbuffer.h">
+    <ClInclude Include="include\ASIOSDK2\driver\asiosample\asiosmpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_stream.h">
+    <ClInclude Include="include\ASIOSDK2\host\ASIOConvertSamples.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_trace.h">
+    <ClInclude Include="include\ASIOSDK2\host\asiodrivers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_win_coinitialize.h">
+    <ClInclude Include="include\ASIOSDK2\host\ginclude.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_win_version.h">
+    <ClInclude Include="include\ASIOSDK2\host\pc\asiolist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_win_waveformat.h">
+    <ClInclude Include="include\portaudio\pa_allocation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\asiosdk\pa_x86_plain_converters.h">
+    <ClInclude Include="include\portaudio\pa_asio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\portaudio\pa_converters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_cpuload.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_dither.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_ringbuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_trace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_win_coinitialize.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_win_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_win_waveformat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\pa_x86_plain_converters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portaudio\portaudio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\wav.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include="include\ASIOSDK2\driver\asiosample\asiosample.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="meson.build" />
   </ItemGroup>
 </Project>
