@@ -16,7 +16,8 @@ BWError BWWASAPIInitialize() {
 
 BWError BWWASAPITerminate() {
     BWError result = BW_OK;
-    //TODO: Release all resources allocated in Initialize()
+
+    CoUninitialize();
 
     return result;
 }

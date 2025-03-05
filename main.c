@@ -4,11 +4,14 @@
 #include <functiondiscoverykeys_devpkey.h>
 
 int main(void) {
-    wasapi_devices devices;
+
+    //NOTE: Testing WASAPI
     BWError res = BWWASAPIInitialize();
+
+    //NOTE: Testing WASAPIQueryDevices()
+    wasapi_devices devices;
     res = BWWASAPIQueryDevices(&devices);
     if(res != BW_OK) printf("Error %d: ", res);
-
     for(int i = 0; i < devices.num_capture_devices; i++) {
         IPropertyStore* dev_props = NULL;
         HRESULT hres = devices.capture_devices[i]->lpVtbl->OpenPropertyStore(devices.capture_devices[i],
@@ -44,4 +47,11 @@ int main(void) {
         }
         if(name.vt != VT_EMPTY) printf("%d: %ls\n", i, name.pwszVal);
     }
+    //NOTE: End testing WASAPIQueryDevices()
+
+    //TODO: Begin testing input / output
+    //      Create capture / render functions
+
+
+    res = BWWASAPITerminate();
 }
