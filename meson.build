@@ -3,90 +3,116 @@ project(
   'c',
   'cpp',
   default_options : [
-    'cpp_std=manual',
+    'cpp_std=c++23',
+    'c_std=c23', #May change depending on compiler (clang not fully supported yet)
     'warning_level=1',
-  ]
+  ],
+  meson_version : '>=1.1.0'
 )
+
 
 cpp_compiler = meson.get_compiler(
   'cpp',
   native : true
 )
 
-c_compiler = meson.get_compiler(
-  'c',
-  native : true
-)
-
-incdir = include_directories(
-  'include/portaudio',
-  'include/portaudio/asio',
-  'include/ASIOSDK2',
-  'include/ASIOSDK2/common',
-  'include/ASIOSDK2/host',
-  'include/ASIOSDK2/host/pc',
-)
-
-asio = [
-  'include/ASIOSDK2/common/asio.cpp', 
-  'include/ASIOSDK2/host/asiodrivers.cpp', 
-  'include/ASIOSDK2/host/pc/asiolist.cpp'
-]
-
-portaudio = [
-  #removing the line below stopped multiple references of
-  #'InterlockedXXX' definitions, if it needs to be added back
-  #line 119 of lib/portaudio/pa_asio.cpp needs to be uncommented
-  #for it to take effect
-  #'lib/portaudio/iasiothiscallresolver.cpp',
-
-  'lib/portaudio/pa_allocation.c',
-  'lib/portaudio/pa_converters.c',
-  'lib/portaudio/pa_cpuload.c',
-  'lib/portaudio/pa_debugprint.c',
-  'lib/portaudio/pa_dither.c',
-  'lib/portaudio/pa_front.c',
-  'lib/portaudio/pa_process.c',
-  'lib/portaudio/pa_ringbuffer.c',
-  'lib/portaudio/pa_stream.c',
-  'lib/portaudio/pa_trace.c',
-  'lib/portaudio/pa_win_coinitialize.c',
-  'lib/portaudio/pa_win_hostapis.c',
-  'lib/portaudio/pa_win_util.c',
-  'lib/portaudio/pa_win_version.c',
-  'lib/portaudio/pa_win_waveformat.c',
-  #'lib/portaudio/pa_x86_plain_converters.c',
-  'lib/portaudio/pa_asio.cpp',
-]
-
+#Windows librarys
 winmm = cpp_compiler.find_library('winmm')
-#ole32 = cpp_compiler.find_library('ole32')
+ole32 = cpp_compiler.find_library('ole32')
+uuid = cpp_compiler.find_library('uuid')
+dsound = cpp_compiler.find_library('dsound')
+
+#ByteWave src files
+bw_src_files = []
+
+#ByteWave include directories
+bw_inc_dir = [
+  'include'
+]
+
+bw_deps = [
+  winmm,
+]
+
+bw_cpp_compiler_args = [
+  '-ffast-math', #Increase Floating Point Speed (And break IEEE compliance but thats alright)
+  '-D_CRT_SECURE_NO_WARNINGS', #Suppress warnings from Microsoft
+]
+
+#Host API Options
+#ASIO
+bw_asio_src = [
+  'lib/ASIOSDK/common/asio.cpp',
+  'lib/ASIOSDK/host/pc/asiolist.cpp',
+  'lib/ASIOSDK/host/asiodrivers.cpp',
+  'src/hostapi/asio/bw_asio.c',
+]
+bw_asio_inc = [
+  'lib/ASIOSDK/common',
+  'lib/ASIOSDK/host/pc',
+  'lib/ASIOSDK/host',
+  'src/hostapi/asio',
+]
+if get_option('BW_USE_ASIO')
+  message('Using ASIO API')
+  bw_cpp_compiler_args += ['-DBW_ASIO']
+  bw_src_files += bw_asio_src
+  bw_inc_dir += bw_asio_inc
+  if not bw_deps.contains(ole32)
+    bw_deps += ole32
+  endif
+  if not bw_deps.contains(uuid)
+    bw_deps += uuid
+  endif
+endif
+
+#WASAPI
+bw_wasapi_src = ['src/hostapi/wasapi/bw_wasapi.c']
+bw_wasapi_inc = ['src/hostapi/wasapi']
+if get_option('BW_USE_WASAPI')
+  message('Using WASAPI')
+  bw_cpp_compiler_args += ['-DBW_WASAPI']
+  bw_src_files += bw_wasapi_src
+  bw_inc_dir += bw_wasapi_inc
+  if not bw_deps.contains(ole32)
+    bw_deps += ole32
+  endif
+  if not bw_deps.contains(uuid)
+    bw_deps += uuid
+  endif
+endif
+
+#DirectSound
+bw_ds_src = ['src/hostapi/dsound/bw_dsound.c']
+bw_ds_inc = ['src/hostapi/dsound']
+if get_option('BW_USE_DIRECTSOUND')
+  message('Using DirectSound API')
+  bw_cpp_compiler_args += ['-DBW_DSOUND']
+  bw_src_files += bw_ds_src
+  bw_inc_dir += bw_ds_inc
+  if not bw_deps.contains(dsound)
+    bw_deps += dsound
+  endif
+endif
 
 executable(
   #executable name
   'ByteWave',
 
   #entry point
-  'main.cpp',
+  'main.c',
 
-  #asio dependencies
-  asio,
+  #Source Files
+  bw_src_files,
 
-  #portaudio dependencies
-  portaudio,
-
-  #windows dependencies
-  dependencies : winmm,
+  dependencies : bw_deps,
 
   #subsystem used, set to 'windows' for a gui app, 'console' otherwise
   win_subsystem : 'console',
 
   #includes
-  include_directories : incdir,
+  include_directories : bw_inc_dir,
 
   #c++ compiler args
-  cpp_args : [
-    '-fpermissive', #Makes some of the error warning produced by ASIOSDK / PortAudio go away (might break something down the road)
-    '-ffast-math', #Increase Floating Point Speed (And break IEEE compliance but thats alright)
-  ]
+  cpp_args : bw_cpp_compiler_args
 )

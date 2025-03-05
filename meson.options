@@ -1,0 +1,5 @@
+option('BW_USE_ASIO', type: 'boolean', value: false, description: 'Use ASIO API')
+option('BW_USE_WASAPI', type: 'boolean', value: true, description: 'Use WASAPI')
+option('BW_USE_DIRECTSOUND', type: 'boolean', value: false, description: 'Use DirectSound API')
+
+option('BW_UTIL', type: 'boolean', value: true, description: 'Build Utility Functions')
