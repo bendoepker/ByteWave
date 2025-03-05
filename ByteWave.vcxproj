@@ -78,30 +78,33 @@
     <ClCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>src/hostapi/wasapi; include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>src/hostapi/wasapi; include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>src/hostapi/wasapi; include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -110,52 +113,15 @@
     <ClCompile>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>src/hostapi/wasapi; include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="include\ASIOSDK2\common\asio.cpp" />
-    <ClCompile Include="include\ASIOSDK2\common\asiodrvr.cpp" />
-    <ClCompile Include="include\ASIOSDK2\common\combase.cpp" />
-    <ClCompile Include="include\ASIOSDK2\common\debugmessage.cpp" />
-    <ClCompile Include="include\ASIOSDK2\common\dllentry.cpp" />
-    <ClCompile Include="include\ASIOSDK2\common\register.cpp" />
-    <ClCompile Include="include\ASIOSDK2\driver\asiosample\asiosmpl.cpp" />
-    <ClCompile Include="include\ASIOSDK2\driver\asiosample\macnanosecs.cpp" />
-    <ClCompile Include="include\ASIOSDK2\driver\asiosample\mactimer.cpp" />
-    <ClCompile Include="include\ASIOSDK2\driver\asiosample\makesamp.cpp" />
-    <ClCompile Include="include\ASIOSDK2\driver\asiosample\wintimer.cpp" />
-    <ClCompile Include="include\ASIOSDK2\host\ASIOConvertSamples.cpp" />
-    <ClCompile Include="include\ASIOSDK2\host\asiodrivers.cpp" />
-    <ClCompile Include="include\ASIOSDK2\host\pc\asiolist.cpp" />
-    <ClCompile Include="include\ASIOSDK2\host\sample\hostsample.cpp" />
-    <ClCompile Include="lib\asiosdk\asio.cpp" />
-    <ClCompile Include="lib\asiosdk\asiodrivers.cpp" />
-    <ClCompile Include="lib\asiosdk\asiolist.cpp" />
-    <ClCompile Include="lib\portaudio\pa_allocation.c" />
-    <ClCompile Include="lib\portaudio\pa_asio.cpp" />
-    <ClCompile Include="lib\portaudio\pa_converters.c" />
-    <ClCompile Include="lib\portaudio\pa_cpuload.c" />
-    <ClCompile Include="lib\portaudio\pa_dither.c" />
-    <ClCompile Include="lib\portaudio\pa_front.c" />
-    <ClCompile Include="lib\portaudio\pa_process.c" />
-    <ClCompile Include="lib\portaudio\pa_ringbuffer.c" />
-    <ClCompile Include="lib\portaudio\pa_stream.c" />
-    <ClCompile Include="lib\portaudio\pa_trace.c" />
-    <ClCompile Include="lib\portaudio\pa_win_coinitialize.c" />
-    <ClCompile Include="lib\portaudio\pa_win_hostapis.c" />
-    <ClCompile Include="lib\portaudio\pa_win_util.c" />
-    <ClCompile Include="lib\portaudio\pa_win_version.c" />
-    <ClCompile Include="lib\portaudio\pa_win_waveformat.c" />
-    <ClCompile Include="lib\portaudio\pa_x86_plain_converters.c" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\parser\wav.cpp" />
-  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ASIOSDK2\common\asio.h" />
     <ClInclude Include="include\ASIOSDK2\common\asiodrvr.h" />
@@ -171,6 +137,7 @@
     <ClInclude Include="include\asiosdk\asio.h" />
     <ClInclude Include="include\asiosdk\asiodrivers.h" />
     <ClInclude Include="include\asiosdk\asiolist.h" />
+    <ClInclude Include="include\bw_win_consts.h" />
     <ClInclude Include="include\portaudio\pa_allocation.h" />
     <ClInclude Include="include\portaudio\pa_asio.h" />
     <ClInclude Include="include\portaudio\pa_converters.h" />
@@ -185,12 +152,16 @@
     <ClInclude Include="include\portaudio\pa_win_waveformat.h" />
     <ClInclude Include="include\portaudio\pa_x86_plain_converters.h" />
     <ClInclude Include="include\portaudio\portaudio.h" />
+    <ClInclude Include="src\hostapi\wasapi\bw_wasapi.h" />
     <ClInclude Include="src\parser\wav.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="include\ASIOSDK2\driver\asiosample\asiosample.def" />
     <None Include="meson.build" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\hostapi\wasapi\bw_wasapi.c" />
+    <ClCompile Include="src\parser\wav.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,26 +1,24 @@
 project(
   'ByteWave',
   'c',
-  'cpp',
   default_options : [
-    'cpp_std=c++23',
-    'c_std=c23', #May change depending on compiler (clang not fully supported yet)
+    'c_std=c11', #May change depending on compiler (clang not fully supported yet)
     'warning_level=1',
   ],
   meson_version : '>=1.1.0'
 )
 
 
-cpp_compiler = meson.get_compiler(
-  'cpp',
+c_compiler = meson.get_compiler(
+  'c',
   native : true
 )
 
 #Windows librarys
-winmm = cpp_compiler.find_library('winmm')
-ole32 = cpp_compiler.find_library('ole32')
-uuid = cpp_compiler.find_library('uuid')
-dsound = cpp_compiler.find_library('dsound')
+winmm = c_compiler.find_library('winmm')
+ole32 = c_compiler.find_library('ole32')
+uuid = c_compiler.find_library('uuid')
+dsound = c_compiler.find_library('dsound')
 
 #ByteWave src files
 bw_src_files = []
@@ -34,7 +32,7 @@ bw_deps = [
   winmm,
 ]
 
-bw_cpp_compiler_args = [
+bw_c_compiler_args = [
   '-ffast-math', #Increase Floating Point Speed (And break IEEE compliance but thats alright)
   '-D_CRT_SECURE_NO_WARNINGS', #Suppress warnings from Microsoft
 ]
@@ -55,7 +53,7 @@ bw_asio_inc = [
 ]
 if get_option('BW_USE_ASIO')
   message('Using ASIO API')
-  bw_cpp_compiler_args += ['-DBW_ASIO']
+  bw_c_compiler_args += ['-DBW_ASIO']
   bw_src_files += bw_asio_src
   bw_inc_dir += bw_asio_inc
   if not bw_deps.contains(ole32)
@@ -71,7 +69,7 @@ bw_wasapi_src = ['src/hostapi/wasapi/bw_wasapi.c']
 bw_wasapi_inc = ['src/hostapi/wasapi']
 if get_option('BW_USE_WASAPI')
   message('Using WASAPI')
-  bw_cpp_compiler_args += ['-DBW_WASAPI']
+  bw_c_compiler_args += ['-DBW_WASAPI']
   bw_src_files += bw_wasapi_src
   bw_inc_dir += bw_wasapi_inc
   if not bw_deps.contains(ole32)
@@ -87,7 +85,7 @@ bw_ds_src = ['src/hostapi/dsound/bw_dsound.c']
 bw_ds_inc = ['src/hostapi/dsound']
 if get_option('BW_USE_DIRECTSOUND')
   message('Using DirectSound API')
-  bw_cpp_compiler_args += ['-DBW_DSOUND']
+  bw_c_compiler_args += ['-DBW_DSOUND']
   bw_src_files += bw_ds_src
   bw_inc_dir += bw_ds_inc
   if not bw_deps.contains(dsound)
@@ -113,6 +111,6 @@ executable(
   #includes
   include_directories : bw_inc_dir,
 
-  #c++ compiler args
-  cpp_args : bw_cpp_compiler_args
+  #c compiler args
+  c_args : bw_c_compiler_args
 )
