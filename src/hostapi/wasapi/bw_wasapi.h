@@ -2,9 +2,11 @@
 #define BW_WASAPI_H
 
 #include <windows.h>
-#include <bw_types.h>
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
+
+//ByteWave
+#include <bw_types.h>
 
 typedef struct {
     IMMDevice* capture_device;

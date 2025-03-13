@@ -1,9 +1,6 @@
 #include "bw_wasapi.h"
-#include <stdio.h>
-
 #include <bw_win_consts.h>
-#include <mmdeviceapi.h>
-#include <windows.h>
+
 
 BWError BWWASAPIInitialize() {
     BWError result = BW_OK;
@@ -155,10 +152,10 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
     IMMDeviceEnumerator* enumerator = NULL;
     IMMDevice* input_device = NULL;
 
-    HRESULT hres = CoCreateInstance(&CLSID_MMDeviceEnumerator,
+    HRESULT hres = CoCreateInstance(&BW_CLSID_MMDeviceEnumerator,
                                     NULL,
                                     CLSCTX_ALL,
-                                    &IID_IMMDeviceEnumerator,
+                                    &BW_IID_IMMDeviceEnumerator,
                                     (void**)&enumerator);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
@@ -177,7 +174,7 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
         return BW_FAILED;
     }
 
-    input_device->lpVtbl->Activate(input_device, &IID_IAudioClient,
+    input_device->lpVtbl->Activate(input_device, &BW_IID_IAudioClient,
                                    CLSCTX_ALL,
                                    NULL,
                                    (void**)&stream_params->audio_client);
@@ -217,7 +214,7 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
     }
 
     hres = stream_params->audio_client->lpVtbl->GetService(stream_params->audio_client,
-                                                           &IID_IAudioCaptureClient,
+                                                           &BW_IID_IAudioCaptureClient,
                                                            (void**)&stream_params->capture_client);
 
     //Free the helper objects
