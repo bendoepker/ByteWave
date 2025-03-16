@@ -1,6 +1,7 @@
 #include "bw_wasapi.h"
 #include <bw_win_consts.h>
 
+#include <stdio.h>
 
 BWError BWWASAPIInitialize() {
     BWError result = BW_OK;
@@ -126,31 +127,21 @@ BWError BWWASAPIQueryDevices(wasapi_devices* devices) {
     return result;
 }
 
-//TODO: Test this
+//TODO: Test this with audio stream, initializers are working as intended
 BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
     BWError result = BW_OK;
 
-    if(stream_params == NULL)
-        stream_params = (wasapi_stream_params*)malloc((sizeof(IMMDevice*) * 2)
-                                                      + sizeof(IAudioClient*)
-                                                      + sizeof(IAudioCaptureClient*)
-                                                      + sizeof(IAudioRenderClient*)
-                                                      + sizeof(WAVEFORMATEX*)
-                                                      + sizeof(UINT32)
-                                                      );
-    if(stream_params == NULL) return BW_FAILED;
-
     //WARN: This may need to change depending on implementation
+    //      But we're gonna roll with it for the time being
     stream_params->audio_client = NULL;
     stream_params->render_client = NULL;
     stream_params->capture_client = NULL;
-    stream_params->audio_format = NULL;
     stream_params->capture_device = NULL;
     stream_params->render_device = NULL;
+    stream_params->audio_format = NULL;
     stream_params->buffer_frame_count = 0;
 
     IMMDeviceEnumerator* enumerator = NULL;
-    IMMDevice* input_device = NULL;
 
     HRESULT hres = CoCreateInstance(&BW_CLSID_MMDeviceEnumerator,
                                     NULL,
@@ -167,20 +158,19 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
     hres = enumerator->lpVtbl->GetDefaultAudioEndpoint(enumerator,
                                                        eCapture,
                                                        eConsole,
-                                                       &input_device);
+                                                       &stream_params->capture_device);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
-        input_device->lpVtbl->Release(input_device);
         return BW_FAILED;
     }
 
-    input_device->lpVtbl->Activate(input_device, &BW_IID_IAudioClient,
-                                   CLSCTX_ALL,
-                                   NULL,
-                                   (void**)&stream_params->audio_client);
+    hres = stream_params->capture_device->lpVtbl->Activate(stream_params->capture_device,
+                                                    &BW_IID_IAudioClient,
+                                                    CLSCTX_ALL,
+                                                    NULL,
+                                                    (void**)&stream_params->audio_client);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
-        input_device->lpVtbl->Release(input_device);
         return BW_FAILED;
     }
 
@@ -188,7 +178,6 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
                                                              &stream_params->audio_format);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
-        input_device->lpVtbl->Release(input_device);
         return BW_FAILED;
     }
 
@@ -201,7 +190,6 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
                                                            NULL);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
-        input_device->lpVtbl->Release(input_device);
         return BW_FAILED;
     }
 
@@ -209,25 +197,32 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
                                                               &stream_params->buffer_frame_count);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
-        input_device->lpVtbl->Release(input_device);
         return BW_FAILED;
     }
 
     hres = stream_params->audio_client->lpVtbl->GetService(stream_params->audio_client,
                                                            &BW_IID_IAudioCaptureClient,
                                                            (void**)&stream_params->capture_client);
+    if(hres != S_OK) {
+        enumerator->lpVtbl->Release(enumerator);
+        return BW_FAILED;
+    }
 
     //Free the helper objects
     enumerator->lpVtbl->Release(enumerator);
-    input_device->lpVtbl->Release(input_device);
+
+    hres = stream_params->audio_client->lpVtbl->Start(stream_params->audio_client);
+    if(hres != S_OK) result = BW_FAILED;
 
     return result;
 }
 
-//TODO: Test this
+//PERF: Done
 //NOTE: releases all windows resources and frees the memory from the heap afterwards
+//      Not thread safe (alloc / dealloc)
 BWError BWWASAPICloseStream(wasapi_stream_params* stream_params) {
     BWError result = BW_OK;
+
 
     if(stream_params == NULL) {
         return BW_UNINITIALIZED;
@@ -235,40 +230,37 @@ BWError BWWASAPICloseStream(wasapi_stream_params* stream_params) {
 
     HRESULT hres = S_OK;
 
+    hres = stream_params->audio_client->lpVtbl->Stop(stream_params->audio_client);
+    if(hres != S_OK) return BW_FAILED;
+
     //Render Device
     if(stream_params->render_device != NULL) {
-        hres = stream_params->render_device->lpVtbl->Release(stream_params->render_device);
-        if(hres != S_OK) return BW_FAILED;
+        stream_params->render_device->lpVtbl->Release(stream_params->render_device);
+        stream_params->render_device = NULL;
     }
-
     //Capture Device
     if(stream_params->capture_device != NULL) {
-        hres = stream_params->capture_device->lpVtbl->Release(stream_params->capture_device);
-        if(hres != S_OK) return BW_FAILED;
+        stream_params->capture_device->lpVtbl->Release(stream_params->capture_device);
+        stream_params->capture_device = NULL;
     }
-
     //Audio Client
     if(stream_params->audio_client != NULL) {
-        hres = stream_params->audio_client->lpVtbl->Release(stream_params->audio_client);
-        if(hres != S_OK) return BW_FAILED;
+        stream_params->audio_client->lpVtbl->Release(stream_params->audio_client);
+        stream_params->audio_client = NULL;
     }
-
     //Render Client
     if(stream_params->render_client != NULL) {
-        hres = stream_params->render_client->lpVtbl->Release(stream_params->render_client);
-        if(hres != S_OK) return BW_FAILED;
+        stream_params->render_client->lpVtbl->Release(stream_params->render_client);
+        stream_params->render_client = NULL;
     }
-
     //Capture Client
     if(stream_params->capture_client != NULL) {
-        hres = stream_params->capture_client->lpVtbl->Release(stream_params->capture_client);
-        if(hres != S_OK) return BW_FAILED;
+        stream_params->capture_client->lpVtbl->Release(stream_params->capture_client);
+        stream_params->capture_client = NULL;
     }
 
-    if(stream_params->audio_format != NULL) {
-        stream_params->audio_format = NULL;
-    }
-
+    //NOTE: this also frees the waveformatex nested struct
+    //      hence it is not freed above
     free(stream_params);
 
     return result;

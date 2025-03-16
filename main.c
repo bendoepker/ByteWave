@@ -57,7 +57,8 @@ int main(void) {
     //Something (looped)
     //
     //Close stream
-    wasapi_stream_params* stream_params = NULL;
+    wasapi_stream_params* stream_params = malloc(sizeof(wasapi_stream_params));
+    if(stream_params == NULL) printf("Failed Malloc (wasapi_stream_params)\n");
     res = BWWASAPIOpenStream(stream_params);
     if(res != BW_OK) printf("Error: %d\n", res);
 
@@ -74,10 +75,22 @@ int main(void) {
     //frame time - duration time = sleep time
     //
     //sleep for sleep time
-    while(1) {
 
+    //NOTE: Testing WAVEFORMAT PARAMS
+    printf("Num Channels: %d\n", stream_params->audio_format->nChannels);
+    printf("Bit Depth: %d\n", stream_params->audio_format->wBitsPerSample);
+    printf("Format Tag (1 is PCM): %d\n", stream_params->audio_format->wFormatTag);
+    printf("Sample Rate: %ld\n", stream_params->audio_format->nSamplesPerSec);
+    printf("Block Align: %d\n", stream_params->audio_format->nBlockAlign);
+
+    while(1) {
+        
     }
+
+    res = BWWASAPICloseStream(stream_params);
+    if(res != BW_OK) printf("Error: %d\n", res);
 
     res = BWWASAPITerminate();
     if(res != BW_OK) printf("Error: %d\n", res);
+    printf("end\n");
 }
