@@ -128,18 +128,21 @@ BWError BWWASAPIQueryDevices(wasapi_devices* devices) {
 }
 
 //TODO: Test this with audio stream, initializers are working as intended
-BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
+BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params) {
     BWError result = BW_OK;
 
     //WARN: This may need to change depending on implementation
     //      But we're gonna roll with it for the time being
-    stream_params->audio_client = NULL;
-    stream_params->render_client = NULL;
-    stream_params->capture_client = NULL;
-    stream_params->capture_device = NULL;
-    stream_params->render_device = NULL;
-    stream_params->audio_format = NULL;
-    stream_params->buffer_frame_count = 0;
+    (*stream_params) = malloc(sizeof(wasapi_stream_params));
+    if(*stream_params == NULL) return BW_FAILED;
+
+    (*stream_params)->audio_client = NULL;
+    (*stream_params)->render_client = NULL;
+    (*stream_params)->capture_client = NULL;
+    (*stream_params)->capture_device = NULL;
+    (*stream_params)->render_device = NULL;
+    (*stream_params)->audio_format = NULL;
+    (*stream_params)->buffer_frame_count = 0;
 
     IMMDeviceEnumerator* enumerator = NULL;
 
@@ -158,51 +161,51 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
     hres = enumerator->lpVtbl->GetDefaultAudioEndpoint(enumerator,
                                                        eCapture,
                                                        eConsole,
-                                                       &stream_params->capture_device);
+                                                       &(*stream_params)->capture_device);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
         return BW_FAILED;
     }
 
-    hres = stream_params->capture_device->lpVtbl->Activate(stream_params->capture_device,
-                                                    &BW_IID_IAudioClient,
-                                                    CLSCTX_ALL,
-                                                    NULL,
-                                                    (void**)&stream_params->audio_client);
+    hres = (*stream_params)->capture_device->lpVtbl->Activate((*stream_params)->capture_device,
+                                                              &BW_IID_IAudioClient,
+                                                              CLSCTX_ALL,
+                                                              NULL,
+                                                              (void**)&(*stream_params)->audio_client);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
         return BW_FAILED;
     }
 
-    hres = stream_params->audio_client->lpVtbl->GetMixFormat(stream_params->audio_client,
-                                                             &stream_params->audio_format);
+    hres = (*stream_params)->audio_client->lpVtbl->GetMixFormat((*stream_params)->audio_client,
+                                                                &(*stream_params)->audio_format);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
         return BW_FAILED;
     }
 
-    hres = stream_params->audio_client->lpVtbl->Initialize(stream_params->audio_client,
-                                                           AUDCLNT_SHAREMODE_SHARED,
-                                                           0,
-                                                           10000000, //Requested Duration
-                                                           0, //Must be zero in shared mode
-                                                           stream_params->audio_format,
-                                                           NULL);
+    hres = (*stream_params)->audio_client->lpVtbl->Initialize((*stream_params)->audio_client,
+                                                              AUDCLNT_SHAREMODE_SHARED,
+                                                              0,
+                                                              10000000, //Requested Duration
+                                                              0, //Must be zero in shared mode
+                                                              (*stream_params)->audio_format,
+                                                              NULL);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
         return BW_FAILED;
     }
 
-    hres = stream_params->audio_client->lpVtbl->GetBufferSize(stream_params->audio_client,
-                                                              &stream_params->buffer_frame_count);
+    hres = (*stream_params)->audio_client->lpVtbl->GetBufferSize((*stream_params)->audio_client,
+                                                                 &(*stream_params)->buffer_frame_count);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
         return BW_FAILED;
     }
 
-    hres = stream_params->audio_client->lpVtbl->GetService(stream_params->audio_client,
-                                                           &BW_IID_IAudioCaptureClient,
-                                                           (void**)&stream_params->capture_client);
+    hres = (*stream_params)->audio_client->lpVtbl->GetService((*stream_params)->audio_client,
+                                                              &BW_IID_IAudioCaptureClient,
+                                                              (void**)&(*stream_params)->capture_client);
     if(hres != S_OK) {
         enumerator->lpVtbl->Release(enumerator);
         return BW_FAILED;
@@ -211,7 +214,7 @@ BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params) {
     //Free the helper objects
     enumerator->lpVtbl->Release(enumerator);
 
-    hres = stream_params->audio_client->lpVtbl->Start(stream_params->audio_client);
+    hres = (*stream_params)->audio_client->lpVtbl->Start((*stream_params)->audio_client);
     if(hres != S_OK) result = BW_FAILED;
 
     return result;

@@ -52,15 +52,18 @@ int main(void) {
     //TODO: Begin testing input / output
     //      Create capture / render functions
 
-    //Open audio stream
-    //
-    //Something (looped)
-    //
-    //Close stream
-    wasapi_stream_params* stream_params = malloc(sizeof(wasapi_stream_params));
-    if(stream_params == NULL) printf("Failed Malloc (wasapi_stream_params)\n");
-    res = BWWASAPIOpenStream(stream_params);
+    //WARN: I would like to move malloc into the open stream function
+    //      posibly requiring a **stream_params
+    wasapi_stream_params* stream_params = NULL; //malloc(sizeof(wasapi_stream_params));
+    res = BWWASAPIOpenStream(&stream_params);
     if(res != BW_OK) printf("Error: %d\n", res);
+
+    //NOTE: Testing WAVEFORMAT PARAMS
+    printf("Num Channels: %d\n", stream_params->audio_format->nChannels);
+    printf("Bit Depth: %d\n", stream_params->audio_format->wBitsPerSample);
+    printf("Format Tag (1 is PCM): %d\n", stream_params->audio_format->wFormatTag);
+    printf("Sample Rate: %ld\n", stream_params->audio_format->nSamplesPerSec);
+    printf("Block Align: %d\n", stream_params->audio_format->nBlockAlign);
 
     //Calculate start time in nsec
     //
@@ -75,13 +78,6 @@ int main(void) {
     //frame time - duration time = sleep time
     //
     //sleep for sleep time
-
-    //NOTE: Testing WAVEFORMAT PARAMS
-    printf("Num Channels: %d\n", stream_params->audio_format->nChannels);
-    printf("Bit Depth: %d\n", stream_params->audio_format->wBitsPerSample);
-    printf("Format Tag (1 is PCM): %d\n", stream_params->audio_format->wFormatTag);
-    printf("Sample Rate: %ld\n", stream_params->audio_format->nSamplesPerSec);
-    printf("Block Align: %d\n", stream_params->audio_format->nBlockAlign);
 
     while(1) {
         

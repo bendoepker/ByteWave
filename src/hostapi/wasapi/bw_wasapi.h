@@ -43,7 +43,7 @@ BWError BWWASAPIQueryDevices(wasapi_devices* devices);
 /*
     * TODO: Add description, return types, parameters
 */
-BWError BWWASAPIOpenStream(wasapi_stream_params* stream_params);
+BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params);
 
 /*
     * TODO: Add description, return types, parameters
