@@ -48,6 +48,6 @@ BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params);
 /*
     * TODO: Add description, return types, parameters
 */
-BWError BWWASAPICloseStream(wasapi_stream_params* stream_params);
+BWError BWWASAPICloseStream(wasapi_stream_params** stream_params);
 
 #endif //BW_WASAPI_H

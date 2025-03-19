@@ -52,8 +52,6 @@ int main(void) {
     //TODO: Begin testing input / output
     //      Create capture / render functions
 
-    //WARN: I would like to move malloc into the open stream function
-    //      posibly requiring a **stream_params
     wasapi_stream_params* stream_params = NULL; //malloc(sizeof(wasapi_stream_params));
     res = BWWASAPIOpenStream(&stream_params);
     if(res != BW_OK) printf("Error: %d\n", res);
@@ -64,6 +62,7 @@ int main(void) {
     printf("Format Tag (1 is PCM): %d\n", stream_params->audio_format->wFormatTag);
     printf("Sample Rate: %ld\n", stream_params->audio_format->nSamplesPerSec);
     printf("Block Align: %d\n", stream_params->audio_format->nBlockAlign);
+    printf("Buffer Frame Count: %d\n", stream_params->buffer_frame_count);
 
     //Calculate start time in nsec
     //
@@ -79,11 +78,45 @@ int main(void) {
     //
     //sleep for sleep time
 
-    while(1) {
-        
+    IPropertyStore* dev_props;
+    HRESULT hres = stream_params->capture_device->lpVtbl->
+        OpenPropertyStore(stream_params->capture_device,
+                          STGM_READ,
+                          &dev_props);
+    if(hres != S_OK) {
+        printf("Failed open property store\n");
+        hres = S_OK;
+    }
+    else {
+        PROPVARIANT name;
+        dev_props->lpVtbl->GetValue(dev_props, &PKEY_Device_FriendlyName, &name);
+        if(name.vt != VT_EMPTY) printf("Current Input Device: %ls\n", name.pwszVal);
     }
 
-    res = BWWASAPICloseStream(stream_params);
+    unsigned int packet_size = 0;
+    unsigned int buffer_frames_available = 0;
+    REFERENCE_TIME duration = 0;
+    const REFERENCE_TIME rt_one_second = 10000000;
+    const REFERENCE_TIME rt_one_millisecond = 10000;
+
+    while(1) {
+        //TODO: calculate sleep duration
+        Sleep(0);
+        //Clears the current line and moves cursor to the beginning
+        printf("\r");
+        printf("\x1b[2K");
+        int num_blocks = 0;
+
+        HRESULT hres = stream_params->capture_client->lpVtbl->GetNextPacketSize(stream_params->capture_client,
+                                                                                &packet_size);
+
+
+        for(int i = 0; i < num_blocks; i++) {
+            printf("0");
+        }
+    }
+
+    res = BWWASAPICloseStream(&stream_params);
     if(res != BW_OK) printf("Error: %d\n", res);
 
     res = BWWASAPITerminate();

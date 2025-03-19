@@ -127,7 +127,7 @@ BWError BWWASAPIQueryDevices(wasapi_devices* devices) {
     return result;
 }
 
-//TODO: Test this with audio stream, initializers are working as intended
+//TODO: Create mode selection via parameters for input and output
 BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params) {
     BWError result = BW_OK;
 
@@ -223,48 +223,48 @@ BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params) {
 //PERF: Done
 //NOTE: releases all windows resources and frees the memory from the heap afterwards
 //      Not thread safe (alloc / dealloc)
-BWError BWWASAPICloseStream(wasapi_stream_params* stream_params) {
+BWError BWWASAPICloseStream(wasapi_stream_params** stream_params) {
     BWError result = BW_OK;
 
 
-    if(stream_params == NULL) {
+    if((*stream_params) == NULL) {
         return BW_UNINITIALIZED;
     }
 
     HRESULT hres = S_OK;
 
-    hres = stream_params->audio_client->lpVtbl->Stop(stream_params->audio_client);
+    hres = (*stream_params)->audio_client->lpVtbl->Stop((*stream_params)->audio_client);
     if(hres != S_OK) return BW_FAILED;
 
     //Render Device
-    if(stream_params->render_device != NULL) {
-        stream_params->render_device->lpVtbl->Release(stream_params->render_device);
-        stream_params->render_device = NULL;
+    if((*stream_params)->render_device != NULL) {
+        (*stream_params)->render_device->lpVtbl->Release((*stream_params)->render_device);
+        (*stream_params)->render_device = NULL;
     }
     //Capture Device
-    if(stream_params->capture_device != NULL) {
-        stream_params->capture_device->lpVtbl->Release(stream_params->capture_device);
-        stream_params->capture_device = NULL;
+    if((*stream_params)->capture_device != NULL) {
+        (*stream_params)->capture_device->lpVtbl->Release((*stream_params)->capture_device);
+        (*stream_params)->capture_device = NULL;
     }
     //Audio Client
-    if(stream_params->audio_client != NULL) {
-        stream_params->audio_client->lpVtbl->Release(stream_params->audio_client);
-        stream_params->audio_client = NULL;
+    if((*stream_params)->audio_client != NULL) {
+        (*stream_params)->audio_client->lpVtbl->Release((*stream_params)->audio_client);
+        (*stream_params)->audio_client = NULL;
     }
     //Render Client
-    if(stream_params->render_client != NULL) {
-        stream_params->render_client->lpVtbl->Release(stream_params->render_client);
-        stream_params->render_client = NULL;
+    if((*stream_params)->render_client != NULL) {
+        (*stream_params)->render_client->lpVtbl->Release((*stream_params)->render_client);
+        (*stream_params)->render_client = NULL;
     }
     //Capture Client
-    if(stream_params->capture_client != NULL) {
-        stream_params->capture_client->lpVtbl->Release(stream_params->capture_client);
-        stream_params->capture_client = NULL;
+    if((*stream_params)->capture_client != NULL) {
+        (*stream_params)->capture_client->lpVtbl->Release((*stream_params)->capture_client);
+        (*stream_params)->capture_client = NULL;
     }
 
     //NOTE: this also frees the waveformatex nested struct
     //      hence it is not freed above
-    free(stream_params);
+    free((*stream_params));
 
     return result;
 }
