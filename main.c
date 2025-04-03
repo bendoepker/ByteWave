@@ -1,6 +1,9 @@
 #include <bw_wasapi.h>
 #include <stdio.h>
 
+//These two must be together in this order in whatever file uses the latter constants
+//in order to link to uuid without errors from GCC
+#include <initguid.h>
 #include <functiondiscoverykeys_devpkey.h>
 
 int main(void) {
