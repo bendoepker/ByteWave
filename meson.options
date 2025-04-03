@@ -3,3 +3,8 @@ option('BW_USE_WASAPI', type: 'boolean', value: true, description: 'Use WASAPI')
 option('BW_USE_DIRECTSOUND', type: 'boolean', value: false, description: 'Use DirectSound API')
 
 option('BW_UTIL', type: 'boolean', value: true, description: 'Build Utility Functions')
+
+option('BW_LOG', type: 'boolean', value: true, description: 'Log all debug statements')
+option('BW_LOG_FUNCTIONS', type: 'boolean', value: true, description: 'Log debug function statements')
+option('BW_LOG_ERRORS', type: 'boolean', value: true, description: 'Log debug errors')
+option('BW_LOG_GEN', type: 'boolean', value: true, description: 'Log general debug statements')

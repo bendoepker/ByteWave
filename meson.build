@@ -92,6 +92,21 @@ if get_option('BW_USE_DIRECTSOUND')
     bw_deps += dsound
   endif
 endif
+#
+#Debug Logging
+if get_option('BW_LOG')
+  c_args += '-DBW_LOG'
+else
+  if get_option('BW_LOG_ERRORS')
+    c_args += ['-DBW_LOG_ERRORS']
+  endif
+  if get_option('BW_LOG_FUNCTIONS')
+    c_args += ['-DBW_LOG_FUNCTIONS']
+  endif
+  if get_option('BW_LOG_GEN')
+    c_args += ['-DBW_LOG_GEN']
+  endif
+endif
 
 executable(
   #executable name
