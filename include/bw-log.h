@@ -8,32 +8,38 @@
 #include <stdarg.h>
 
 void _bw_log(const char* s, ...);
+void _bw_print(const char* s, ...);
 
 //General Log Statements
 #if defined BW_LOG || defined BW_LOG_GEN
 #define BW_LOG_GEN(fmt, ...) \
-    _bw_log("[LOG] " fmt, __VA_ARGS__)
+    _bw_log("[LOG] " fmt, ##__VA_ARGS__)
 #else 
-#define BW_LOG_GEN
+#define BW_LOG_GEN(fmt, ...)
 #endif
 
 //Error Log Statements
 #if defined BW_LOG || defined BW_LOG_ERRORS
 #define BW_LOG_ERR(fmt, ...) \
-    _bw_log("[ERROR] " fmt, __VA_ARGS__)
+    _bw_log("[ERROR] " fmt, ##__VA_ARGS__)
 #else
-#define BW_LOG_ERROR(s)
+#define BW_LOG_ERROR(fmt, ...)
 #endif
 
 //Function Log Statements
 #if defined BW_LOG || defined BW_LOG_FUNCTIONS
 #define BW_LOG_FUNC(fmt, ...) \
-    _bw_log("[FUNC] " fmt, __VA_ARGS__)
+    _bw_log("[FUNC] " fmt, ##__VA_ARGS__)
 #else
-#define BW_LOG_FUNCTION(s)
+#define BW_LOG_FUNCTION(fmt, ...)
 #endif
 
-//#define LOG_TEST(fmt, ...) \
-//  _bw_log("[TEST] " fmt, __VA_ARGS__)
+//BW_PRINT does not print any [identifier]s and prints to stdout rather than stderr
+#if defined BW_LOG
+#define BW_PRINT(fmt, ...) \
+    _bw_print("" fmt, ##__VA_ARGS__)
+#else
+#define BW_PRINT(fmt, ...)
+#endif
 
 #endif //BW_LOG_H

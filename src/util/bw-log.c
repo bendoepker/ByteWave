@@ -10,3 +10,12 @@ void _bw_log(const char* s, ...) {
     fprintf(stderr, "\n");
     fflush(stderr);
 }
+
+void _bw_print(const char* s, ...) {
+    va_list ap;
+    va_start(ap, s);
+    vfprintf(stdout, s, ap);
+    va_end(ap);
+    fprintf(stdout, "\n");
+    fflush(stdout);
+}
