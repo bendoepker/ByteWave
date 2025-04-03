@@ -1,4 +1,4 @@
-#include "bw_hostapi.h"
+#include "bw-hostapi.h"
 
 BWError BWInitialize() {
     BWError result = BW_OK;

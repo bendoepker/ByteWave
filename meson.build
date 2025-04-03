@@ -65,7 +65,7 @@ if get_option('BW_USE_ASIO')
 endif
 
 #WASAPI
-bw_wasapi_src = ['src/hostapi/wasapi/bw_wasapi.c']
+bw_wasapi_src = ['src/hostapi/wasapi/bw-wasapi.c']
 bw_wasapi_inc = ['src/hostapi/wasapi']
 if get_option('BW_USE_WASAPI')
   message('Using WASAPI')
@@ -81,7 +81,7 @@ if get_option('BW_USE_WASAPI')
 endif
 
 #DirectSound
-bw_ds_src = ['src/hostapi/dsound/bw_dsound.c']
+bw_ds_src = ['src/hostapi/dsound/bw-dsound.c']
 bw_ds_inc = ['src/hostapi/dsound']
 if get_option('BW_USE_DIRECTSOUND')
   message('Using DirectSound API')
@@ -92,19 +92,23 @@ if get_option('BW_USE_DIRECTSOUND')
     bw_deps += dsound
   endif
 endif
-#
+
+#Utility
+bw_src_files += ['src/util/bw-threads.c']
+
 #Debug Logging
+bw_src_files += ['src/util/bw-log.c']
 if get_option('BW_LOG')
-  c_args += '-DBW_LOG'
+  bw_c_compiler_args += '-DBW_LOG'
 else
   if get_option('BW_LOG_ERRORS')
-    c_args += ['-DBW_LOG_ERRORS']
+    bw_c_compiler_args += ['-DBW_LOG_ERRORS']
   endif
   if get_option('BW_LOG_FUNCTIONS')
-    c_args += ['-DBW_LOG_FUNCTIONS']
+    bw_c_compiler_args += ['-DBW_LOG_FUNCTIONS']
   endif
   if get_option('BW_LOG_GEN')
-    c_args += ['-DBW_LOG_GEN']
+    bw_c_compiler_args += ['-DBW_LOG_GEN']
   endif
 endif
 

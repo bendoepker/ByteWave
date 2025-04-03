@@ -2,15 +2,15 @@
 #define BW_HOSTAPI_H
 
 #ifdef BW_ASIO
-    #include "asio/bw_asio.h"
+    #include "asio/bw-asio.h"
 #endif
 #ifdef BW_WASAPI
-    #include "wasapi/bw_wasapi.h"
+    #include "wasapi/bw-wasapi.h"
 #endif
 #ifdef BW_DSOUND
-    #include "dsound/bw_dsound.h"
+    #include "dsound/bw-dsound.h"
 #endif
-#include <bw_types.h>
+#include <bw-types.h>
 
 BWError BWInitialize();
 

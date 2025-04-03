@@ -1,5 +1,5 @@
-#include "bw_wasapi.h"
-#include <bw_win_consts.h>
+#include "bw-wasapi.h"
+#include <bw-win-consts.h>
 
 #include <stdio.h>
 

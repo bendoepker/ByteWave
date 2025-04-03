@@ -2,7 +2,7 @@
 #define BW_ASIO_H
 
 #include "../../lib/ASIOSDK/common/asio.h"
-#include <bw_types.h>
+#include <bw-types.h>
 
 BWError BWAsioInitialize();
 

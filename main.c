@@ -1,5 +1,6 @@
-#include <bw_wasapi.h>
+#include <bw-wasapi.h>
 #include <stdio.h>
+#include <bw-log.h>
 
 //These two must be together in this order in whatever file uses the latter constants
 //in order to link to uuid without errors from GCC
@@ -7,6 +8,10 @@
 #include <functiondiscoverykeys_devpkey.h>
 
 int main(void) {
+
+    BW_LOG_GEN("Hello %d", 1);
+    BW_LOG_ERR("Hello %d", 2);
+    BW_LOG_FUNC("Hello %d", 2);
 
     //NOTE: Testing WASAPI
     BWError res = BWWASAPIInitialize();
@@ -95,6 +100,7 @@ int main(void) {
         dev_props->lpVtbl->GetValue(dev_props, &PKEY_Device_FriendlyName, &name);
         if(name.vt != VT_EMPTY) printf("Current Input Device: %ls\n", name.pwszVal);
     }
+
 
     unsigned int packet_size = 0;
     unsigned int buffer_frames_available = 0;

@@ -1,4 +1,4 @@
-#include "bw_dsound.h"
+#include "bw-dsound.h"
 
 BWError BWDSoundInitialize() {
     BWError result = BW_OK;

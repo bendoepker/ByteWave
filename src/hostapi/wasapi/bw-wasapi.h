@@ -6,7 +6,7 @@
 #include <Audioclient.h>
 
 //ByteWave
-#include <bw_types.h>
+#include <bw-types.h>
 
 typedef struct {
     IMMDevice* capture_device;
