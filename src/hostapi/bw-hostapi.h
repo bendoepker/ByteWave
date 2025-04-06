@@ -12,6 +12,10 @@
 #endif
 #include <bw-types.h>
 
-BWError BWInitialize();
+BWError BWHostApi_Initialize();
+BWError BWHostApi_Terminate();
+BWError BWHostApi_QueryDevices();
+BWError BWHostApi_OpenStream();
+BWError BWHostApi_CloseStream();
 
 #endif // BW_HOSTAPI_H

@@ -6,17 +6,17 @@
 
 typedef struct {
 
-} asio_stream_params;
+} _asio_stream_params;
 
 typedef struct {
     char name[32];
     long device_index;
-} asio_device;
+} _asio_device;
 
-BWError BWAsioInitialize();
-BWError BWAsioTerminate();
-BWError BWAsioQueryDevices(asio_device** devices, uint32_t* num_devices);
-BWError BWAsioOpenStream();
-BWError BWAsioCloseStream();
+BWError BWAsio_Initialize();
+BWError BWAsio_Terminate();
+BWError BWAsio_QueryDevices(_asio_device** devices, uint32_t* num_devices);
+BWError BWAsio_OpenStream();
+BWError BWAsio_CloseStream();
 
 #endif //BW_ASIO_H

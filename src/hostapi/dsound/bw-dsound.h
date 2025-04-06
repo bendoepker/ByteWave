@@ -3,6 +3,10 @@
 #include <dsound.h>
 #include <bw-types.h>
 
-BWError BWDSoundInitialize();
+BWError BWDSound_Initialize();
+BWError BWDSound_Terminate();
+BWError BWDSound_QueryDevices();
+BWError BWDSound_OpenStream();
+BWError BWDSound_CloseStream();
 
 #endif //BW_DSOUND_H

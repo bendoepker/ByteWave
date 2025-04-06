@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-BWError BWWASAPIInitialize() {
+BWError BWWASAPI_Initialize() {
     BWError result = BW_OK;
     HRESULT hres;
     hres = CoInitialize(NULL);
@@ -12,7 +12,7 @@ BWError BWWASAPIInitialize() {
     return result;
 }
 
-BWError BWWASAPITerminate() {
+BWError BWWASAPI_Terminate() {
     BWError result = BW_OK;
 
     CoUninitialize();
@@ -21,7 +21,7 @@ BWError BWWASAPITerminate() {
 }
 
 //PERF: Working as intended
-BWError BWWASAPIQueryDevices(wasapi_devices* devices) {
+BWError BWWASAPI_QueryDevices(_wasapi_devices* devices) {
     //Initial Variables
     BWError result = BW_OK;
     HRESULT hres = S_OK;
@@ -128,12 +128,12 @@ BWError BWWASAPIQueryDevices(wasapi_devices* devices) {
 }
 
 //TODO: Create mode selection via parameters for input and output
-BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params) {
+BWError BWWASAPI_OpenStream(_wasapi_stream_params** stream_params) {
     BWError result = BW_OK;
 
     //WARN: This may need to change depending on implementation
     //      But we're gonna roll with it for the time being
-    (*stream_params) = malloc(sizeof(wasapi_stream_params));
+    (*stream_params) = malloc(sizeof(_wasapi_stream_params));
     if(*stream_params == NULL) return BW_FAILED;
 
     (*stream_params)->audio_client = NULL;
@@ -223,7 +223,7 @@ BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params) {
 //PERF: Done
 //NOTE: releases all windows resources and frees the memory from the heap afterwards
 //      Not thread safe (alloc / dealloc)
-BWError BWWASAPICloseStream(wasapi_stream_params** stream_params) {
+BWError BWWASAPI_CloseStream(_wasapi_stream_params** stream_params) {
     BWError result = BW_OK;
 
 

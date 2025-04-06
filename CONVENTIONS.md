@@ -41,6 +41,18 @@
 >   void _bw_ui_function_name() { /* Internally Used */ }
 >```
 
+### Utility
+
+> Utility functions that are exposed globally should be pascal case and prefixed with BWUtil_
+> ```c
+>   void BWUtil_CreateThread();
+>```
+
+> Utility functions that are only for internal use should be snake case and prefixed with \_bw_
+>```c
+>   void _bw_function_name();
+>```
+
 ### Macros
 
 > All macros should have the BW_ prefix and should be all caps  

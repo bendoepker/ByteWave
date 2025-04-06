@@ -3,22 +3,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-BWError BWAsioInitialize() {
+BWError BWAsio_Initialize() {
     BWError result = BW_OK;
 
-    bw_asio_construct_drivers();
+    _bw_asio_construct_drivers();
     return result;
 }
 
-BWError BWAsioTerminate() {
+BWError BWAsio_Terminate() {
     BWError result = BW_OK;
 
-    bw_asio_destroy_drivers();
+    _bw_asio_destroy_drivers();
     return result;
 }
 
 //WARN: Not thread safe, uses malloc
-BWError BWAsioQueryDevices(asio_device** devices, uint32_t* num_devices){
+BWError BWAsio_QueryDevices(_asio_device** devices, uint32_t* num_devices){
     BWError result = BW_OK;
 
     long max_drivers = 32; //Arbitrary number, unlikely to be more than 32 drivers on a pc
@@ -27,7 +27,7 @@ BWError BWAsioQueryDevices(asio_device** devices, uint32_t* num_devices){
         driver_names[i] = (char*)malloc(32); //Max 32 Bytes per name as per asio standard
         if(driver_names[i] == 0) return BW_FAILED_MALLOC;
     }
-    long res = bw_asio_get_drv_names(driver_names, max_drivers);
+    long res = _bw_asio_get_drv_names(driver_names, max_drivers);
     if(res < 0){
         if(res == -1010) return BW_UNINITIALIZED;
         return BW_FAILED;
@@ -39,7 +39,7 @@ BWError BWAsioQueryDevices(asio_device** devices, uint32_t* num_devices){
     }
 
     //Translate the driver_names array into an array of asio_device
-    (*devices) = (asio_device*)malloc(sizeof(asio_device) * res);
+    (*devices) = (_asio_device*)malloc(sizeof(_asio_device) * res);
     for(int i = 0; i < res; i++) {
         (*devices)[i].device_index = i;
         memcpy((*devices)[i].name, driver_names[i], 32);

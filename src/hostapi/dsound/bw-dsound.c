@@ -1,9 +1,26 @@
 #include "bw-dsound.h"
 
-BWError BWDSoundInitialize() {
-    BWError result = BW_OK;
+BWError BWDSound_Initialize() {
 
-    //TODO: implement Direct Sound Initialization
+    return BW_OK;
+}
 
-    return result;
+BWError BWDSound_Terminate() {
+
+    return BW_OK;
+}
+
+BWError BWDSound_QueryDevices() {
+
+    return BW_OK;
+}
+
+BWError BWDSound_OpenStream() {
+
+    return BW_OK;
+}
+
+BWError BWDSound_CloseStream() {
+
+    return BW_OK;
 }

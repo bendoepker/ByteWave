@@ -16,38 +16,38 @@ typedef struct {
     IAudioRenderClient* render_client;
     WAVEFORMATEX* audio_format;
     UINT32 buffer_frame_count;
-} wasapi_stream_params;
+} _wasapi_stream_params;
 
 typedef struct {
     unsigned int num_capture_devices;
     unsigned int num_render_devices;
     IMMDevice** capture_devices;
     IMMDevice** render_devices;
-} wasapi_devices;
+} _wasapi_devices;
 
 /*
     * TODO: Add description, return types, parameters
 */
-BWError BWWASAPIInitialize();
+BWError BWWASAPI_Initialize();
 
 /*
     * TODO: Add description, return types, parameters
 */
-BWError BWWASAPITerminate();
+BWError BWWASAPI_Terminate();
 
 /*
     * TODO: Add description, return types, parameters
 */
-BWError BWWASAPIQueryDevices(wasapi_devices* devices);
+BWError BWWASAPI_QueryDevices(_wasapi_devices* devices);
 
 /*
     * TODO: Add description, return types, parameters
 */
-BWError BWWASAPIOpenStream(wasapi_stream_params** stream_params);
+BWError BWWASAPI_OpenStream(_wasapi_stream_params** stream_params);
 
 /*
     * TODO: Add description, return types, parameters
 */
-BWError BWWASAPICloseStream(wasapi_stream_params** stream_params);
+BWError BWWASAPI_CloseStream(_wasapi_stream_params** stream_params);
 
 #endif //BW_WASAPI_H

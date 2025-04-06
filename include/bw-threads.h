@@ -22,39 +22,39 @@ typedef enum {
     BW_LOW_PRIORITY = THREAD_PRIORITY_LOWEST,
 #endif //Windows
 #ifdef __linux__
-    //'nice' values not priority values
+    //Priority values for real time scheduling (SCHED_FIFO / SCHED_RR)
     BW_HIGH_PRIORITY = 99,
     BW_NORMAL_PRIORITY = 50,
     BW_LOW_PRIORITY = 1,
 #endif //Linux
-} BW_THREAD_PRIORITY;
+} BWThreadPriority;
 
 #ifdef _WIN32
-    typedef HANDLE bw_thread;
+    typedef HANDLE BWThread;
 #endif
 #ifdef __linux__
-    typedef pthread_t bw_thread;
+    typedef pthread_t BWThread;
 #endif
 
 //Struct to pass function pointer and data to the create_thread function
 typedef struct {
     void* (*function)(void*);
     void* data;
-} function_data;
+} BWFunctionData;
 
 //Get / Set the priority of the current thread
-size_t get_thread_priority();
-void set_thread_priority(BW_THREAD_PRIORITY priority);
+size_t BWUtil_GetThreadPriority();
+void BWUtil_SetThreadPriority(BWThreadPriority priority);
 
 //Creates a new thread and executes the function in func_data using the data in func_data
 //returns the thread id of the new thread
-bw_thread create_thread(function_data* func_data, BW_THREAD_PRIORITY priority);
+BWThread BWUtil_CreateThread(BWFunctionData* func_data, BWThreadPriority priority);
 
 //Waits for all of the threads in the 'threads' array to finish, thread count
 //is the number of thread ids in 'threads'
-size_t wait_for_threads(bw_thread* threads, size_t thread_count);
+size_t BWUtil_WaitForThreads(BWThread* threads, size_t thread_count);
 
 //Waits for the thread 'thread' to complete before continuing in the function
-size_t wait_for_thread(bw_thread thread);
+size_t BWUtil_WaitForThread(BWThread thread);
 
 #endif //BW_THREADS_H

@@ -2,7 +2,7 @@
 #include "bw-log.h"
 #include <stdio.h>
 
-size_t get_thread_priority() {
+size_t BWUtil_GetThreadPriority() {
 #ifdef _WIN32
     HANDLE cur_thr = GetCurrentThread();
     return GetThreadPriority(cur_thr);
@@ -20,7 +20,7 @@ size_t get_thread_priority() {
 }
 
 //Sets the priority of the thread
-void set_thread_priority(BW_THREAD_PRIORITY priority) {
+void BWUtil_SetThreadPriority(BWThreadPriority priority) {
 #ifdef _WIN32
     HANDLE cur_thr = GetCurrentThread();
     SetThreadPriority(cur_thr, priority);
@@ -38,20 +38,20 @@ void set_thread_priority(BW_THREAD_PRIORITY priority) {
 }
 
 //Intermediate function that is passed to the create_thread function
-//May need to be used in other OS's?
+//May need to be used in other OS's (Mac)?
 #ifdef _WIN32
-static inline DWORD WINAPI __intermediate_function(void* func_data) {
+static inline DWORD WINAPI _bw_win_threading_function(void* func_data) {
     //TODO: Test that this works with a return value of (void*) as opposed to (void)
-    function_data* data = (function_data*)func_data;
+    BWFunctionData* data = (BWFunctionData*)func_data;
     data->function(data->data);
     return 0;
 }
 #endif //Windows
 
 //Returns a thread ID of the new thread on succes, returns 0 on fail
-bw_thread create_thread(function_data* func_data, BW_THREAD_PRIORITY priority) {
+BWThread BWUtil_CreateThread(BWFunctionData* func_data, BWThreadPriority priority) {
 #ifdef _WIN32
-    HANDLE t_out = CreateThread(NULL, 0, __intermediate_function, (void*)func_data, 0, 0);
+    HANDLE t_out = CreateThread(NULL, 0, _bw_win_threading_function, (void*)func_data, 0, 0);
     if(!t_out) return 0;
     if(SetThreadPriority(t_out, priority) == 0) return 0;
     return t_out; //Returns 0 if the handle is invalid, else returns the thread
@@ -66,7 +66,7 @@ bw_thread create_thread(function_data* func_data, BW_THREAD_PRIORITY priority) {
     return 0; //No operating system defined, that's above my pay grade
 }
 
-size_t wait_for_threads(bw_thread* threads, size_t thread_count) {
+size_t BWUtil_WaitForThreads(BWThread* threads, size_t thread_count) {
 #ifdef _WIN32
     //TODO: Implement a meaningful return value here
     return WaitForMultipleObjects(thread_count, threads, TRUE, INFINITE);
@@ -79,7 +79,7 @@ size_t wait_for_threads(bw_thread* threads, size_t thread_count) {
 #endif
 }
 
-size_t wait_for_thread(bw_thread thread) {
+size_t BWUtil_WaitForThread(BWThread thread) {
 #ifdef _WIN32
     return WaitForSingleObject(thread, INFINITE);
 #endif
