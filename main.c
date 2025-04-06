@@ -7,11 +7,31 @@
 #include <initguid.h>
 #include <functiondiscoverykeys_devpkey.h>
 
-int main(void) {
+//WARN: ASIO TESTING
+#include "lib/ASIOSDK/common/asio.h"
+#include <bw-asio.h>
+#include <bw-asio-il.h>
 
-    BW_LOG_GEN("Hello %d", 1);
-    BW_LOG_ERR("Hello %d", 2);
-    BW_LOG_FUNC("Hello %d", 2);
+int main(void) {
+    BW_PRINT("Beginning ASIO Test");
+
+    BWAsioInitialize();
+    asio_device* devs;
+    uint32_t num_devs;
+    BWError err = BWAsioQueryDevices(&devs, &num_devs);
+    if(err != BW_OK) {
+        BW_LOG_ERR("BW Error: %d", err);
+        return -1;
+    }
+    BW_PRINT("Numer of Asio Devices: %d", num_devs);
+    for(int i = 0; i < num_devs; i++) {
+        BW_PRINT("Device %d: %s", devs[i].device_index, devs[i].name);
+    }
+
+    BWAsioTerminate();
+
+//PERF: THIS IS THE END OF ASIO TESTING
+exit(0);
 
     //NOTE: Testing WASAPI
     BWError res = BWWASAPIInitialize();

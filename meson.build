@@ -1,6 +1,7 @@
 project(
   'ByteWave',
   'c',
+  'cpp',
   default_options : [
     'c_std=c11', #May change depending on compiler (clang not fully supported yet)
     'warning_level=1',
@@ -43,7 +44,8 @@ bw_asio_src = [
   'lib/ASIOSDK/common/asio.cpp',
   'lib/ASIOSDK/host/pc/asiolist.cpp',
   'lib/ASIOSDK/host/asiodrivers.cpp',
-  'src/hostapi/asio/bw_asio.c',
+  'src/hostapi/asio/bw-asio.c',
+  'src/hostapi/asio/bw-asio-il.cpp',
 ]
 bw_asio_inc = [
   'lib/ASIOSDK/common',
