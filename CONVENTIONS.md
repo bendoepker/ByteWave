@@ -41,6 +41,19 @@
 >   void _bw_ui_function_name() { /* Internally Used */ }
 >```
 
+### Macros
+
+> All macros should have the BW_ prefix and should be all caps  
+> Macros should not contain semicolons, semicolons should be put at the
+> end in use
+>```c
+>   #define BW_MACRO(s) do_something(s)
+>
+>   int main() {
+>       BW_MACRO("Hello World!");
+>   }
+>```
+
 ## Variables
 
 ### Local Variables
