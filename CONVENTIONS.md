@@ -81,3 +81,9 @@
 - These functions should then be defined in bw-\<host-api-name\>.c
 - Any extra helper functions should be declared in bw-\<host-api-name\>-\<descriptor\>.h
 - These functions should then be defined in bw-\<host-api-name\>-\<descriptor\>.c(pp)
+
+### Utility
+
+- All utility functionality such as logging, threading, etc. that is meant to be cross platform  
+should have the declarations put in include/* with the definitions in src/util/*
+- Utility files should be named bw-\<purpose\>.(h/c)
