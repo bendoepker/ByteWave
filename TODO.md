@@ -1,5 +1,5 @@
 # TODO
 
-Complete the interface layer for asio (bw-asio-il.(h/c))
- - create the interface for the main asio.cpp and asio.h files
- - currently it is as simple as wrapping asio.h in ```cpp extern "C" {}```
+- Create an object that will store all of the necessary information for each of the
+    ASIO devices available on a system
+- Create the OpenStream and CloseStream functions for ASIO

@@ -3,16 +3,24 @@
 #include <asiodrivers.h>
 
 //Asio driver functions (asiodrivers.h)
+
 //Globals
-AsioDrivers* _bw_asio_drivers = 0;
+//PERF: !!THE LINE BELOW MUST REMAIN THE SAME TO CORRECTLY LINK WITH ASIO!!
+extern AsioDrivers* asioDrivers;
 
 //Wrap constructor / destructor
-void _bw_asio_construct_drivers() { _bw_asio_drivers = new AsioDrivers(); }
+void _bw_asio_construct_drivers() {
+    if(asioDrivers) {
+        BW_LOG_GEN("asioDrivers already initialized");
+        return;
+    }
+    asioDrivers = new AsioDrivers();
+}
 
 void _bw_asio_destroy_drivers() { 
-    if(_bw_asio_drivers != 0) {
-        delete _bw_asio_drivers; 
-        _bw_asio_drivers = 0;
+    if(asioDrivers != 0) {
+        delete asioDrivers; 
+        asioDrivers = 0;
     }
 }
 
@@ -20,34 +28,34 @@ void _bw_asio_destroy_drivers() {
 //Returns the number of drivers (up to the total number of drivers)
 //or -1010 if the class is not instantiated
 long _bw_asio_get_drv_names(char** names, long max_drivers) {
-    if(!_bw_asio_drivers) return -1010;
-    return _bw_asio_drivers->getDriverNames(names, max_drivers);
+    if(!asioDrivers) return -1010;
+    return asioDrivers->getDriverNames(names, max_drivers);
 }
 
 //Retrieves the name of the current loaded driver
 BWError _bw_asio_get_current_drv_name(char* name) {
-    if(!_bw_asio_drivers) return BW_UNINITIALIZED;
-    if(_bw_asio_drivers->getCurrentDriverName(name))
+    if(!asioDrivers) return BW_UNINITIALIZED;
+    if(asioDrivers->getCurrentDriverName(name))
         return BW_OK;
     else return BW_FAILED;
 }
 
 //Retrieves the index of the current loaded driver
 long _bw_asio_get_current_driver_index() {
-    if(!_bw_asio_drivers) return BW_UNINITIALIZED;
-    return _bw_asio_drivers->getCurrentDriverIndex();
+    if(!asioDrivers) return BW_UNINITIALIZED;
+    return asioDrivers->getCurrentDriverIndex();
 }
 
 BWError _bw_asio_load_driver(char* name) {
-    if(!_bw_asio_drivers) return BW_UNINITIALIZED;
-    if(_bw_asio_drivers->loadDriver(name))
+    if(!asioDrivers) return BW_UNINITIALIZED;
+    if(asioDrivers->loadDriver(name))
         return BW_OK;
     else return BW_FAILED;
 }
 
 void _bw_asio_remove_current_driver() {
-    if(!_bw_asio_drivers) return;
-    _bw_asio_drivers->removeCurrentDriver();
+    if(!asioDrivers) return;
+    asioDrivers->removeCurrentDriver();
     return;
 }
 

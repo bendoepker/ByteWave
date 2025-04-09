@@ -17,7 +17,7 @@ int main(void) {
     if(result != BW_OK) {
         BW_LOG_ERR("BWAsio_Initialize() failed: %d", result);
     }
-    /*
+
     _asio_device* devs;
     uint32_t num_devs;
     BWError err = BWAsio_QueryDevices(&devs, &num_devs);
@@ -30,14 +30,24 @@ int main(void) {
         BW_PRINT("Device %d: %s", devs[i].device_index, devs[i].name);
     }
 
-    //err = BWAsio_ChangeDevice(devs[3].name);
-    //BW_LOG_ERR("Change device error: %d", err);
-    //_bw_asio_control_panel();
-*/
+    _bw_asio_control_panel();
+    Sleep(500);
+    BW_LOG_GEN("New Device: %s", devs[3]);
+    err = BWAsio_ChangeDevice(devs[3].name);
+    if(err){
+        BW_LOG_ERR("Change device error: %d", err);
+    }
+    _bw_asio_control_panel();
 
     result = BWAsio_Terminate();
     if(result != BW_OK) {
         BW_LOG_ERR("BWAsio_Terminate() failed: %d", result);
+    }
+
+    int i = 100;
+    while(i >=0) {
+        Sleep(100);
+        i--;
     }
 
     BW_PRINT("done: %d", result);

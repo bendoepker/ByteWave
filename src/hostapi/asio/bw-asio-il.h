@@ -11,6 +11,7 @@ extern "C" {
 //Asio driver functions
 void _bw_asio_construct_drivers();
 void _bw_asio_destroy_drivers();
+
 long _bw_asio_get_drv_names(char** names, long max_drivers);
 BWError _bw_asio_get_current_drv_name(char* name);
 long _bw_asio_get_current_driver_index();

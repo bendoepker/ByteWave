@@ -5,9 +5,11 @@
 #include <string.h>
 #include <windows.h>
 
+//Globals
 ASIODriverInfo* _bw_asio_driver_info = 0;
 _asio_device* _bw_asio_devices = 0;
 uint32_t _bw_asio_num_devices = 0;
+unsigned char _bw_asio_is_initialized = 0;
 
 //WARN: Not thread safe, uses malloc (and file io soon)
 //TODO: Use saved default device (saved_device)
@@ -20,7 +22,7 @@ BWError BWAsio_Initialize() {
     result = BWAsio_QueryDevices(&_bw_asio_devices, & _bw_asio_num_devices);
     if(_bw_asio_num_devices == 0) return BW_FAILED; //No asio devices available
 
-    long saved_device = 3;
+    long saved_device = 0;
     result = _bw_asio_load_driver(_bw_asio_devices[saved_device].name);
     if(result != BW_OK) return result;
 
@@ -34,43 +36,48 @@ BWError BWAsio_Initialize() {
     result = _bw_asio_init(_bw_asio_driver_info);
     if(result != BW_OK) return result;
 
+    _bw_asio_is_initialized = 1;
+
     return result;
 }
 
 BWError BWAsio_Terminate() {
-    BWError result = BW_OK;
-    BW_PRINT("BW_Terminate");
-    result = _bw_asio_exit(); //This will remove the current driver as well
+    BWError result = _bw_asio_exit();
+    if(result != BW_OK) return result;
+    _bw_asio_remove_current_driver();
     _bw_asio_destroy_drivers();
-    return result;
+    _bw_asio_is_initialized = 0;
+    return BW_OK;
 }
 
-//WARN: Close stream may need to be called before this to dispose old buffers
-//TODO: Test above ^
+//WARN: Close stream needs to be called before this to dispose old buffers
 BWError BWAsio_ChangeDevice(char device[32]) {
-    //Reset driver info
+    //Exit and remove current driver
+    BWError res = _bw_asio_exit();
+    if(res) {
+        BW_LOG_ERR("Error exiting ASIO: %d", res);
+        return res;
+    }
 
+    //Reset driver info
     if(_bw_asio_driver_info != 0)
         memset(_bw_asio_driver_info, 0, sizeof(ASIODriverInfo));
     else {
         _bw_asio_driver_info = (ASIODriverInfo*)malloc(sizeof(ASIODriverInfo));
         if(_bw_asio_driver_info == 0) return BW_FAILED_MALLOC;
     }
-
     _bw_asio_driver_info->sysRef = GetCurrentProcess();
     _bw_asio_driver_info->asioVersion = 2;
 
-    //NOTE: ASIO takes care of removing / unloading the old driver
-
     //Link new device driver
-    BWError res = _bw_asio_load_driver(device);
+    res = _bw_asio_load_driver(device);
     if(res) {
-        BW_LOG_ERR("%d", res);
+        BW_LOG_ERR("Error loading driver: %d", res);
         return res;
     }
     res = _bw_asio_init(_bw_asio_driver_info);
     if(res) {
-        BW_LOG_ERR("%d", res);
+        BW_LOG_ERR("Error initializing driver: %d", res);
         return res;
     }
 
