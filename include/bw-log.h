@@ -6,9 +6,16 @@
 */
 
 #include <stdarg.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void _bw_log(const char* s, ...);
 void _bw_print(const char* s, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 //General Log Statements
 #if defined BW_LOG || defined BW_LOG_GEN
@@ -23,7 +30,7 @@ void _bw_print(const char* s, ...);
 #define BW_LOG_ERR(fmt, ...) \
     _bw_log("[ERROR] " fmt, ##__VA_ARGS__)
 #else
-#define BW_LOG_ERROR(fmt, ...)
+#define BW_LOG_ERR(fmt, ...)
 #endif
 
 //Function Log Statements

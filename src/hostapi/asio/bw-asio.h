@@ -19,4 +19,6 @@ BWError BWAsio_QueryDevices(_asio_device** devices, uint32_t* num_devices);
 BWError BWAsio_OpenStream();
 BWError BWAsio_CloseStream();
 
+BWError BWAsio_ChangeDevice(char device[32]);
+
 #endif //BW_ASIO_H

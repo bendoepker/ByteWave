@@ -13,11 +13,14 @@
 
 int main(void) {
     BW_PRINT("Beginning ASIO Test");
-
-    BWAsioInitialize();
-    asio_device* devs;
+    BWError result = BWAsio_Initialize();
+    if(result != BW_OK) {
+        BW_LOG_ERR("BWAsio_Initialize() failed: %d", result);
+    }
+    /*
+    _asio_device* devs;
     uint32_t num_devs;
-    BWError err = BWAsioQueryDevices(&devs, &num_devs);
+    BWError err = BWAsio_QueryDevices(&devs, &num_devs);
     if(err != BW_OK) {
         BW_LOG_ERR("BW Error: %d", err);
         return -1;
@@ -27,17 +30,27 @@ int main(void) {
         BW_PRINT("Device %d: %s", devs[i].device_index, devs[i].name);
     }
 
-    BWAsioTerminate();
+    //err = BWAsio_ChangeDevice(devs[3].name);
+    //BW_LOG_ERR("Change device error: %d", err);
+    //_bw_asio_control_panel();
+*/
+
+    result = BWAsio_Terminate();
+    if(result != BW_OK) {
+        BW_LOG_ERR("BWAsio_Terminate() failed: %d", result);
+    }
+
+    BW_PRINT("done: %d", result);
 
 //PERF: THIS IS THE END OF ASIO TESTING
 exit(0);
 
     //NOTE: Testing WASAPI
-    BWError res = BWWASAPIInitialize();
+    BWError res = BWWASAPI_Initialize();
 
     //NOTE: Testing WASAPIQueryDevices()
-    wasapi_devices devices;
-    res = BWWASAPIQueryDevices(&devices);
+    _wasapi_devices devices;
+    res = BWWASAPI_QueryDevices(&devices);
     if(res != BW_OK) printf("Error: %d", res);
     for(int i = 0; i < devices.num_capture_devices; i++) {
         IPropertyStore* dev_props = NULL;
@@ -79,8 +92,8 @@ exit(0);
     //TODO: Begin testing input / output
     //      Create capture / render functions
 
-    wasapi_stream_params* stream_params = NULL; //malloc(sizeof(wasapi_stream_params));
-    res = BWWASAPIOpenStream(&stream_params);
+    _wasapi_stream_params* stream_params = NULL; //malloc(sizeof(wasapi_stream_params));
+    res = BWWASAPI_OpenStream(&stream_params);
     if(res != BW_OK) printf("Error: %d\n", res);
 
     //NOTE: Testing WAVEFORMAT PARAMS
@@ -144,10 +157,10 @@ exit(0);
         }
     }
 
-    res = BWWASAPICloseStream(&stream_params);
+    res = BWWASAPI_CloseStream(&stream_params);
     if(res != BW_OK) printf("Error: %d\n", res);
 
-    res = BWWASAPITerminate();
+    res = BWWASAPI_Terminate();
     if(res != BW_OK) printf("Error: %d\n", res);
     printf("end\n");
 }
