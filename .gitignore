@@ -1,7 +1,14 @@
 #--------------------------------------#
-# ASIOSDK Ignored (Avoiding a lawsuit) #
+#           ASIOSDK Ignored            #
 #--------------------------------------#
 /lib/ASIOSDK
+
+#--------------------------------------#
+#            Raylub Ignored            #
+#--------------------------------------#
+/lib/ui/raylib.h
+/lib/ui/libraylib.a
+/lib/ui/raymath.h
 
 #-----------------------------------------------#
 # Zig build ignores for potential zig additions #

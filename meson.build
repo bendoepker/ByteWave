@@ -96,7 +96,59 @@ if get_option('BW_USE_DIRECTSOUND')
 endif
 
 #Utility
-bw_src_files += ['src/util/bw-threads.c']
+bw_src_files += ['src/util/bw-threads.c',
+                 'src/util/bw-config.c',
+                 'src/util/bw-types.c']
+
+#UI
+bw_ui_src_files = [
+  'src/ui/bw-ui.c',
+]
+if build_machine.system() == 'windows'
+  #winmm
+  winmm = c_compiler.find_library('winmm')
+  bw_deps += winmm
+
+  #dgi
+  gdi32 = c_compiler.find_library('gdi32')
+  bw_deps += gdi32
+
+  #OpenGL
+  opengl = c_compiler.find_library('opengl32')
+  bw_deps += opengl
+endif
+if build_machine.system() == 'linux'
+  #GL
+  gl = c_compiler.find_library('GL')
+  bw_deps += gl
+
+  #m
+  m = c_compiler.find_library('m')
+  bw_deps += m
+
+  #pthread
+  pthread = c_compiler.find_library('pthread')
+  bw_deps += pthread
+
+  #dl
+  dl = c_compiler.find_library('dl')
+  bw_deps += dl
+
+  #rt
+  rt = c_compiler.find_library('rt')
+  bw_deps += rt
+
+  #X11
+  X11 = c_compiler.find_library('X11')
+  bw_deps += X11
+endif
+
+#Raylib
+cwd = meson.current_source_dir()
+lib_dir = join_paths(cwd, 'lib')
+raylib = c_compiler.find_library('raylib', dirs: lib_dir)
+bw_deps += raylib
+bw_src_files += bw_ui_src_files
 
 #Debug Logging
 bw_src_files += ['src/util/bw-log.c']
@@ -124,7 +176,7 @@ executable(
   #Source Files
   bw_src_files,
 
-  dependencies : bw_deps,
+  dependencies : [ bw_deps ],
 
   #subsystem used, set to 'windows' for a gui app, 'console' otherwise
   win_subsystem : 'console',

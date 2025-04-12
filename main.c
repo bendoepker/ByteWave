@@ -1,58 +1,48 @@
-#include <bw-wasapi.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <bw-log.h>
+#include <string.h>
+#include <bw-threads.h>
+#include <bw-ui.h>
 
 //These two must be together in this order in whatever file uses the latter constants
 //in order to link to uuid without errors from GCC
-#include <initguid.h>
-#include <functiondiscoverykeys_devpkey.h>
+//#include <initguid.h>
+//#include <functiondiscoverykeys_devpkey.h>
 
 //WARN: ASIO TESTING
 #include <bw-asio.h>
 #include <bw-asio-il.h>
 
+//WARN: Config Testing
+#include <bw-config.h>
+
+BWThread thread_pool[1];
+
 int main(void) {
+    BWUIData* ui_data = (BWUIData*)malloc(sizeof(BWUIData));
+
+    BWConfigData* conf_data = (BWConfigData*)malloc(sizeof(BWConfigData));
+    BWError_Handle(BWConfig_Read("test-config.bwc", conf_data));
+    ui_data->config_data = conf_data;
+
+    //SECTION: Create the UI thread
+    BWFunctionData func_data = {.function = BWUI_UIMain, .data = (void*)ui_data};
+    BWThread ui_thread = BWUtil_CreateThread(&func_data, BW_NORMAL_PRIORITY);
+    thread_pool[0] = ui_thread;
+
     BW_PRINT("Beginning ASIO Test");
-    BWError result = BWAsio_Initialize();
-    if(result != BW_OK) {
-        BW_LOG_ERR("BWAsio_Initialize() failed: %d", result);
-    }
+    BWError_Handle(BWAsio_Initialize());
 
-    _asio_device* devs;
-    uint32_t num_devs;
-    BWError err = BWAsio_QueryDevices(&devs, &num_devs);
-    if(err != BW_OK) {
-        BW_LOG_ERR("BW Error: %d", err);
-        return -1;
-    }
-    BW_PRINT("Numer of Asio Devices: %d", num_devs);
-    for(int i = 0; i < num_devs; i++) {
-        BW_PRINT("Device %d: %s", devs[i].device_index, devs[i].name);
-    }
+    BWError_Handle(BWAsio_Terminate());
 
-    _bw_asio_control_panel();
-    Sleep(500);
-    BW_LOG_GEN("New Device: %s", devs[3]);
-    err = BWAsio_ChangeDevice(devs[3].name);
-    if(err){
-        BW_LOG_ERR("Change device error: %d", err);
-    }
-    _bw_asio_control_panel();
+    BW_PRINT("DONE");
+    BWError_Handle(BWConfig_Write("test-config.bwc", conf_data));
+    BWUtil_WaitForThreads(thread_pool, 1);
+    free(conf_data->device_name);
+    free(conf_data);
+}
 
-    result = BWAsio_Terminate();
-    if(result != BW_OK) {
-        BW_LOG_ERR("BWAsio_Terminate() failed: %d", result);
-    }
-
-    int i = 100;
-    while(i >=0) {
-        Sleep(100);
-        i--;
-    }
-
-    BW_PRINT("done: %d", result);
-
-//PERF: THIS IS THE END OF ASIO TESTING
+/*
 exit(0);
 
     //NOTE: Testing WASAPI
@@ -173,4 +163,4 @@ exit(0);
     res = BWWASAPI_Terminate();
     if(res != BW_OK) printf("Error: %d\n", res);
     printf("end\n");
-}
+    */
