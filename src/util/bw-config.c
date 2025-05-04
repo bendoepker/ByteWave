@@ -22,7 +22,26 @@ BWError BWConfig_Write(char* file_name, BWConfigData* data) {
     if(num_written != 1) return BW_FILE_WRITE_ERROR;
 
     //SECTION: Host API Tag
-    num_written = fwrite(&data->host_api, 1, 4, file);
+    switch(data->host_api) {
+        case UNKNOWN:
+            num_written = fwrite("UNKN", 1, 4, file);
+            break;
+        case ASIO:
+            num_written = fwrite("ASIO", 1, 4, file);
+            break;
+        case WASAPI:
+            num_written = fwrite("WAPI", 1, 4, file);
+            break;
+        case JACK:
+            num_written = fwrite("JACK", 1, 4, file);
+            break;
+        case ALSA:
+            num_written = fwrite("ALSA", 1, 4, file);
+            break;
+        case CORE:
+            num_written = fwrite("CORE", 1, 4, file);
+            break;
+    }
     if(num_written != 4) return BW_FILE_WRITE_ERROR;
 
     //SECTION: Device Name Length
@@ -61,15 +80,23 @@ BWError BWConfig_Read(char* file_name, BWConfigData* data) {
     if(version != 1) return BW_VERSION_INCOMPATIBLE;
 
     //SECTION: Host API
-    num_read = fread(data->host_api, 1, 4, file);
+    char host_api[4];
+    num_read = fread(host_api, 1, 4, file);
     if(num_read != 4) return BW_FILE_READ_ERROR;
+    if(strncmp(host_api, "UNKN", 4) == 0) data->host_api = UNKNOWN;
+    else if(strncmp(host_api, "WAPI", 4) == 0) data->host_api = WASAPI;
+    else if(strncmp(host_api, "ASIO", 4) == 0) data->host_api = ASIO;
+    else if(strncmp(host_api, "JACK", 4) == 0) data->host_api = JACK;
+    else if(strncmp(host_api, "ALSA", 4) == 0) data->host_api = ALSA;
+    else if(strncmp(host_api, "CORE", 4) == 0) data->host_api = CORE;
+    else return BW_FILE_READ_ERROR; //NOTE: Add other hostapis before this line
 
     //SECTION: Device Name Length
     num_read = fread(&data->device_name_length, 4, 1, file);
     if(num_read != 1) return BW_FILE_READ_ERROR;
 
     //SECTION: Device Name
-    data->device_name = (char*)malloc(data->device_name_length);
+    data->device_name = malloc(data->device_name_length);
     num_read = fread(data->device_name, 1, data->device_name_length, file);
     if(num_read != data->device_name_length) return BW_FILE_READ_ERROR;
 
@@ -90,7 +117,7 @@ BWError BWConfig_Read(char* file_name, BWConfigData* data) {
 BWError _get_current_directory(char** directory_name) {
     int name_length = GetCurrentDirectory(0, 0);
     if(name_length == 0) return BW_FAILED; //Could not get the directory name
-    *directory_name = (char*)malloc(name_length);
+    *directory_name = malloc(name_length);
     if(directory_name == 0) return BW_FAILED_MALLOC;
 
     if(!GetCurrentDirectory(name_length, *directory_name)) return BW_FAILED;

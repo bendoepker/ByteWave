@@ -1,0 +1,12 @@
+Initialize: query the host api's for device options and initialize global variables
+
+Activate: selects a hostapi and device to use and creates the necessary data structures for
+          use of the device
+
+Deactivate: reverses the effects of activate
+
+Terminate: deallocates all of the memory used to store queried information about each of the
+           host api's
+
+State:
+ - At any one time only one device should be active

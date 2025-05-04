@@ -9,9 +9,7 @@
 //#include <initguid.h>
 //#include <functiondiscoverykeys_devpkey.h>
 
-//WARN: ASIO TESTING
-#include <bw-asio.h>
-#include <bw-asio-il.h>
+#include "src/hostapi/bw-hostapi.h"
 
 //WARN: Config Testing
 #include <bw-config.h>
@@ -19,11 +17,12 @@
 BWThread thread_pool[1];
 
 int main(void) {
-    BWUIData* ui_data = (BWUIData*)malloc(sizeof(BWUIData));
+    BWUIData* ui_data = malloc(sizeof *ui_data);
 
-    BWConfigData* conf_data = (BWConfigData*)malloc(sizeof(BWConfigData));
+    BWConfigData* conf_data = malloc(sizeof *conf_data);
     BWError_Handle(BWConfig_Read("test-config.bwc", conf_data));
     ui_data->config_data = conf_data;
+    BW_LOG_GEN("%s", conf_data->device_name);
 
     //SECTION: Create the UI thread
     BWFunctionData func_data = {.function = BWUI_UIMain, .data = (void*)ui_data};
@@ -31,9 +30,9 @@ int main(void) {
     thread_pool[0] = ui_thread;
 
     BW_PRINT("Beginning ASIO Test");
-    BWError_Handle(BWAsio_Initialize());
+    BWError_Handle(BWHostApi_Initialize(*conf_data));
 
-    BWError_Handle(BWAsio_Terminate());
+    BWError_Handle(BWHostApi_Terminate());
 
     BW_PRINT("DONE");
     BWError_Handle(BWConfig_Write("test-config.bwc", conf_data));
@@ -92,7 +91,7 @@ exit(0);
     //TODO: Begin testing input / output
     //      Create capture / render functions
 
-    _wasapi_stream_params* stream_params = NULL; //malloc(sizeof(wasapi_stream_params));
+    _wasapi_stream_params* stream_params = NULL; //malloc(sizeof *_wasapi_stream_params);
     res = BWWASAPI_OpenStream(&stream_params);
     if(res != BW_OK) printf("Error: %d\n", res);
 

@@ -10,7 +10,7 @@ typedef struct {
 
 typedef struct {
     char name[32];
-    long device_index;
+    //long device_index;
     uint16_t num_input_channels;
     uint16_t num_output_channels;
 
@@ -19,19 +19,15 @@ typedef struct {
     //All available buffer sizes are stored in an array of uint32_t
     //Index 0 represents the minimum buffer size
     //Index num_buffer_sizes - 1 = the maximum buffer size
-    uint32_t* buffer_sizes;
-    uint16_t num_buffer_sizes;
-    uint16_t preferred_buffer_size_index; //Index of the preferred buffer size by the device
+    uint32_t buffer_size;
 
     uint32_t input_latency;
     uint32_t output_latency;
 } _asio_device;
 
-BWError BWAsio_Initialize();
-BWError BWAsio_Terminate();
 BWError BWAsio_QueryDevices(_asio_device** devices, uint32_t* num_devices);
-BWError BWAsio_OpenStream();
-BWError BWAsio_CloseStream();
+BWError BWAsio_Activate();
+BWError BWAsio_Deactivate();
 
 BWError BWAsio_ChangeDevice(char device[32]);
 

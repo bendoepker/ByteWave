@@ -39,6 +39,13 @@ bw_c_compiler_args = [
 ]
 
 #Host API Options
+#General
+bw_src_files += [
+  'src/hostapi/bw-hostapi.c'
+]
+bw_inc_dir += [
+  'src/hostapi'
+]
 #ASIO
 bw_asio_src = [
   'lib/ASIOSDK/common/asio.cpp',
