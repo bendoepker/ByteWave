@@ -3,6 +3,9 @@
 #include <string.h>
 #include <bw-threads.h>
 #include <bw-ui.h>
+#include <stdio.h>
+
+#include <bw-dynamic-array.h>
 
 //These two must be together in this order in whatever file uses the latter constants
 //in order to link to uuid without errors from GCC
@@ -16,7 +19,67 @@
 
 BWThread thread_pool[1];
 
+void print_da(d_array* da) {
+    BW_PRINT("-----------------------");
+    BW_PRINT("Array Capacity: %d", da->array_capacity);
+    BW_PRINT("Array Length: %d", da->array_length);
+    BW_PRINT("Array Empty Space: %d", da->array_empty_space);
+    BW_PRINT("Element Size: %d", da->element_size);
+    BW_PRINT("Array:");
+    for(int i = 0; i < da->array_length; i++) {
+        BW_PRINT("Char %d: %c", i, *(char*)DArrayAt(da, i));
+    }
+    BW_PRINT("-----------------------");
+}
+
 int main(void) {
+
+    d_array da = {0};
+    BWError te = DArrayCreate(&da, sizeof(char), 5);
+    if(te) return -1;
+
+    BW_PRINT("Append 'a' 'b' 'c'");
+    DArrayAppend(&da, (char[]){'a', 'b', 'c'}, 3);
+    print_da(&da);
+
+    BW_PRINT("Append 'd' 'e' 'f'");
+    DArrayAppend(&da, (char[]){'d', 'e', 'f'}, 3);
+    print_da(&da);
+
+    BW_PRINT("PopBack 4");
+    DArrayPopBack(&da, 4);
+    print_da(&da);
+
+    BW_PRINT("Insert 'g' at index 1");
+    DArrayInsert(&da, (char[]){'g', 'h'}, 2, 1);
+    print_da(&da);
+
+    BW_PRINT("Append 'i' 'j' 'k' 'l' 'm'");
+    DArrayAppend(&da, (char[]){'i', 'j', 'k', 'l', 'm'}, 5);
+    print_da(&da);
+
+    BW_PRINT("Insert 'n' 'o' at index 3");
+    DArrayInsert(&da, (char[]){'n', 'o'}, 2, 3);
+    print_da(&da);
+
+    BW_PRINT("Remove 'g' 'h'");
+    DArrayRemove(&da, 2, 1);
+    print_da(&da);
+
+    BW_PRINT("Search for 'a' 'm' 'i' 'x'");
+    BW_PRINT("-----------------------");
+    BW_PRINT("'a': %d", DArraySearch(&da, (char[]){'a'}));
+    BW_PRINT("'m': %d", DArraySearch(&da, (char[]){'m'}));
+    BW_PRINT("'i': %d", DArraySearch(&da, (char[]){'i'}));
+    BW_PRINT("'x': %d", DArraySearch(&da, (char[]){'x'}));
+    BW_PRINT("-----------------------");
+    BW_PRINT("Print Array Memory as hex");
+    BW_PRINT("-----------------------");
+    for(int i = 0; i < da.array_capacity; i++) {
+        printf("0x%.2x ", *(char*)(da.array + i));
+    }
+
+    exit(0);
     BWUIData* ui_data = malloc(sizeof *ui_data);
 
     BWConfigData* conf_data = malloc(sizeof *conf_data);
