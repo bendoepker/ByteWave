@@ -1,10 +1,11 @@
 #include "bw-hostapi.h"
+#include "bw-log.h"
 
 BWHostApi_AudioDevice* _active_audio_device = 0;
 int num_devices = 0;
 BWAudioDeviceEnumeration* devices_enumeration = 0;
 
-BWError BWHostApi_Initialize(BWConfigData conf_data) {
+BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     //SECTION: Enumerate devices
     //ASIO
     uint32_t num_asio_devs = 0;
@@ -39,15 +40,15 @@ BWError BWHostApi_Initialize(BWConfigData conf_data) {
 
     //Search for audio device matching the one in the config data
     for(int i = 0; i < num_devices; i++) {
-        if(devices_enumeration[i].host_api == conf_data.host_api) {
+        if(devices_enumeration[i].host_api == conf_data->host_api) {
             if(devices_enumeration[i].host_api == ASIO) {
-                if(strncmp(devices_enumeration[i].device_name, conf_data.device_name, 32) == 0){
+                if(strncmp(devices_enumeration[i].device_name, conf_data->device_name, 32) == 0){
                     strncpy(_active_audio_device->device_name, devices_enumeration[i].device_name, 32);
                     _active_audio_device->host_api = devices_enumeration[i].host_api;
                     break;
                 }
             } else {
-                if(strncmp(devices_enumeration[i].device_name, conf_data.device_name, 128) == 0) {
+                if(strncmp(devices_enumeration[i].device_name, conf_data->device_name, 128) == 0) {
                     strncpy(_active_audio_device->device_name, devices_enumeration[i].device_name, 128);
                     _active_audio_device->host_api = devices_enumeration[i].host_api;
                     break;
@@ -55,8 +56,13 @@ BWError BWHostApi_Initialize(BWConfigData conf_data) {
             }
         }
     }
-    if(_active_audio_device->host_api == UNKNOWN || _active_audio_device->device_name[0] == 0)
-        return BW_NO_DEVICES;
+    if(_active_audio_device->host_api == UNKNOWN || _active_audio_device->device_name[0] == 0) {
+        //Default to the first device
+        _active_audio_device->host_api = devices_enumeration[0].host_api;
+        strncpy(_active_audio_device->device_name, devices_enumeration[0].device_name, 128);
+        strncpy(conf_data->device_name, _active_audio_device->device_name, 128);
+        conf_data->host_api = _active_audio_device->host_api;
+    }
 
     return BW_OK;
 }
@@ -67,13 +73,15 @@ BWError BWHostApi_Terminate() {
     return BW_OK;
 }
 
-BWError BWHostApi_Activate(BWAudioDeviceEnumeration device) {
+BWError BWHostApi_Activate() {
     //Device selection
-    switch(device.host_api) {
+    switch(_active_audio_device->host_api) {
         case ASIO:
-            BWAsio_Activate();
-            break;
+            return BWAsio_Activate(_active_audio_device);
         case WASAPI:
+            //TODO:
+            break;
+        default:
             //TODO:
             break;
     }
@@ -86,6 +94,9 @@ BWError BWHostApi_Deactivate() {
             BWAsio_Deactivate();
             break;
         case WASAPI:
+            //TODO:
+            break;
+        default:
             //TODO:
             break;
     }

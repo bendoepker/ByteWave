@@ -7,30 +7,58 @@
 #include <assert.h>
 #include <math.h>
 
+#define ASIO_MAX_INPUT_CHANNELS 32
+#define ASIO_MAX_OUTPUT_CHANNELS 2
+
+typedef struct {
+    long num_input_channels;
+    long num_output_channels;
+    long num_channels;
+
+    ASIOBufferInfo buffer_infos[ASIO_MAX_INPUT_CHANNELS + ASIO_MAX_OUTPUT_CHANNELS];
+    long min_buffer_size;
+    long max_buffer_size;
+    long preferred_buffer_size;
+    long buffer_granularity;
+
+    double sample_rate;
+    long input_latency;
+    long output_latency;
+
+    long post_output;
+
+    ASIOChannelInfo channel_infos[ASIO_MAX_INPUT_CHANNELS + ASIO_MAX_OUTPUT_CHANNELS];
+} _asio_device_attributes;
+
 //Globals
-ASIOCallbacks _asio_callbacks = {0};
 ASIODriverInfo* _bw_asio_driver_info = 0;
 uint32_t _bw_asio_num_devices = 0;
 unsigned char _bw_asio_is_initialized = 0;
+ASIOBufferInfo* _bw_asio_buffer_infos = 0;
+_asio_device _active_asio_device = {0};
 
-_asio_device _active_asio_device;
+//This is defined separate from _active_asio_device because it accesses structures defined
+//in asio.h which I do not wish to include in the header files pertaining to any hostapis
+_asio_device_attributes _device_attr = {0}; //Attributes pertaining to the active asio device
 
 //Inner ASIO Functions
 void bufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
 void sampleRateDidChange(ASIOSampleRate sRate);
 long asioMessage(long selector, long value, void* message, double* opt);
 ASIOTime* bufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
+ASIOCallbacks _asio_callbacks = {bufferSwitch, sampleRateDidChange, asioMessage, bufferSwitchTimeInfo};
 
-BWError BWAsio_Terminate() {
-}
-
-BWError BWAsio_Activate() {
+BWError BWAsio_Activate(BWHostApi_AudioDevice* audio_device) {
     BWError result = BW_OK;
+
+    //Translate audio_device to _active_asio_device
+    strncpy(_active_asio_device.name, audio_device->device_name, 32);
 
     //Cpp class constructor
     _bw_asio_construct_drivers();
 
     //SECTION: Load driver
+    BW_LOG_GEN("Current Device: %s", _active_asio_device.name);
     result = _bw_asio_load_driver(_active_asio_device.name);
     if(result != BW_OK) return result;
 
@@ -46,22 +74,93 @@ BWError BWAsio_Activate() {
 
     _bw_asio_is_initialized = 1;
 
-    //SECTION: 
+    //SECTION: Buffer creation
+    result = _bw_asio_get_channels(&_device_attr.num_input_channels,
+                                   &_device_attr.num_output_channels);
+    if(result != BW_OK) return result;
+
+    result = _bw_asio_get_buffer_size(&_device_attr.min_buffer_size, &_device_attr.max_buffer_size,
+                                      &_device_attr.preferred_buffer_size, &_device_attr.buffer_granularity);
+    if(result != BW_OK) return result;
+
+    //Limit the number of channels to the pre-defined limits
+    if(_device_attr.num_input_channels > ASIO_MAX_INPUT_CHANNELS)
+        _device_attr.num_input_channels = ASIO_MAX_INPUT_CHANNELS;
+    if(_device_attr.num_output_channels > ASIO_MAX_OUTPUT_CHANNELS)
+        _device_attr.num_output_channels = ASIO_MAX_OUTPUT_CHANNELS;
+
+    //Set the input buffer infos to reflect that they are input buffers
+    for(int i = 0; i < _device_attr.num_input_channels; i++) {
+        _device_attr.buffer_infos[i].isInput = ASIOTrue;
+        _device_attr.buffer_infos[i].channelNum = i;
+        _device_attr.buffer_infos[i].buffers[0] = 0;
+        _device_attr.buffer_infos[i].buffers[1] = 0;
+    }
+
+    //Set the output buffer infos to reflect that they are output buffers
+    for(int i = 0; i < _device_attr.num_output_channels; i++) {
+        _device_attr.buffer_infos[i + _device_attr.num_input_channels].isInput = ASIOFalse;
+        _device_attr.buffer_infos[i + _device_attr.num_input_channels].channelNum = i;
+        _device_attr.buffer_infos[i + _device_attr.num_input_channels].buffers[0] = 0;
+        _device_attr.buffer_infos[i + _device_attr.num_input_channels].buffers[1] = 0;
+    }
+
+    result = _bw_asio_get_sample_rate(&_device_attr.sample_rate);
+    if(result != BW_OK) return result;
+
+    BW_PRINT("Sample Rate: %f", _device_attr.sample_rate);
+    BW_PRINT("Input Channels: %d", _device_attr.num_input_channels);
+    BW_PRINT("Output Channels: %d", _device_attr.num_output_channels);
+    BW_PRINT("Buffer Size: %d", _device_attr.preferred_buffer_size);
+
+    result = _bw_asio_create_buffers(_device_attr.buffer_infos,
+                                     _device_attr.num_input_channels + _device_attr.num_output_channels,
+                                     _device_attr.preferred_buffer_size,
+                                     &_asio_callbacks);
+    if(result != BW_OK) return result;
+
+    //Match the Channel Info Structures to the Buffer Info Structures
+    for(int i = 0; i < _device_attr.num_input_channels + _device_attr.num_output_channels; i++) {
+        _device_attr.channel_infos[i].channel = _device_attr.buffer_infos[i].channelNum;
+        _device_attr.channel_infos[i].isInput = _device_attr.buffer_infos[i].isInput;
+        result = _bw_asio_get_channel_info(&_device_attr.channel_infos[i]);
+        if(result != BW_OK) return result;
+        BW_PRINT("Channel %d Info", i);
+        BW_PRINT("    Channel Number: %ld", _device_attr.channel_infos[i].channel);
+        BW_PRINT("    Is Input: %ld", _device_attr.channel_infos[i].isInput);
+        BW_PRINT("    Is Input of Assoc. Buf: %ld", _device_attr.buffer_infos[i].isInput);
+        BW_PRINT("    Is Active: %ld", _device_attr.channel_infos[i].isActive);
+        BW_PRINT("    Channel Group: %ld", _device_attr.channel_infos[i].channelGroup);
+        BW_PRINT("    Sample Type: %ld", _device_attr.channel_infos[i].type);
+        BW_PRINT("    Name: %s\n", _device_attr.channel_infos[i].name);
+    }
+
+    //As per the ASIOSDK: Latencies may be invalid if requested before ASIOCreateBuffers()
+    result = _bw_asio_get_latencies(&_device_attr.input_latency, &_device_attr.output_latency);
+    if(result != BW_OK) return result;
+    BW_LOG_GEN("Input Latency | Output Latency: %d | %d", _device_attr.input_latency, _device_attr.output_latency);
+
+    //Test if the device supports the post output optimization
+    if(_bw_asio_output_ready() == BW_OK)
+        _device_attr.post_output = 1;
+    else _device_attr.post_output = 0;
+    BW_PRINT("Supports Post Output: %d", _device_attr.post_output);
 
     return result;
 }
 
 BWError BWAsio_Deactivate() {
-    BWError result = _bw_asio_exit();
+    BWError result = _bw_asio_dispose_buffers();
+    result = _bw_asio_exit();
     if(result != BW_OK) return result;
     _bw_asio_remove_current_driver();
+    free(_bw_asio_driver_info);
     _bw_asio_destroy_drivers();
     _bw_asio_is_initialized = 0;
     return BW_OK;
 
 }
 
-//WARN: Not thread safe, uses malloc
 BWError BWAsio_QueryDevices(_asio_device** devices, uint32_t* num_devices){
 
     _bw_asio_construct_drivers();
@@ -115,7 +214,6 @@ void sampleRateDidChange(ASIOSampleRate sRate) {
 }
 
 long asioMessage(long selector, long value, void* message, double* opt) {
-
     //Unused as of ASIO 2.3
     (void)message;
     (void)opt;
@@ -154,5 +252,9 @@ long asioMessage(long selector, long value, void* message, double* opt) {
 }
 
 ASIOTime* bufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess) {
-    
+    (void) directProcess; //Processing should never be deferred
+
+    if(_device_attr.post_output)
+        _bw_asio_output_ready();
+    return 0;
 }

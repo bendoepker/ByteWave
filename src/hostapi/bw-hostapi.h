@@ -12,10 +12,10 @@
 #endif
 #include <bw-types.h>
 
-BWError BWHostApi_Initialize(BWConfigData conf_data);
+BWError BWHostApi_Initialize(BWConfigData* conf_data);
 BWError BWHostApi_Terminate();
 
-BWError BWHostApi_Activate(BWAudioDeviceEnumeration device);
+BWError BWHostApi_Activate();
 BWError BWHostApi_Deactivate();
 
 #endif // BW_HOSTAPI_H
