@@ -93,7 +93,7 @@ typedef enum {
 
 typedef struct {
     BWHostApi host_api;             //The last host api that was used
-    char* device_name;          //The name of the device within the host api that was used
+    char device_name[128];          //The name of the device within the host api that was used
     uint32_t device_name_length;
     uint32_t window_width;
     uint32_t window_height;

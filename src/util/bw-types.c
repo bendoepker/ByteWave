@@ -7,6 +7,8 @@ const char* _bw_get_error_message(BWError err) {
             return "No Error";
         case BW_FAILED:
             return "Failed, unspecified";
+        case BW_NO_DEVICES:
+            return "No device found";
         case BW_UNINITIALIZED:
             return "Host API / Device was not initialized";
         case BW_WINDOWS_ERROR:

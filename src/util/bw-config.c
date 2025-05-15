@@ -96,7 +96,7 @@ BWError BWConfig_Read(char* file_name, BWConfigData* data) {
     if(num_read != 1) return BW_FILE_READ_ERROR;
 
     //SECTION: Device Name
-    data->device_name = malloc(data->device_name_length);
+    memset(data->device_name, 0, 128); //Ensure a null termination for any 0-127 byte name
     num_read = fread(data->device_name, 1, data->device_name_length, file);
     if(num_read != data->device_name_length) return BW_FILE_READ_ERROR;
 
