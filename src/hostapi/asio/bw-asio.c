@@ -1,6 +1,7 @@
 #include "bw-asio.h"
 #include "bw-asio-il.h"
 #include <bw-log.h>
+#include <bw-conversions.h>
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
@@ -28,6 +29,7 @@ typedef struct {
     long post_output;
 
     ASIOChannelInfo channel_infos[ASIO_MAX_INPUT_CHANNELS + ASIO_MAX_OUTPUT_CHANNELS];
+    BWSampleTypes sample_format;
 } _asio_device_attributes;
 
 //Globals
@@ -78,6 +80,7 @@ BWError BWAsio_Activate(BWHostApi_AudioDevice* audio_device) {
     result = _bw_asio_get_channels(&_device_attr.num_input_channels,
                                    &_device_attr.num_output_channels);
     if(result != BW_OK) return result;
+    _device_attr.num_channels = _device_attr.num_input_channels + _device_attr.num_output_channels;
 
     result = _bw_asio_get_buffer_size(&_device_attr.min_buffer_size, &_device_attr.max_buffer_size,
                                       &_device_attr.preferred_buffer_size, &_device_attr.buffer_granularity);
@@ -135,6 +138,33 @@ BWError BWAsio_Activate(BWHostApi_AudioDevice* audio_device) {
         BW_PRINT("    Name: %s\n", _device_attr.channel_infos[i].name);
     }
 
+    /*
+        *WARN:
+        * It isn't specified in the ASIOSDK that all of the devices' channels must have the
+        * same input / output sample type format, for the time being all of the channels will
+        * be given the same conversion function, if there is an interface which requires different
+        * functions per channel this will have to be assigned on a channel by channel basis
+    */
+
+    switch(_device_attr.channel_infos[0].type) {
+        case ASIOSTInt16LSB:
+            _device_attr.sample_format = INT_16_BIT;
+            break;
+        case ASIOSTInt24LSB:
+            _device_attr.sample_format = INT_24_BIT;
+            break;
+        case ASIOSTInt32LSB:
+            _device_attr.sample_format = INT_32_BIT;
+            break;
+        case ASIOSTFloat32LSB:
+            _device_attr.sample_format = FLOAT_32_BIT;
+            break;
+        default:
+            //TODO: Add support for more sample types (especially Big Endian Types for mobile port)
+            assert(1 && "Device sample type not supported\n");
+            break;
+    }
+
     //As per the ASIOSDK: Latencies may be invalid if requested before ASIOCreateBuffers()
     result = _bw_asio_get_latencies(&_device_attr.input_latency, &_device_attr.output_latency);
     if(result != BW_OK) return result;
@@ -146,11 +176,15 @@ BWError BWAsio_Activate(BWHostApi_AudioDevice* audio_device) {
     else _device_attr.post_output = 0;
     BW_PRINT("Supports Post Output: %d", _device_attr.post_output);
 
+    result = _bw_asio_start();
+    if(result != BW_OK) return result;
+
     return result;
 }
 
 BWError BWAsio_Deactivate() {
-    BWError result = _bw_asio_dispose_buffers();
+    BWError result = _bw_asio_stop();
+    result = _bw_asio_dispose_buffers();
     result = _bw_asio_exit();
     if(result != BW_OK) return result;
     _bw_asio_remove_current_driver();
@@ -254,7 +288,39 @@ long asioMessage(long selector, long value, void* message, double* opt) {
 ASIOTime* bufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess) {
     (void) directProcess; //Processing should never be deferred
 
+    //TODO: Mixer tracks (specifically the buffers) need to be set up for the conversion to happen
+
+    if(_device_attr.preferred_buffer_size > 0) {
+        float buffer[_device_attr.num_channels][_device_attr.preferred_buffer_size];
+        float output_buffer[_device_attr.preferred_buffer_size];
+
+        int i = 0;
+        //Process Inputs
+        for(i = 0; i < _device_attr.num_input_channels; i++) {
+            //Turn the input into 32 bit float
+            BWUtil_ConvertToFloat(_device_attr.buffer_infos[i].buffers[doubleBufferIndex],
+                                  buffer[i], _device_attr.sample_format, _device_attr.preferred_buffer_size);
+            //Mixer Process
+            for(int j = 0; j < _device_attr.preferred_buffer_size; j++) {
+                output_buffer[j] += buffer[i][j];
+            }
+
+            //Turn the output into the device format
+            BWUtil_ConvertFromFloat(output_buffer, _device_attr.buffer_infos[i].buffers[doubleBufferIndex],
+                                   _device_attr.sample_format, _device_attr.preferred_buffer_size);
+            //Copy the output to both channels
+            if(_device_attr.num_output_channels > 1) {
+                memcpy(_device_attr.buffer_infos[i + 1].buffers[doubleBufferIndex],
+                       _device_attr.buffer_infos[i].buffers[doubleBufferIndex],
+                       _device_attr.preferred_buffer_size);
+            }
+
+        }
+    }
+    BW_PRINT("Test");
+
     if(_device_attr.post_output)
         _bw_asio_output_ready();
+
     return 0;
 }
