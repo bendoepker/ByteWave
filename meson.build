@@ -106,7 +106,8 @@ endif
 bw_src_files += ['src/util/bw-threads.c',
                  'src/util/bw-config.c',
                  'src/util/bw-types.c',
-                 'src/util/bw-dynamic-array.c',]
+                 'src/util/bw-dynamic-array.c',
+                 'src/util/bw-conversions.c',]
 
 #UI
 bw_ui_src_files = [
