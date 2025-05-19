@@ -22,7 +22,7 @@ static inline void _int24_to_float32(void* input_buffer, float* output_buffer, u
         tmp3 = ib[(i * 3) + 2];
         // Pack each of the bytes into a 32 bit int in the appropriate order
         tmp[i] = (tmp1 << 16) | (tmp2 << 8) | tmp3;
-        if(tmp[i] * 0x800000) tmp[i] |= 0xFF000000; //Negative values are translated to 32 bit int
+        if(tmp[i] & 0x800000) tmp[i] |= 0xFF000000; //Negative values are translated to 32 bit int
         //At this point the values are stored as 32 bit ints, but the values are still in the range
         //of -8,388,608 <-> 8,388,607 (Signed 24 Bit Int Range)
         output_buffer[i] = tmp[i] / 8388608.0f;
@@ -70,15 +70,16 @@ void BWUtil_ConvertToFloat(void* input_buffer, float* output_buffer,
     switch(input_type) {
         case INT_16_BIT:
             _int16_to_float32(input_buffer, output_buffer, buffer_size);
-            break;
+            return;
         case INT_24_BIT:
             _int24_to_float32(input_buffer, output_buffer, buffer_size);
-            break;
+            return;
         case INT_32_BIT:
             _int32_to_float32(input_buffer, output_buffer, buffer_size);
+            return;
         case FLOAT_32_BIT:
             memcpy(output_buffer, input_buffer, buffer_size * sizeof(float));
-            break;
+            return;
     }
 }
 
@@ -87,12 +88,15 @@ void BWUtil_ConvertFromFloat(float* input_buffer, void* output_buffer,
     switch(output_type) {
         case INT_16_BIT:
             _float32_to_int16(input_buffer, output_buffer, buffer_size);
+            return;
         case INT_24_BIT:
             _float32_to_int24(input_buffer, output_buffer, buffer_size);
+            return;
         case INT_32_BIT:
             _float32_to_int32(input_buffer, output_buffer, buffer_size);
+            return;
         case FLOAT_32_BIT:
             memcpy(output_buffer, input_buffer, buffer_size * sizeof(float));
-            break;
+            return;
     }
 }
