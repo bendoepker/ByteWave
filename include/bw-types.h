@@ -22,14 +22,25 @@ typedef enum {
     BW_TRUE = 1,
 } BWBool;
 
+//If byte ordering is not specified it is assumed to be little endian (x86_64 native)
 typedef enum {
     //Int types
+    INT_8_BIT,
+
     INT_16_BIT,
-    INT_24_BIT, //Actually just a 32 bit int with lowered min and max values
+    INT_24_BIT,
     INT_32_BIT,
+
+    INT_16_BIT_MSB, //TODO:
+    INT_24_BIT_MSB, //TODO:
+    INT_32_BIT_MSB, //TODO:
 
     //Floating point types
     FLOAT_32_BIT,
+    FLOAT_64_BIT, //TODO:
+
+    FLOAT_32_BIT_MSB, //TODO:
+    FLOAT_64_BIT_MSB, //TODO:
 
 } BWSampleTypes;
 
@@ -38,11 +49,8 @@ typedef enum {
 #define UINT_8_BIT_MIN 0
 #define INT_16_BIT_MAX 32767
 #define INT_16_BIT_MIN -32768
-
-//TODO:
-//#define INT_24_BIT_MAX 8388607
-//#define INT_24_BIT_MIN -8388608
-
+#define INT_24_BIT_MAX 8388607
+#define INT_24_BIT_MIN -8388608
 #define INT_32_BIT_MAX 2147483647
 #define INT_32_BIT_MIN -2147483648
 
@@ -83,12 +91,12 @@ typedef struct {
 } BWAudioStream;
 
 typedef enum {
-    UNKNOWN,
-    ASIO = 1,
-    ALSA,
-    JACK,
-    WASAPI,
-    CORE,
+    UNKNOWN = 0,
+    ASIO    = 1,
+    ALSA    = 2,
+    JACK    = 3,
+    WASAPI  = 4,
+    CORE    = 5,
 } BWHostApi;
 
 typedef struct {
@@ -97,7 +105,6 @@ typedef struct {
     uint32_t device_name_length;
     uint32_t window_width;
     uint32_t window_height;
-
 } BWConfigData;
 
 typedef struct {
