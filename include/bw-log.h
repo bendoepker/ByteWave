@@ -49,4 +49,11 @@ void _bw_print(const char* s, ...);
 #define BW_PRINT(fmt, ...)
 #endif
 
+#if defined BW_LOG
+#define BW_LOG_CUSTOM(specifier, fmt, ...) \
+    _bw_print("[" specifier "] " fmt, ##__VA_ARGS__)
+#else
+#define BW_LOG_CUSTOM(specifier, fmt, ...)
+#endif
+
 #endif //BW_LOG_H
