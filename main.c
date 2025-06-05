@@ -1,6 +1,9 @@
 /* For malloc() and free() */
 #include <stdlib.h>
 
+/* For memset() */
+#include <string.h>
+
 /* Logging functions */
 #include <bw-log.h>
 
