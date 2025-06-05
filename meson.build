@@ -15,12 +15,6 @@ c_compiler = meson.get_compiler(
   native : true
 )
 
-#Windows librarys
-winmm = c_compiler.find_library('winmm')
-ole32 = c_compiler.find_library('ole32')
-uuid = c_compiler.find_library('uuid')
-dsound = c_compiler.find_library('dsound')
-
 #ByteWave src files
 bw_src_files = []
 
@@ -30,13 +24,65 @@ bw_inc_dir = [
 ]
 
 bw_deps = [
-  winmm,
 ]
 
 bw_c_compiler_args = [
   '-ffast-math', #Increase Floating Point Speed (And break IEEE compliance but thats alright)
   '-D_CRT_SECURE_NO_WARNINGS', #Suppress warnings from Microsoft
 ]
+
+if build_machine.system() == 'windows'
+  #Windows librarys
+  winmm = c_compiler.find_library('winmm')
+  ole32 = c_compiler.find_library('ole32')
+  uuid = c_compiler.find_library('uuid')
+  dsound = c_compiler.find_library('dsound')
+
+  #winmm
+  winmm = c_compiler.find_library('winmm')
+  bw_deps += winmm
+
+  #dgi
+  gdi32 = c_compiler.find_library('gdi32')
+  bw_deps += gdi32
+
+  #OpenGL
+  opengl = c_compiler.find_library('opengl32')
+  bw_deps += opengl
+
+  #RTWorkQ (Scheduler)
+  rtworkq = c_compiler.find_library('Rtworkq')
+  bw_deps += rtworkq
+
+  #HACK: Gets around some compiler errors
+  bw_c_compiler_args += ['-D_MT', '-D_DLL']
+  bw_linker_args += ['-nodefaultlibs', '-lmsvcrtd', '-lucrtd', '-lmsvcprt', '-lvcruntime']
+endif
+if build_machine.system() == 'linux'
+  #GL
+  gl = c_compiler.find_library('GL')
+  bw_deps += gl
+
+  #m
+  m = c_compiler.find_library('m')
+  bw_deps += m
+
+  #pthread
+  pthread = c_compiler.find_library('pthread')
+  bw_deps += pthread
+
+  #dl
+  dl = c_compiler.find_library('dl')
+  bw_deps += dl
+
+  #rt
+  rt = c_compiler.find_library('rt')
+  bw_deps += rt
+
+  #X11
+  X11 = c_compiler.find_library('X11')
+  bw_deps += X11
+endif
 
 #Host API Options
 #General
@@ -117,52 +163,6 @@ bw_ui_src_files = [
 
 bw_linker_args = []
 
-if build_machine.system() == 'windows'
-  #winmm
-  winmm = c_compiler.find_library('winmm')
-  bw_deps += winmm
-
-  #dgi
-  gdi32 = c_compiler.find_library('gdi32')
-  bw_deps += gdi32
-
-  #OpenGL
-  opengl = c_compiler.find_library('opengl32')
-  bw_deps += opengl
-
-  #RTWorkQ (Scheduler)
-  rtworkq = c_compiler.find_library('Rtworkq')
-  bw_deps += rtworkq
-
-  #HACK: Gets around some compiler errors
-  bw_c_compiler_args += ['-D_MT', '-D_DLL']
-  bw_linker_args += ['-nodefaultlibs', '-lmsvcrtd', '-lucrtd', '-lmsvcprt', '-lvcruntime']
-endif
-if build_machine.system() == 'linux'
-  #GL
-  gl = c_compiler.find_library('GL')
-  bw_deps += gl
-
-  #m
-  m = c_compiler.find_library('m')
-  bw_deps += m
-
-  #pthread
-  pthread = c_compiler.find_library('pthread')
-  bw_deps += pthread
-
-  #dl
-  dl = c_compiler.find_library('dl')
-  bw_deps += dl
-
-  #rt
-  rt = c_compiler.find_library('rt')
-  bw_deps += rt
-
-  #X11
-  X11 = c_compiler.find_library('X11')
-  bw_deps += X11
-endif
 
 #Raylib
 cwd = meson.current_source_dir()
