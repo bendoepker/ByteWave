@@ -1,4 +1,6 @@
 #include <bw-ui.h>
+
+/* For Logging */
 #include <bw-log.h>
 
 #define CLAY_IMPLEMENTATION
@@ -40,8 +42,16 @@ void* BWUI_UIMain(void* ui_data) {
     SetTextureFilter(fonts[0].texture, TEXTURE_FILTER_BILINEAR);
     Clay_SetMeasureTextFunction(Raylib_MeasureText, &fonts[0]);
 
+    SetExitKey(KEY_NULL);
+
     //Main render loop
     while(!WindowShouldClose()) {
+        //Keyboard Handles
+        if(IsKeyPressed(KEY_SPACE)) {
+            //TODO: Pause / Resume playback
+        }
+
+
         Clay_SetLayoutDimensions((Clay_Dimensions) {
             .width = GetScreenWidth(),
             .height = GetScreenHeight()

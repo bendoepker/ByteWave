@@ -2,8 +2,9 @@
 #include <string.h>
 #include <assert.h>
 
-//16 Bit signed int conversions
+//TODO: Add Conversions for non LSB byte ordered types
 
+//Conversion to float
 static inline void _int16_to_float32(int16_t* input_buffer, float* output_buffer, uint32_t buffer_size) {
     for(uint32_t i = 0; i < buffer_size; i++) {
         output_buffer[i] = input_buffer[i] / 32768.0f;
