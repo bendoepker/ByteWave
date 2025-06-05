@@ -1,7 +1,15 @@
 #include <bw-config.h>
+
+/* For Logging */
 #include <bw-log.h>
+
+/* For file I/O */
 #include <stdio.h>
 
+/* For strncmp() */
+#include <string.h>
+
+/* For File System */
 #ifdef _WIN32
 #include <windows.h>
 #endif
