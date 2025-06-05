@@ -12,7 +12,7 @@ size_t BWUtil_GetThreadPriority() {
     struct sched_param sp;
     int policy;
     if(pthread_getschedparam(cur_thr, &policy, &sp) != 0) {
-        BW_LOG_ERROR("Failed to get pthread scheduling params.");
+        BW_LOG_ERR("Failed to get pthread scheduling params.");
     }
     return sp.sched_priority;
 #endif
@@ -31,7 +31,7 @@ void BWUtil_SetThreadPriority(BWThreadPriority priority) {
     struct sched_param sp;
     sp.sched_priority = priority;
     if(pthread_setschedparam(cur_thr, SCHED_FIFO, &sp) != 0) {
-        BW_LOG_ERROR("Failed to set pthread scheduling (requires root privilege).");
+        BW_LOG_ERR("Failed to set pthread scheduling (requires root privilege).");
     }
     return;
 #endif
@@ -59,7 +59,7 @@ BWThread BWUtil_CreateThread(BWFunctionData* func_data, BWThreadPriority priorit
 #ifdef __linux__
     pthread_t t_out = 0;
     if(pthread_create(&t_out, NULL, func_data->function, func_data->data) != 0){
-        BW_LOG_ERROR("Failed to create a new thread.");
+        BW_LOG_ERR("Failed to create a new thread.");
     }
     return t_out;
 #endif //Linux
