@@ -1,5 +1,11 @@
 #include "bw-asio.h"
+/* ASIO Function Interface Layer and ASIO Types */
 #include "bw-asio-il.h"
+
+/* For main processing function */
+#include "../../process/bw-process.h"
+
+/* For Logging */
 #include <bw-log.h>
 #include <bw-conversions.h>
 #include <stdlib.h>
@@ -26,6 +32,7 @@ typedef struct {
     long input_latency;
     long output_latency;
 
+    /* Optimize the processing by reporting when it finishes to the interface */
     long post_output;
 
     ASIOChannelInfo channel_infos[ASIO_MAX_INPUT_CHANNELS + ASIO_MAX_OUTPUT_CHANNELS];
@@ -38,6 +45,9 @@ uint32_t _bw_asio_num_devices = 0;
 unsigned char _bw_asio_is_initialized = 0;
 ASIOBufferInfo* _bw_asio_buffer_infos = 0;
 _asio_device _active_asio_device = {0};
+
+//WHY DOES THIS NOT THROW A LINKER ERROR???
+extern BWHostApi_AudioDevice* _active_audio_device;
 
 //This is defined separate from _active_asio_device because it accesses structures defined
 //in asio.h which I do not wish to include in the header files pertaining to any hostapis
@@ -263,6 +273,9 @@ long asioMessage(long selector, long value, void* message, double* opt) {
 			|| value == kAsioSupportsTimeCode
 			|| value == kAsioSupportsInputMonitor)
 				return 1L;
+        case kAsioBufferSizeChange:
+            BWAsio_Deactivate();
+            BWAsio_Activate(_active_audio_device);
         case kAsioResetRequest:
             //TODO: Handle reset request, currently we will just crash
             assert(1 && "ASIO Reset Request was sent");
@@ -288,36 +301,48 @@ long asioMessage(long selector, long value, void* message, double* opt) {
 ASIOTime* bufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess) {
     (void) directProcess; //Processing should never be deferred
 
-    //TODO: Mixer tracks (specifically the buffers) need to be set up for the conversion to happen
+    long buf_size = _device_attr.preferred_buffer_size;
+    long num_inputs = _device_attr.num_input_channels;
+    long num_outputs = _device_attr.num_output_channels;
+    BWSampleTypes native_format = _device_attr.sample_format;
+    ASIOBufferInfo* infos = _device_attr.buffer_infos;
 
-    if(_device_attr.preferred_buffer_size > 0) {
-        float buffer[_device_attr.num_channels][_device_attr.preferred_buffer_size];
-        float output_buffer[_device_attr.preferred_buffer_size];
+    //Internal buffer declaration
+    float input_bufs[num_inputs][buf_size];
+    float output_bufs[num_outputs][buf_size];
 
-        int i = 0;
-        //Process Inputs
-        for(i = 0; i < _device_attr.num_input_channels; i++) {
-            //Turn the input into 32 bit float
-            BWUtil_ConvertToFloat(_device_attr.buffer_infos[i].buffers[doubleBufferIndex],
-                                  buffer[i], _device_attr.sample_format, _device_attr.preferred_buffer_size);
-            //Mixer Process
-            for(int j = 0; j < _device_attr.preferred_buffer_size; j++) {
-                output_buffer[j] += buffer[i][j];
+    //Convert the input buffers into floats
+    for(int i = 0; i < num_inputs; i++, infos++) {
+        BWUtil_ConvertToFloat(infos->buffers[doubleBufferIndex], input_bufs[i], native_format, buf_size);
+    }
+
+    //Processing
+
+    /*
+    *   At this point all of the derived parameters should be passed to the processing function,
+    *   namely input_bufs, output_bufs, num_inputs, num_outputs; There should also be a timing
+    *   function to roughly measure input overflow and output underflows
+    *
+    *   process_buffers(input_bufs, output_bufs, num_inputs, num_outputs, buf_size);
+    */
+    //Zero Initialize all of the output buffers
+    for(int i = 0; i < num_outputs; i++) {
+        memset(output_bufs[i], 0, buf_size * sizeof(float));
+
+        //Add the inputs to the outputs
+        for(int j = 0; j < num_inputs; j++) {
+            for(int k = 0; k < buf_size; k++) {
+                output_bufs[i][k] += input_bufs[j][k];
+                if(output_bufs[i][k] > 1.0) output_bufs[i][k] = 1.0;
+                if(output_bufs[i][k] < -1.0) output_bufs[i][k] = -1.0;
             }
-
-            //Turn the output into the device format
-            BWUtil_ConvertFromFloat(output_buffer, _device_attr.buffer_infos[i].buffers[doubleBufferIndex],
-                                   _device_attr.sample_format, _device_attr.preferred_buffer_size);
-            //Copy the output to both channels
-            if(_device_attr.num_output_channels > 1) {
-                memcpy(_device_attr.buffer_infos[i + 1].buffers[doubleBufferIndex],
-                       _device_attr.buffer_infos[i].buffers[doubleBufferIndex],
-                       _device_attr.preferred_buffer_size);
-            }
-
         }
     }
-    BW_PRINT("Test");
+
+    //Convert the output buffers to the native format
+    for(int i = 0; i < num_outputs; i++, infos++) {
+        BWUtil_ConvertFromFloat(output_bufs[i], infos->buffers[doubleBufferIndex], native_format, buf_size);
+    }
 
     if(_device_attr.post_output)
         _bw_asio_output_ready();
