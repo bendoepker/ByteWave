@@ -19,15 +19,14 @@ c_compiler = meson.get_compiler(
 bw_src_files = []
 
 #ByteWave include directories
-bw_inc_dir = [
-  'include'
-]
+bw_inc_dir = [ 'include' ]
 
-bw_deps = [
-]
+bw_deps = [ ]
+
+bw_linker_args = [ ]
 
 bw_c_compiler_args = [
-  '-ffast-math', #Increase Floating Point Speed (And break IEEE compliance but thats alright)
+  #'-ffast-math', #Increase Floating Point Speed (And break IEEE compliance but thats alright)
   '-D_CRT_SECURE_NO_WARNINGS', #Suppress warnings from Microsoft
 ]
 
@@ -92,21 +91,21 @@ bw_src_files += [
 bw_inc_dir += [
   'src/hostapi'
 ]
-#ASIO
-bw_asio_src = [
-  'lib/ASIOSDK/common/asio.cpp',
-  'lib/ASIOSDK/host/pc/asiolist.cpp',
-  'lib/ASIOSDK/host/asiodrivers.cpp',
-  'src/hostapi/asio/bw-asio.c',
-  'src/hostapi/asio/bw-asio-il.cpp',
-]
-bw_asio_inc = [
-  'lib/ASIOSDK/common',
-  'lib/ASIOSDK/host/pc',
-  'lib/ASIOSDK/host',
-  'src/hostapi/asio',
-]
 if get_option('BW_USE_ASIO')
+  #ASIO
+  bw_asio_src = [
+    'lib/ASIOSDK/common/asio.cpp',
+    'lib/ASIOSDK/host/pc/asiolist.cpp',
+    'lib/ASIOSDK/host/asiodrivers.cpp',
+    'src/hostapi/asio/bw-asio.c',
+    'src/hostapi/asio/bw-asio-il.cpp',
+  ]
+  bw_asio_inc = [
+    'lib/ASIOSDK/common',
+    'lib/ASIOSDK/host/pc',
+    'lib/ASIOSDK/host',
+    'src/hostapi/asio',
+  ]
   message('Using ASIO API')
   bw_c_compiler_args += ['-DBW_ASIO']
   bw_src_files += bw_asio_src
@@ -160,8 +159,6 @@ bw_src_files += ['src/util/bw-threads.c',
 bw_ui_src_files = [
   'src/ui/bw-ui.c',
 ]
-
-bw_linker_args = []
 
 
 #Raylib
