@@ -107,12 +107,16 @@ bw_src_files += ['src/util/bw-threads.c',
                  'src/util/bw-config.c',
                  'src/util/bw-types.c',
                  'src/util/bw-dynamic-array.c',
-                 'src/util/bw-conversions.c',]
+                 'src/util/bw-conversions.c',
+                 'src/util/bw-schedule.c',]
 
 #UI
 bw_ui_src_files = [
   'src/ui/bw-ui.c',
 ]
+
+bw_linker_args = []
+
 if build_machine.system() == 'windows'
   #winmm
   winmm = c_compiler.find_library('winmm')
@@ -125,6 +129,14 @@ if build_machine.system() == 'windows'
   #OpenGL
   opengl = c_compiler.find_library('opengl32')
   bw_deps += opengl
+
+  #RTWorkQ (Scheduler)
+  rtworkq = c_compiler.find_library('Rtworkq')
+  bw_deps += rtworkq
+
+  #HACK: Gets around some compiler errors
+  bw_c_compiler_args += ['-D_MT', '-D_DLL']
+  bw_linker_args += ['-nodefaultlibs', '-lmsvcrtd', '-lucrtd', '-lmsvcprt', '-lvcruntime']
 endif
 if build_machine.system() == 'linux'
   #GL
@@ -154,7 +166,7 @@ endif
 
 #Raylib
 cwd = meson.current_source_dir()
-lib_dir = join_paths(cwd, 'lib')
+lib_dir = join_paths(cwd, 'lib/ui')
 raylib = c_compiler.find_library('raylib', dirs: lib_dir)
 bw_deps += raylib
 bw_src_files += bw_ui_src_files
@@ -194,5 +206,7 @@ executable(
   include_directories : bw_inc_dir,
 
   #c compiler args
-  c_args : bw_c_compiler_args
+  c_args : bw_c_compiler_args,
+
+  link_args: bw_linker_args,
 )
