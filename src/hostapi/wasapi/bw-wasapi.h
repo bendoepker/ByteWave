@@ -1,53 +1,26 @@
 #ifndef BW_WASAPI_H
 #define BW_WASAPI_H
 
-#include <windows.h>
-#include <mmdeviceapi.h>
-#include <Audioclient.h>
-
-//ByteWave
 #include <bw-types.h>
 
 typedef struct {
-    IMMDevice* capture_device;
-    IMMDevice* render_device;
-    IAudioClient* audio_client;
-    IAudioCaptureClient* capture_client;
-    IAudioRenderClient* render_client;
-    WAVEFORMATEX* audio_format;
-    UINT32 buffer_frame_count;
-} _wasapi_stream_params;
-
-typedef struct {
-    unsigned int num_capture_devices;
-    unsigned int num_render_devices;
-    IMMDevice** capture_devices;
-    IMMDevice** render_devices;
-} _wasapi_devices;
+    char name[128];
+    uint8_t device_usable;
+} _wasapi_device;
 
 /*
-    * TODO: Add description, return types, parameters
+*   Activate a connection and start I/O with a device
 */
-BWError BWWASAPI_Initialize();
+BWError BWWASAPI_Activate(BWHostApi_AudioDevice* audio_device);
 
 /*
-    * TODO: Add description, return types, parameters
+*   Close the connection to the active device
 */
-BWError BWWASAPI_Terminate();
+BWError BWWASAPI_Deactivate();
 
 /*
-    * TODO: Add description, return types, parameters
+*   Query all of the devices available to WASAPI
 */
-BWError BWWASAPI_QueryDevices(_wasapi_devices* devices);
-
-/*
-    * TODO: Add description, return types, parameters
-*/
-BWError BWWASAPI_OpenStream(_wasapi_stream_params** stream_params);
-
-/*
-    * TODO: Add description, return types, parameters
-*/
-BWError BWWASAPI_CloseStream(_wasapi_stream_params** stream_params);
+BWError BWWASAPI_QueryDevices(_wasapi_device** devices, uint32_t* num_devices);
 
 #endif //BW_WASAPI_H

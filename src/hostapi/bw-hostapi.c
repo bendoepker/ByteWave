@@ -1,5 +1,19 @@
 #include "bw-hostapi.h"
+
+/* For memcpy() */
+#include <string.h>
+
+/* For malloc() and free() */
+#include <stdlib.h>
+
+/* For device enumeration dynamic array */
+#include <bw-dynamic-array.h>
+
+/* Logging */
 #include "bw-log.h"
+
+/* For assert() */
+#include <assert.h>
 
 BWHostApi_AudioDevice* _active_audio_device = 0;
 int num_devices = 0;
@@ -7,12 +21,24 @@ BWAudioDeviceEnumeration* devices_enumeration = 0;
 
 BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     //SECTION: Enumerate devices
+    BWError ret = 0;
+#ifdef BW_ASIO
     //ASIO
     uint32_t num_asio_devs = 0;
     _asio_device* asio_devs = 0;
-    BWError ret = BWAsio_QueryDevices(&asio_devs, &num_asio_devs);
+    ret = BWAsio_QueryDevices(&asio_devs, &num_asio_devs);
     if(ret != BW_OK) return ret;
     num_devices += num_asio_devs;
+#endif
+
+#ifdef BW_WASAPI
+    //WASAPI
+    uint32_t num_wasapi_devs = 0;
+    _wasapi_device* wasapi_devs = 0;
+    ret = BWWASAPI_QueryDevices(&wasapi_devs, &num_wasapi_devs);
+    if(ret != BW_OK) return ret;
+    num_devices += num_wasapi_devs;
+#endif
 
     //TODO: Other host api enumerations (WASAPI, JACK, ALSA...)
 
@@ -22,16 +48,37 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     if(devices_enumeration == 0) return BW_FAILED_MALLOC;
 
     //SECTION: Copy names and assign host api identifier
+    int offset = 0;
+#ifdef BW_ASIO
     //ASIO
     for(int i = 0; i < num_asio_devs; i++) {
-        memset(devices_enumeration[i].device_name, 0, 128);
-        memcpy(devices_enumeration[i].device_name, asio_devs[i].name, 32);
-        devices_enumeration[i].host_api = ASIO;
+        memcpy(devices_enumeration[offset + i].device_name, asio_devs[i].name, 32);
+        devices_enumeration[offset + i].host_api = ASIO;
     }
+    offset += num_asio_devs;
     free(asio_devs);
     asio_devs = 0;
+#endif //ASIO Enumeration
+
+#ifdef BW_WASAPI
+    //WASAPI
+    for(int i = 0; i < num_wasapi_devs; i++) {
+        memcpy(devices_enumeration[offset + i].device_name, wasapi_devs[i].name, 128);
+        devices_enumeration[offset + i].host_api = WASAPI;
+    }
+    offset += num_wasapi_devs;
+    free(wasapi_devs);
+    wasapi_devs = 0;
+#endif //WASAPI Enumeration
 
     //TODO: Other host api enumerations (WASAPI, JACK, ALSA...)
+
+    //SECTION: LOG All Devices
+#ifdef BW_LOG
+    for(int i = 0; i < num_devices; i++) {
+        BW_LOG_GEN("%s", devices_enumeration[i].device_name);
+    }
+#endif //Log Device Names
 
     //SECTION: Set the active audio device based on defaults
     _active_audio_device = malloc(sizeof* _active_audio_device);
@@ -77,12 +124,15 @@ BWError BWHostApi_Activate() {
     //Device selection
     switch(_active_audio_device->host_api) {
         case ASIO:
+            #ifdef BW_ASIO
             return BWAsio_Activate(_active_audio_device);
+            #endif //BW_ASIO
         case WASAPI:
-            //TODO:
-            break;
+            #ifdef BW_WASAPI
+            return BWWASAPI_Activate(_active_audio_device);
+            #endif //BW_WASAPI
         default:
-            //TODO:
+            assert(1 && "Host Api Not Implemented");
             break;
     }
     return BW_OK;
@@ -91,13 +141,15 @@ BWError BWHostApi_Activate() {
 BWError BWHostApi_Deactivate() {
     switch(_active_audio_device->host_api) {
         case ASIO:
-            BWAsio_Deactivate();
-            break;
+            #ifdef BW_ASIO
+            return BWAsio_Deactivate();
+            #endif //BW_ASIO
         case WASAPI:
-            //TODO:
-            break;
+            #ifdef BW_WASAPI
+            return BWWASAPI_Deactivate();
+            #endif //BW_WASAPI
         default:
-            //TODO:
+            assert(1 && "Host Api Not Implemented");
             break;
     }
     return BW_OK;
