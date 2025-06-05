@@ -1,39 +1,6 @@
-#ifndef MIXER_H
-#define MIXER_H
-/*
-*
-*   The Mixer Track
-*
-*   Mixer tracks have different input types which should be handled in different ways
-*
-*   External Input: mixer tracks that have an input coming from an external source
-*   (host api input buffer) should immediately call the begin_mixer() function to begin
-*   processing the buffer
-*
-*   Mixer Input: mixer tracks which have an input coming from another mixer track should
-*   wait until the processing is finished for each previous mixer track before processing
-*
-*   Convergent Mixer: requires all previous mixers to be finished outputting before 
-*
-*
-*
-*/
-#define MIXER_MAX_EFFECTS 10
+#include "mixer.h"
 
-struct Mixer {
-    bool done_processing;
-    int buffer_size;
-    float* left_buffer;
-    float* right_buffer;
-    int num_mixer_inputs;
-    int num_mixer_outputs;
-    Mixer* mixer_inputs;
-    Mixer* mixer_outputs;
-    void begin_mixer(Mixer);
-    float gain_level;
-};
-
-/* PERF: mixer_begin algorithm
+//WARN: THIS IS PSEUDOCODE
 void mixer_begin(Mixer* mixer) {
     //SECT: Check that all input mixers have the done processing flag set, if not return
     //      (Another mixer track will call it if not)
@@ -70,11 +37,8 @@ void mixer_begin(Mixer* mixer) {
         mixer->right_buffer[i] *= mixer->gain_level;
     }
 
-    mixer->done_processing = true;
+    mixer->done_processing = 1;
     for(int i = 0; i < mixer->num_mixer_outputs; i++) {
         mixer_begin(&mixer->mixer_outputs[i]);
     }
 }
-*/
-
-#endif //MIXER_H
