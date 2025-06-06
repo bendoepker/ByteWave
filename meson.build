@@ -49,9 +49,8 @@ if build_machine.system() == 'windows'
   opengl = c_compiler.find_library('opengl32')
   bw_deps += opengl
 
-  #RTWorkQ (Scheduler)
-  rtworkq = c_compiler.find_library('Rtworkq')
-  bw_deps += rtworkq
+  #Windows utils
+  bw_inc_dir += ['include/win-utils']
 
   #HACK: Gets around some compiler errors
   bw_c_compiler_args += ['-D_MT', '-D_DLL']
