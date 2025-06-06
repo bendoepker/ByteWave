@@ -12,6 +12,9 @@
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
 
+/* For increasing thread priority */
+#include <avrt.h>
+
 /* For spawning the audio thread */
 #include <bw-threads.h>
 
@@ -31,7 +34,28 @@ typedef struct {
 
 } _wasapi_device_attributes;
 
+//Globals
 _wasapi_device_attributes device_attr = {0};
+
+void _wasapi_internal_process_loop() {
+    //WARN: This runs in a separate thread with higher priority!
+
+    DWORD task_index = 0;
+    HANDLE mmcss_handle = AvSetMmThreadCharacteristics("Pro Audio", &task_index);
+    if(mmcss_handle == 0) {
+        //Failed to set thread characteristics
+        //TODO:
+        return;
+    }
+    AvSetMmThreadPriority(mmcss_handle, AVRT_PRIORITY_HIGH);
+
+    while(1 /* Add a Way Out */ ) {
+        //TODO: Processing
+    }
+
+
+    AvRevertMmThreadCharacteristics(mmcss_handle);
+}
 
 static inline BWError _translate_win_err(HRESULT hres) {
     switch(hres) {
