@@ -157,6 +157,8 @@ bw_src_files += ['src/util/bw-threads.c',
 #UI
 bw_ui_src_files = [
   'src/ui/bw-ui.c',
+  'src/ui/bw-kb.c',
+  'src/ui/bw-ui-components.c',
 ]
 
 

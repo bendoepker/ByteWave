@@ -1,11 +1,17 @@
 #include <bw-ui.h>
+#include <stdio.h>
+
+/* For config data type */
+#include <bw-types.h>
+
+/* For keybind handling */
+#include "bw-kb.h"
+
+/* For UI Components */
+#include "bw-ui-components.h"
 
 /* For Logging */
 #include <bw-log.h>
-
-#define CLAY_IMPLEMENTATION
-#include "../../lib/ui/clay.h"
-#include "../../lib/ui/clay_renderer.c"
 
 /*
 #ifdef _WIN32
@@ -14,68 +20,73 @@
 #endif
 */
 
-void _bw_ui_handle_clay_errors(Clay_ErrorData error_data) {
-    BW_LOG_ERR("%s", error_data.errorText.chars);
-}
+#define MINIMUM_SCREEN_WIDTH 1200
+#define MINIMUM_SCREEN_HEIGHT 800
 
 void* BWUI_UIMain(void* ui_data) {
 
-    Clay_Raylib_Initialize(1024, 768, "ByteWave", FLAG_WINDOW_RESIZABLE
-                                                  | FLAG_WINDOW_HIGHDPI
-                                                  | FLAG_MSAA_4X_HINT
-                                                  | FLAG_VSYNC_HINT);
+    BWUIData* data = (BWUIData*)ui_data;
+
+    if(data->config_data->window_width < MINIMUM_SCREEN_WIDTH) data->config_data->window_width = 800;
+    if(data->config_data->window_height < MINIMUM_SCREEN_HEIGHT) data->config_data->window_height = 500;
+
+    InitWindow(data->config_data->window_width, data->config_data->window_height, "ByteWave");
+    SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
+
+    SetWindowMinSize(1200, 800);
+    SetWindowMaxSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
+
     SetTargetFPS(60);
 
-    uint64_t clayRequiredMemory = Clay_MinMemorySize();
-    Clay_Arena clayMemory = (Clay_Arena) {
-        .memory = malloc(clayRequiredMemory),
-        .capacity = clayRequiredMemory
-    };
-
-    Clay_Initialize(clayMemory, (Clay_Dimensions){
-        .width = GetScreenWidth(),
-        .height = GetScreenHeight()
-    }, (Clay_ErrorHandler) { _bw_ui_handle_clay_errors });
+    SetExitKey(KEY_NULL);
 
     Font fonts[1] = {0};
     fonts[0] = LoadFontEx("../res/Open_Sans/static/OpenSans-Regular.ttf", 48, 0, 400);
     SetTextureFilter(fonts[0].texture, TEXTURE_FILTER_BILINEAR);
-    Clay_SetMeasureTextFunction(Raylib_MeasureText, &fonts[0]);
 
-    SetExitKey(KEY_NULL);
+
+    char key_press_list[32];
+    const int MAX_NUM_KEYS = 32;
+
+    BWVertSlider vert_slider;
+    BWUI_CreateVSlider(&vert_slider, 100, 100, 80);
+
+    BWHorizSlider horiz_slider;
+    BWUI_CreateHSlider(&horiz_slider, 100, 200, 80);
+
+    BWRingSlider ring_slider;
+    BWUI_CreateRSlider(&ring_slider, 100, 300, 25);
 
     //Main render loop
     while(!WindowShouldClose()) {
         //Keyboard Handles
-        if(IsKeyPressed(KEY_SPACE)) {
-            //TODO: Pause / Resume playback
-        }
+        get_key_press_list(key_press_list, MAX_NUM_KEYS);
 
-
-        Clay_SetLayoutDimensions((Clay_Dimensions) {
-            .width = GetScreenWidth(),
-            .height = GetScreenHeight()
-        });
-
-        Clay_BeginLayout();
-
-        CLAY({.id = CLAY_ID("Container"),
-            .layout = {
-                .sizing = {
-                .width = CLAY_SIZING_GROW(),
-                .height = CLAY_SIZING_GROW()
-            }
-            },
-             .backgroundColor = {
-                140, 140, 140, 255
-             }
-        }){ /* Child Components in here */ }
-
-        Clay_RenderCommandArray renderCommands = Clay_EndLayout();
 
         BeginDrawing();
-        ClearBackground(BLACK);
-        Clay_Raylib_Render(renderCommands, fonts);
+        ClearBackground(LIGHTGRAY);
+
+        //Text Display
+        DrawText(key_press_list, 400, 400, 40, BLACK);
+
+        //Vertical Slider Test
+        BWUI_UpdateVSlider(&vert_slider);
+        char arr[32];
+        sprintf(arr, "%f", vert_slider.value);
+        DrawText(arr, 150, 100, 40, BLACK);
+
+        //Horizontal Slider Test
+        BWUI_UpdateHSlider(&horiz_slider);
+        char arr2[32];
+        sprintf(arr2, "%f", horiz_slider.value);
+        DrawText(arr2, 250, 200, 40, BLACK);
+
+        //Ring Slider Test
+        BWUI_UpdateRSlider(&ring_slider);
+        char arr3[32];
+        sprintf(arr3, "%f", ring_slider.value);
+        DrawText(arr3, 150, 275, 40, BLACK);
+
         EndDrawing();
     }
 
