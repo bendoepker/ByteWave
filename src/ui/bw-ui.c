@@ -23,6 +23,10 @@
 #define MINIMUM_SCREEN_WIDTH 1200
 #define MINIMUM_SCREEN_HEIGHT 800
 
+void bcb() {
+    BW_PRINT("PRESSED");
+}
+
 void* BWUI_UIMain(void* ui_data) {
 
     BWUIData* data = (BWUIData*)ui_data;
@@ -57,6 +61,9 @@ void* BWUI_UIMain(void* ui_data) {
     BWRingSlider ring_slider;
     BWUI_CreateRSlider(&ring_slider, 100, 300, 25);
 
+    BWButton button;
+    BWUI_CreateButton(&button, 100, 400, 100, 50, "Hello", bcb);
+
     //Main render loop
     while(!WindowShouldClose()) {
         //Keyboard Handles
@@ -86,6 +93,9 @@ void* BWUI_UIMain(void* ui_data) {
         char arr3[32];
         sprintf(arr3, "%f", ring_slider.value);
         DrawText(arr3, 150, 275, 40, BLACK);
+
+        //Button Test
+        BWUI_UpdateButton(&button);
 
         EndDrawing();
     }

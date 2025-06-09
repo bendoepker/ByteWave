@@ -48,4 +48,19 @@ typedef struct {
 void BWUI_CreateRSlider(BWRingSlider* slider, int pos_x, int pos_y, int radius);
 void BWUI_UpdateRSlider(BWRingSlider* slider);
 
+//SECTION: BUTTON
+typedef struct {
+    Rectangle button;
+    void (*callback)(void);
+    char text[64];
+
+    int font_size;
+    Vector2 text_offset;
+
+    bool clicked;
+} BWButton;
+
+void BWUI_CreateButton(BWButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback));
+void BWUI_UpdateButton(BWButton* button);
+
 #endif //BW_UI_COMPONENTS_H

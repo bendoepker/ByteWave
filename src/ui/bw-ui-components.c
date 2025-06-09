@@ -1,7 +1,13 @@
 #include "bw-ui-components.h"
 
+/* For Logging */
+#include <bw-log.h>
+
+/* For trig funcs */
 #include <math.h>
-#include <stdio.h>
+
+/* For strncpy() */
+#include <string.h>
 
 void BWUI_CreateVSlider(BWVertSlider* slider, int pos_x, int pos_y, int bar_length) {
     slider->bar.x = pos_x;
@@ -233,4 +239,52 @@ void BWUI_UpdateRSlider(BWRingSlider* slider) {
     DrawRing(slider->pos, slider->radius, slider->radius + 3, -208, 28, 32, DARKGRAY);
     if(slider->clicked) DrawRectanglePro(slider->bar, (Vector2){11 - slider->radius, 5}, (240 * slider->value + 150), RED);
     else DrawRectanglePro(slider->bar, (Vector2){11 - slider->radius, 5}, (240 * slider->value + 150), BLACK);
+}
+
+void BWUI_CreateButton(BWButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback)) {
+    button->button.x = pos_x;
+    button->button.y = pos_y;
+    button->button.width = width;
+    button->button.height = height;
+    strncpy(button->text, text, 64);
+    if(callback != 0)
+        button->callback = callback;
+
+    //Find the font size that will fill the box but not overflow it
+    button->font_size = 0;
+    while(true) {
+        ++button->font_size;
+        BW_PRINT("%d", button->font_size);
+        Vector2 real_size = MeasureTextEx(GetFontDefault(), text, button->font_size, ceilf(button->font_size / 10.0));
+
+        //HACK: Magic number 3: im giving a default padding of 3 pixels (so there should be 6 pixels extra)
+        if(real_size.x >= button->button.width - 6.0) break;
+        if(real_size.y >= button->button.height - 6.0) break;
+    }
+    --button->font_size;
+
+    //Get the text offset so that it is centered on the button
+    Vector2 real_size = MeasureTextEx(GetFontDefault(), text, button->font_size, ceilf(button->font_size / 10.0));
+    button->text_offset.x = ceilf((button->button.width - real_size.x) / 2.0);
+    button->text_offset.y = ceilf((button->button.height - real_size.y) / 2.0);
+}
+
+void BWUI_UpdateButton(BWButton* button) {
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        Vector2 mouse_pos = GetMousePosition();
+        if(CheckCollisionPointRec(mouse_pos, button->button)) {
+            button->clicked = true;
+        }
+    } else if(button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        Vector2 mouse_pos = GetMousePosition();
+        if(button->callback != 0)
+            if(CheckCollisionPointRec(mouse_pos, button->button))
+                button->callback();
+        button->clicked = false;
+    }
+
+    //Draw Button
+    if(button->clicked) DrawRectangleRec(button->button, RED);
+    else DrawRectangleRec(button->button, DARKGRAY);
+    DrawText(button->text, button->button.x + button->text_offset.x, button->button.y + button->text_offset.y, button->font_size, BLACK);
 }
