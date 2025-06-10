@@ -9,6 +9,7 @@
 
 /* For UI Components */
 #include "bw-ui-components.h"
+#include "bw-toggle-cluster.h"
 
 /* For Logging */
 #include <bw-log.h>
@@ -29,6 +30,8 @@ void bcb() {
 
 void* BWUI_UIMain(void* ui_data) {
 
+    Image bytewave_icon = LoadImage("../res/bytewave-icon.png");
+
     BWUIData* data = (BWUIData*)ui_data;
 
     if(data->config_data->window_width < MINIMUM_SCREEN_WIDTH) data->config_data->window_width = 800;
@@ -36,6 +39,8 @@ void* BWUI_UIMain(void* ui_data) {
 
     InitWindow(data->config_data->window_width, data->config_data->window_height, "ByteWave");
     SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
+
+    SetWindowIcon(bytewave_icon);
 
     SetWindowMinSize(1200, 800);
     SetWindowMaxSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
@@ -48,10 +53,6 @@ void* BWUI_UIMain(void* ui_data) {
     fonts[0] = LoadFontEx("../res/Open_Sans/static/OpenSans-Regular.ttf", 48, 0, 400);
     SetTextureFilter(fonts[0].texture, TEXTURE_FILTER_BILINEAR);
 
-
-    char key_press_list[32];
-    const int MAX_NUM_KEYS = 32;
-
     BWVertSlider vert_slider;
     BWUI_CreateVSlider(&vert_slider, 100, 100, 80);
 
@@ -61,20 +62,17 @@ void* BWUI_UIMain(void* ui_data) {
     BWRingSlider ring_slider;
     BWUI_CreateRSlider(&ring_slider, 100, 300, 25);
 
-    BWButton button;
-    BWUI_CreateButton(&button, 100, 400, 100, 50, "Hello", bcb);
+    BWTextButton text_button;
+    BWUI_CreateTextButton(&text_button, 100, 400, 100, 50, "Hello", bcb);
+
+    BWToggleCluster toggle_cluster;
+    BWUI_CreateToggleCluster(&toggle_cluster);
 
     //Main render loop
     while(!WindowShouldClose()) {
-        //Keyboard Handles
-        get_key_press_list(key_press_list, MAX_NUM_KEYS);
-
 
         BeginDrawing();
         ClearBackground(LIGHTGRAY);
-
-        //Text Display
-        DrawText(key_press_list, 400, 400, 40, BLACK);
 
         //Vertical Slider Test
         BWUI_UpdateVSlider(&vert_slider);
@@ -94,8 +92,10 @@ void* BWUI_UIMain(void* ui_data) {
         sprintf(arr3, "%f", ring_slider.value);
         DrawText(arr3, 150, 275, 40, BLACK);
 
-        //Button Test
-        BWUI_UpdateButton(&button);
+        //Text Button Test
+        BWUI_UpdateTextButton(&text_button);
+
+        BWUI_UpdateToggleCluster(&toggle_cluster);
 
         EndDrawing();
     }

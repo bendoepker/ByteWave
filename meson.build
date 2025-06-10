@@ -159,6 +159,7 @@ bw_ui_src_files = [
   'src/ui/bw-ui.c',
   'src/ui/bw-kb.c',
   'src/ui/bw-ui-components.c',
+  'src/ui/bw-toggle-cluster.c',
 ]
 
 
