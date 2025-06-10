@@ -1,6 +1,6 @@
 #ignore tmp folders and .tmp files
 **/tmp/
-*.tmp
+*tmp
 
 #--------------------------------------#
 #           ASIOSDK Ignored            #
