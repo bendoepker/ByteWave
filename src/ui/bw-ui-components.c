@@ -20,6 +20,7 @@ void BWUI_CreateVSlider(BWVertSlider* slider, int pos_x, int pos_y, int bar_leng
     slider->track.height = bar_length;
     slider->value = 1.0f;
 }
+
 void BWUI_UpdateVSlider(BWVertSlider* slider) {
     //Update the slider
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !slider->clicked){
@@ -65,6 +66,19 @@ void BWUI_UpdateVSlider(BWVertSlider* slider) {
     DrawRectangleRounded(slider->track, 1.0, 2, DARKGRAY);
     if(slider->clicked) DrawRectangleRounded(slider->bar, 10.0, 5, RED);
     else DrawRectangleRounded(slider->bar, 10.0, 5, BLACK);
+}
+
+Rectangle BWUI_GetVSliderRec(BWVertSlider* slider) {
+    return (Rectangle){
+        .x = slider->bar.x,
+        .width = slider->bar.width,
+        .y = slider->track.y - 5,
+        .height = slider->track.height + 10,
+    };
+}
+
+void BWUI_VSliderHandleMouse(BWVertSlider* slider, BWMouseState state, int button, Vector2 mouse_pos) {
+    
 }
 
 void BWUI_CreateHSlider(BWHorizSlider* slider, int pos_x, int pos_y, int bar_length) {
@@ -126,6 +140,19 @@ void BWUI_UpdateHSlider(BWHorizSlider* slider) {
     else DrawRectangleRounded(slider->bar, 10.0, 5, BLACK);
 }
 
+Rectangle BWUI_GetHSliderRec(BWHorizSlider* slider) {
+    return (Rectangle) {
+        .x = slider->track.x - 5,
+        .y = slider->bar.y,
+        .width = slider->track.width + 10,
+        .height = slider->bar.height
+    };
+}
+
+void BWUI_HSliderHandleMouse(BWHorizSlider* slider, BWMouseState state, int button, Vector2 mouse_pos) {
+    
+}
+
 void BWUI_CreateRSlider(BWRingSlider* slider, int pos_x, int pos_y, int radius) {
     slider->pos.x = pos_x;
     slider->pos.y = pos_y;
@@ -133,10 +160,22 @@ void BWUI_CreateRSlider(BWRingSlider* slider, int pos_x, int pos_y, int radius) 
 
     slider->bar.x = pos_x;
     slider->bar.y = pos_y;
-    slider->bar.width = 24;
-    slider->bar.height = 10;
+    slider->bar.width = radius + 3;
+    slider->bar.height = ceilf(radius / 2.0);
+
+    slider->bar_offset.x = ceilf(radius / 2.0);
+    slider->bar_offset.y = ceilf(slider->bar.height / 2.0);
 
     slider->value = 0.0;
+
+    //Set the bar bounding box for use in mouse handling
+    //Since the slider is rotationally symmetric for the top 240° the top position is the same as the x pos
+    slider->bounding_box = (Rectangle) {
+        .x = slider->pos.x - slider->bar.width - slider->bar_offset.x,
+        .y = slider->pos.y - slider->bar.width - slider->bar_offset.x,
+        .width = slider->bar.width * 2 + slider->bar_offset.x * 2,
+        .height = slider->bar.width * 2 + slider->bar_offset.x,
+    };
 }
 
 static inline bool _check_collision_ring_slider(BWRingSlider* slider, Vector2 pos) {
@@ -146,15 +185,15 @@ static inline bool _check_collision_ring_slider(BWRingSlider* slider, Vector2 po
     Vector2 p4 = {0};
 
     //HACK: magic numbers as described below
+    //      TLDR: min angle = 210° CCW and max angle is 30° CW => total angle = 240°
     float rotation = 240 * slider->value + 150;
 
     float sinRotation = sinf(rotation*DEG2RAD);
     float cosRotation = cosf(rotation*DEG2RAD);
     float x = slider->pos.x;
     float y = slider->pos.y;
-    //HACK: magic numbers again
-    float dx = -(11 - slider->radius);
-    float dy = -(5);
+    float dx = slider->bar_offset.x;
+    float dy = -(slider->bar_offset.y);
 
     //'Top Left'
     p1.x = x + dx*cosRotation - dy*sinRotation;
@@ -230,25 +269,31 @@ void BWUI_UpdateRSlider(BWRingSlider* slider) {
     //          30: maximum angle is 30, same as -210
     //          32: number of segments rendered
     //      For DrawRectanglePro():
-    //          in (Vector2):
-    //              11 - slider->radius: offsets the bar 11 pixels from the center of radius (center of circle)
-    //              5: half of the height of the bar, aligns the rectangle to the circle
     //          in (240...):
     //              240 * slider->value: angle of the arc is 240°
     //              150: the clockwise offset of the beginning of the arc is 150 degrees (inverse of -210)
     DrawRing(slider->pos, slider->radius, slider->radius + 3, -208, 28, 32, DARKGRAY);
-    if(slider->clicked) DrawRectanglePro(slider->bar, (Vector2){11 - slider->radius, 5}, (240 * slider->value + 150), RED);
-    else DrawRectanglePro(slider->bar, (Vector2){11 - slider->radius, 5}, (240 * slider->value + 150), BLACK);
+    if(slider->clicked) DrawRectanglePro(slider->bar, (Vector2){-slider->bar_offset.x, slider->bar_offset.y}, (240 * slider->value + 150), RED);
+    else DrawRectanglePro(slider->bar, (Vector2){-slider->bar_offset.x, slider->bar_offset.y}, (240 * slider->value + 150), BLACK);
+    DrawRectangleLinesEx(BWUI_GetRSliderRec(slider), 1, RED);
 }
 
-void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback)) {
-    button->button.x = pos_x;
-    button->button.y = pos_y;
-    button->button.width = width;
-    button->button.height = height;
+Rectangle BWUI_GetRSliderRec(BWRingSlider* slider) {
+    return slider->bounding_box;
+}
+
+void BWUI_RSliderHandleMouse(BWRingSlider* slider, BWMouseState state, int button, Vector2 mouse_pos) {
+
+}
+
+void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback), void* callback_params) {
+    button->hitbox.x = pos_x;
+    button->hitbox.y = pos_y;
+    button->hitbox.width = width;
+    button->hitbox.height = height;
     strncpy(button->text, text, 64);
-    if(callback != 0)
-        button->callback = callback;
+    button->callback = callback;
+    button->callback_params = callback_params;
 
     //Find the font size that will fill the box but not overflow it
     button->font_size = 0;
@@ -257,38 +302,46 @@ void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width
         Vector2 real_size = MeasureTextEx(GetFontDefault(), text, button->font_size, ceilf(button->font_size / 10.0));
 
         //HACK: Magic number 3: im giving a default padding of 3 pixels (so there should be 6 pixels extra)
-        if(real_size.x >= button->button.width - 6.0) break;
-        if(real_size.y >= button->button.height - 6.0) break;
+        if(real_size.x >= button->hitbox.width - 6.0) break;
+        if(real_size.y >= button->hitbox.height - 6.0) break;
     }
     --button->font_size;
 
     //Get the text offset so that it is centered on the button
     Vector2 real_size = MeasureTextEx(GetFontDefault(), text, button->font_size, ceilf(button->font_size / 10.0));
-    button->text_offset.x = ceilf((button->button.width - real_size.x) / 2.0);
-    button->text_offset.y = ceilf((button->button.height - real_size.y) / 2.0);
+    button->text_offset.x = ceilf((button->hitbox.width - real_size.x) / 2.0);
+    button->text_offset.y = ceilf((button->hitbox.height - real_size.y) / 2.0);
 }
 
 void BWUI_UpdateTextButton(BWTextButton* button) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mouse_pos = GetMousePosition();
-        if(CheckCollisionPointRec(mouse_pos, button->button)) {
+        if(CheckCollisionPointRec(mouse_pos, button->hitbox)) {
             button->clicked = true;
         }
     } else if(button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         Vector2 mouse_pos = GetMousePosition();
         if(button->callback != 0)
-            if(CheckCollisionPointRec(mouse_pos, button->button))
-                button->callback();
+            if(CheckCollisionPointRec(mouse_pos, button->hitbox))
+                button->callback(button->callback_params);
         button->clicked = false;
     }
 
     //Draw Button
-    if(button->clicked) DrawRectangleRec(button->button, RED);
-    else DrawRectangleRec(button->button, DARKGRAY);
-    DrawText(button->text, button->button.x + button->text_offset.x, button->button.y + button->text_offset.y, button->font_size, BLACK);
+    if(button->clicked) DrawRectangleRec(button->hitbox, RED);
+    else DrawRectangleRec(button->hitbox, DARKGRAY);
+    DrawText(button->text, button->hitbox.x + button->text_offset.x, button->hitbox.y + button->text_offset.y, button->font_size, BLACK);
 }
 
-void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int width, int height, Image image, Image image_clicked, void(*callback)) {
+Rectangle BWUI_GetTextButtonRec(BWTextButton* button) {
+    return button->hitbox;
+}
+
+void BWUI_TextButtonHandleMouse(BWTextButton* button, BWMouseState state, int mouse_button, Vector2 mouse_pos) {
+
+}
+
+void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int width, int height, Image image, Image image_clicked, void(*callback), void* callback_params) {
     button->hitbox.x = pos_x;
     button->hitbox.y = pos_y;
     button->hitbox.width = width;
@@ -296,6 +349,7 @@ void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int wid
     button->texture = LoadTextureFromImage(image);
     button->texture_clicked = LoadTextureFromImage(image_clicked);
     button->callback = callback;
+    button->callback_params = callback_params;
 
     if(button->texture.width > width || button->texture.height > height) {
         //Scale the texture down to fit within the hitbox
@@ -326,7 +380,8 @@ void BWUI_UpdateImageButton(BWImageButton* button) {
     } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && button->clicked) {
         Vector2 mouse_pos = GetMousePosition();
         if(CheckCollisionPointRec(mouse_pos, button->hitbox))
-            button->callback();
+            if(button->callback != 0)
+                button->callback(button->callback_params);
         button->clicked = false;
     }
 
@@ -339,4 +394,12 @@ void BWUI_UpdateImageButton(BWImageButton* button) {
         DrawTextureEx(button->texture,
                       (Vector2){button->hitbox.x + button->texture_offset.x, button->hitbox.y + button->texture_offset.y},
                       0, button->scale_factor, WHITE);
+}
+
+Rectangle BWUI_GetImageButtonRec(BWImageButton* button) {
+    return button->hitbox;
+}
+
+void BWUI_ImageButtonHandleMouse(BWImageButton* button, BWMouseState state, int mouse_button, Vector2 mouse_pos) {
+
 }

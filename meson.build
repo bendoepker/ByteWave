@@ -160,6 +160,8 @@ bw_ui_src_files = [
   'src/ui/bw-kb.c',
   'src/ui/bw-ui-components.c',
   'src/ui/bw-toggle-cluster.c',
+  'src/ui/bw-mouse.c',
+  'src/ui/bw-mixer-ui.c'
 ]
 
 

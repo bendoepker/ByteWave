@@ -8,8 +8,10 @@
 #include "bw-kb.h"
 
 /* For UI Components */
-#include "bw-ui-components.h"
-#include "bw-toggle-cluster.h"
+#include "bw-toplevel-ui.h"
+
+/* For Mouse Functions */
+#include "bw-mouse.h"
 
 /* For Logging */
 #include <bw-log.h>
@@ -23,10 +25,6 @@
 
 #define MINIMUM_SCREEN_WIDTH 1200
 #define MINIMUM_SCREEN_HEIGHT 800
-
-void bcb() {
-    BW_PRINT("PRESSED");
-}
 
 void* BWUI_UIMain(void* ui_data) {
 
@@ -60,16 +58,36 @@ void* BWUI_UIMain(void* ui_data) {
     BWUI_CreateHSlider(&horiz_slider, 100, 200, 80);
 
     BWRingSlider ring_slider;
-    BWUI_CreateRSlider(&ring_slider, 100, 300, 25);
+    BWUI_CreateRSlider(&ring_slider, 100, 300, 15);
 
-    BWTextButton text_button;
-    BWUI_CreateTextButton(&text_button, 100, 400, 100, 50, "Hello", bcb);
+    BWMixerUI mixer_ui;
+    BWUI_CreateMixer(&mixer_ui, 0, 0);
 
     BWToggleCluster toggle_cluster;
-    BWUI_CreateToggleCluster(&toggle_cluster);
+    BWUI_CreateToggleCluster(&toggle_cluster, &mixer_ui);
+
+    BWToplevelUI toplevel;
+    toplevel.toggle_cluster = &toggle_cluster;
+    toplevel.mixer = &mixer_ui;
+
+
+    BWMouseState left_mouse_state;
+    BWMouseState right_mouse_state;
+    BWMouseLocale mouse_locale;
 
     //Main render loop
     while(!WindowShouldClose()) {
+
+        Vector2 mouse_pos = GetMousePosition();
+        left_mouse_state = _get_mouse_state(MOUSE_BUTTON_LEFT);
+        right_mouse_state = _get_mouse_state(MOUSE_BUTTON_RIGHT);
+        mouse_locale = _get_mouse_locale(mouse_pos, &toggle_cluster, 0);
+        if(left_mouse_state != MOUSE_UP) {
+            BWUI_HandleMouseByLocale(left_mouse_state, MOUSE_BUTTON_LEFT, mouse_locale, mouse_pos, &toplevel);
+        }
+        if(right_mouse_state != MOUSE_UP) {
+            BWUI_HandleMouseByLocale(left_mouse_state, MOUSE_BUTTON_RIGHT, mouse_locale, mouse_pos, &toplevel);
+        }
 
         BeginDrawing();
         ClearBackground(LIGHTGRAY);
@@ -92,10 +110,8 @@ void* BWUI_UIMain(void* ui_data) {
         sprintf(arr3, "%f", ring_slider.value);
         DrawText(arr3, 150, 275, 40, BLACK);
 
-        //Text Button Test
-        BWUI_UpdateTextButton(&text_button);
-
         BWUI_UpdateToggleCluster(&toggle_cluster);
+        BWUI_UpdateMixer(&mixer_ui);
 
         EndDrawing();
     }

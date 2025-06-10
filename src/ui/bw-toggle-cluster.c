@@ -1,41 +1,54 @@
 #include "bw-toggle-cluster.h"
 
+#include "bw-ui-components.h"
+
 /* For Logging */
 #include <bw-log.h>
 
-void _mt_cb() {
-    BW_PRINT("TODO: Mixer Toggle Pressed");
+void _mt_cb(void* params) {
+    BWMixerUI* mixer = params;
+    mixer->is_open = !mixer->is_open;
 }
 
-void _pb_pause_cb() {
+void _pb_pause_cb(void* params) {
+    (void)params;
     BW_PRINT("TODO: Playback Pause Pressed");
 }
 
-void _pb_stop_cb() {
+void _pb_stop_cb(void* params) {
+    (void)params;
     BW_PRINT("TODO: Playback Stop Pressed");
 }
 
-void _pb_play_cb() {
+void _pb_play_cb(void* params) {
+    (void)params;
     BW_PRINT("TODO: Playback Play Pressed");
 }
 
-void BWUI_CreateToggleCluster(BWToggleCluster* toggle_cluster) {
+void BWUI_CreateToggleCluster(BWToggleCluster* toggle_cluster, BWMixerUI* mixer_ui) {
+    toggle_cluster->mixer_ui_ref = mixer_ui;
+
     //Toggle Cluster
     Image mixer_toggle_img = LoadImage("../res/assets/buttons/mixer_toggle.png");
     Image mixer_toggle_clicked_img = LoadImage("../res/assets/buttons/mixer_toggle_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->mixer_toggle, 0, 0, 32, 32, mixer_toggle_img, mixer_toggle_clicked_img, _mt_cb);
+    BWUI_CreateImageButton(&toggle_cluster->mixer_toggle, 0, 0, 32, 32, mixer_toggle_img, mixer_toggle_clicked_img, _mt_cb, mixer_ui);
 
     Image playback_stop_img = LoadImage("../res/assets/buttons/playback_stop.png");
     Image playback_stop_clicked_img = LoadImage("../res/assets/buttons/playback_stop_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->pb_stop, 32, 0, 32, 32, playback_stop_img, playback_stop_clicked_img, _pb_stop_cb);
+    BWUI_CreateImageButton(&toggle_cluster->pb_stop, 32, 0, 32, 32, playback_stop_img, playback_stop_clicked_img, _pb_stop_cb, 0);
 
     Image playback_play_img = LoadImage("../res/assets/buttons/playback_play.png");
     Image playback_play_clicked_img = LoadImage("../res/assets/buttons/playback_play_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->pb_play, 64, 0, 32, 32, playback_play_img, playback_play_clicked_img, _pb_play_cb);
+    BWUI_CreateImageButton(&toggle_cluster->pb_play, 64, 0, 32, 32, playback_play_img, playback_play_clicked_img, _pb_play_cb, 0);
 
     Image playback_pause_img = LoadImage("../res/assets/buttons/playback_pause.png");
     Image playback_pause_clicked_img = LoadImage("../res/assets/buttons/playback_pause_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->pb_pause, 96, 0, 32, 32, playback_pause_img, playback_pause_clicked_img, _pb_pause_cb);
+    BWUI_CreateImageButton(&toggle_cluster->pb_pause, 96, 0, 32, 32, playback_pause_img, playback_pause_clicked_img, _pb_pause_cb, 0);
+
+    toggle_cluster->hitbox.x = 0;
+    toggle_cluster->hitbox.y = 0;
+    toggle_cluster->hitbox.width = 128;
+    toggle_cluster->hitbox.height = 32;
 
     //Images are stored in gpu memory so they can be unloaded from ram
     UnloadImage(mixer_toggle_img);
@@ -53,4 +66,20 @@ void BWUI_UpdateToggleCluster(BWToggleCluster* toggle_cluster) {
     BWUI_UpdateImageButton(&toggle_cluster->pb_pause);
     BWUI_UpdateImageButton(&toggle_cluster->pb_stop);
     BWUI_UpdateImageButton(&toggle_cluster->pb_play);
+}
+
+Rectangle BWUI_GetToggleClusterRec(BWToggleCluster* toggle_cluster) {
+    return toggle_cluster->hitbox;
+}
+
+void BWUI_ToggleClusterHandleMouse(BWToggleCluster* toggle_cluster, BWMouseState state, int button, Vector2 mouse_pos) {
+    if(CheckCollisionPointRec(mouse_pos, BWUI_GetImageButtonRec(&toggle_cluster->mixer_toggle))) {
+        BWUI_ImageButtonHandleMouse(&toggle_cluster->mixer_toggle, state, button, mouse_pos);
+    } else if(CheckCollisionPointRec(mouse_pos, BWUI_GetImageButtonRec(&toggle_cluster->pb_pause))) {
+        BWUI_ImageButtonHandleMouse(&toggle_cluster->pb_pause, state, button, mouse_pos);
+    } else if(CheckCollisionPointRec(mouse_pos, BWUI_GetImageButtonRec(&toggle_cluster->pb_stop))) {
+        BWUI_ImageButtonHandleMouse(&toggle_cluster->pb_stop, state, button, mouse_pos);
+    } else if(CheckCollisionPointRec(mouse_pos, BWUI_GetImageButtonRec(&toggle_cluster->pb_play))) {
+        BWUI_ImageButtonHandleMouse(&toggle_cluster->pb_play, state, button, mouse_pos);
+    }
 }
