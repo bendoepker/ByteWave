@@ -1,10 +1,14 @@
+#ignore tmp folders and .tmp files
+**/tmp/
+*.tmp
+
 #--------------------------------------#
 #           ASIOSDK Ignored            #
 #--------------------------------------#
 /lib/ASIOSDK
 
 #--------------------------------------#
-#            Raylub Ignored            #
+#            Raylib Ignored            #
 #--------------------------------------#
 /lib/ui/raylib.h
 /lib/ui/libraylib.a
