@@ -241,7 +241,7 @@ void BWUI_UpdateRSlider(BWRingSlider* slider) {
     else DrawRectanglePro(slider->bar, (Vector2){11 - slider->radius, 5}, (240 * slider->value + 150), BLACK);
 }
 
-void BWUI_CreateButton(BWButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback)) {
+void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback)) {
     button->button.x = pos_x;
     button->button.y = pos_y;
     button->button.width = width;
@@ -254,7 +254,6 @@ void BWUI_CreateButton(BWButton* button, int pos_x, int pos_y, int width, int he
     button->font_size = 0;
     while(true) {
         ++button->font_size;
-        BW_PRINT("%d", button->font_size);
         Vector2 real_size = MeasureTextEx(GetFontDefault(), text, button->font_size, ceilf(button->font_size / 10.0));
 
         //HACK: Magic number 3: im giving a default padding of 3 pixels (so there should be 6 pixels extra)
@@ -269,7 +268,7 @@ void BWUI_CreateButton(BWButton* button, int pos_x, int pos_y, int width, int he
     button->text_offset.y = ceilf((button->button.height - real_size.y) / 2.0);
 }
 
-void BWUI_UpdateButton(BWButton* button) {
+void BWUI_UpdateTextButton(BWTextButton* button) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mouse_pos = GetMousePosition();
         if(CheckCollisionPointRec(mouse_pos, button->button)) {
@@ -287,4 +286,57 @@ void BWUI_UpdateButton(BWButton* button) {
     if(button->clicked) DrawRectangleRec(button->button, RED);
     else DrawRectangleRec(button->button, DARKGRAY);
     DrawText(button->text, button->button.x + button->text_offset.x, button->button.y + button->text_offset.y, button->font_size, BLACK);
+}
+
+void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int width, int height, Image image, Image image_clicked, void(*callback)) {
+    button->hitbox.x = pos_x;
+    button->hitbox.y = pos_y;
+    button->hitbox.width = width;
+    button->hitbox.height = height;
+    button->texture = LoadTextureFromImage(image);
+    button->texture_clicked = LoadTextureFromImage(image_clicked);
+    button->callback = callback;
+
+    if(button->texture.width > width || button->texture.height > height) {
+        //Scale the texture down to fit within the hitbox
+        float width_scale = (float)button->texture.width / (float)width;
+        float height_scale = (float)button->texture.height / (float)height;
+        button->scale_factor = (1.0 / fmax(width_scale, height_scale));
+    } else if (button->texture.width < width || button->texture.height < height) {
+        //Scale the texture up to fit the hitbox
+        float width_scale = (float)button->texture.width / (float)width;
+        float height_scale = (float)button->texture.height / (float)height;
+        button->scale_factor = (1.0 / fmax(width_scale, height_scale));
+    } else {
+        button->scale_factor = 1.0;
+    }
+
+    if(button->texture.width < button->hitbox.width)
+        button->texture_offset.x = (button->hitbox.width - button->texture.width) / 2.0;
+
+    if(button->texture.height < button->hitbox.height)
+        button->texture_offset.y = (button->hitbox.height - button->texture.height) / 2.0;
+}
+
+void BWUI_UpdateImageButton(BWImageButton* button) {
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        Vector2 mouse_pos = GetMousePosition();
+        if(CheckCollisionPointRec(mouse_pos, button->hitbox))
+            button->clicked = true;
+    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && button->clicked) {
+        Vector2 mouse_pos = GetMousePosition();
+        if(CheckCollisionPointRec(mouse_pos, button->hitbox))
+            button->callback();
+        button->clicked = false;
+    }
+
+    //Draw button
+    if(button->clicked)
+        DrawTextureEx(button->texture_clicked,
+                      (Vector2){button->hitbox.x + button->texture_offset.x, button->hitbox.y + button->texture_offset.y},
+                      0, button->scale_factor, WHITE);
+    else
+        DrawTextureEx(button->texture,
+                      (Vector2){button->hitbox.x + button->texture_offset.x, button->hitbox.y + button->texture_offset.y},
+                      0, button->scale_factor, WHITE);
 }

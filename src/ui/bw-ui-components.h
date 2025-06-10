@@ -48,7 +48,7 @@ typedef struct {
 void BWUI_CreateRSlider(BWRingSlider* slider, int pos_x, int pos_y, int radius);
 void BWUI_UpdateRSlider(BWRingSlider* slider);
 
-//SECTION: BUTTON
+//SECTION: TEXT BUTTON
 typedef struct {
     Rectangle button;
     void (*callback)(void);
@@ -58,9 +58,25 @@ typedef struct {
     Vector2 text_offset;
 
     bool clicked;
-} BWButton;
+} BWTextButton;
 
-void BWUI_CreateButton(BWButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback));
-void BWUI_UpdateButton(BWButton* button);
+void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback));
+void BWUI_UpdateTextButton(BWTextButton* button);
+
+//SECTION: IMAGE BUTTON
+typedef struct {
+    Rectangle hitbox;
+    void (*callback)(void);
+    Texture texture;
+    Texture texture_clicked;
+
+    Vector2 texture_offset;
+    float scale_factor;
+
+    bool clicked;
+} BWImageButton;
+
+void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int width, int height, Image image, Image image_clicked, void(*callback));
+void BWUI_UpdateImageButton(BWImageButton* button);
 
 #endif //BW_UI_COMPONENTS_H
