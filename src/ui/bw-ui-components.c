@@ -10,6 +10,7 @@
 #include <string.h>
 
 void BWUI_CreateVSlider(BWVertSlider* slider, int pos_x, int pos_y, int bar_length) {
+    memset(slider, 0, sizeof(*slider));
     slider->bar.x = pos_x;
     slider->bar.y = pos_y;
     slider->bar.width = 23;
@@ -82,6 +83,7 @@ void BWUI_VSliderHandleMouse(BWVertSlider* slider, BWMouseState state, int butto
 }
 
 void BWUI_CreateHSlider(BWHorizSlider* slider, int pos_x, int pos_y, int bar_length) {
+    memset(slider, 0, sizeof(*slider));
     slider->bar.x = pos_x;
     slider->bar.y = pos_y;
     slider->bar.height = 23;
@@ -154,6 +156,7 @@ void BWUI_HSliderHandleMouse(BWHorizSlider* slider, BWMouseState state, int butt
 }
 
 void BWUI_CreateRSlider(BWRingSlider* slider, int pos_x, int pos_y, int radius) {
+    memset(slider, 0, sizeof(*slider));
     slider->pos.x = pos_x;
     slider->pos.y = pos_y;
     slider->radius = radius;
@@ -287,6 +290,7 @@ void BWUI_RSliderHandleMouse(BWRingSlider* slider, BWMouseState state, int butto
 }
 
 void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback), void* callback_params) {
+    memset(button, 0, sizeof(*button));
     button->hitbox.x = pos_x;
     button->hitbox.y = pos_y;
     button->hitbox.width = width;
@@ -294,6 +298,7 @@ void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width
     strncpy(button->text, text, 64);
     button->callback = callback;
     button->callback_params = callback_params;
+    button->clicked = false;
 
     //Find the font size that will fill the box but not overflow it
     button->font_size = 0;
@@ -342,6 +347,7 @@ void BWUI_TextButtonHandleMouse(BWTextButton* button, BWMouseState state, int mo
 }
 
 void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int width, int height, Image image, Image image_clicked, void(*callback), void* callback_params) {
+    memset(button, 0, sizeof(*button));
     button->hitbox.x = pos_x;
     button->hitbox.y = pos_y;
     button->hitbox.width = width;
@@ -350,6 +356,7 @@ void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int wid
     button->texture_clicked = LoadTextureFromImage(image_clicked);
     button->callback = callback;
     button->callback_params = callback_params;
+    button->clicked = false;
 
     if(button->texture.width > width || button->texture.height > height) {
         //Scale the texture down to fit within the hitbox
@@ -370,6 +377,11 @@ void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int wid
 
     if(button->texture.height < button->hitbox.height)
         button->texture_offset.y = (button->hitbox.height - button->texture.height) / 2.0;
+}
+
+void BWUI_DestroyImageButton(BWImageButton* button) {
+    UnloadTexture(button->texture);
+    UnloadTexture(button->texture_clicked);
 }
 
 void BWUI_UpdateImageButton(BWImageButton* button) {

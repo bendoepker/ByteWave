@@ -3,8 +3,10 @@
 
 #include "bw-ui-types.h"
 
-BWMouseState _get_mouse_state(int button);
-BWMouseLocale _get_mouse_locale(Vector2 mouse_pos, BWToggleCluster* toggle_cluster, int num_open_effects);
+BWMouseState BWUI_GetMouseState(int button);
+BWMouseLocale BWUI_GetMouseLocale(Vector2 mouse_pos, BWToplevelUI* toplevel);
 void BWUI_HandleMouseByLocale(BWMouseState state, int button, BWMouseLocale locale, Vector2 mouse_pos, BWToplevelUI* toplevel);
+void BWUI_EnableOSMousePos();
+Vector2 GetMousePositionAbsolute();
 
 #endif //BW_MOUSE_H

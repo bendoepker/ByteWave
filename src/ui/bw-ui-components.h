@@ -29,6 +29,7 @@ void BWUI_TextButtonHandleMouse(BWTextButton* button, BWMouseState state, int mo
 
 //SECTION: IMAGE BUTTON
 void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int width, int height, Image image, Image image_clicked, void(*callback), void* callback_params);
+void BWUI_DestroyImageButton(BWImageButton* button);
 void BWUI_UpdateImageButton(BWImageButton* button);
 Rectangle BWUI_GetImageButtonRec(BWImageButton* button);
 void BWUI_ImageButtonHandleMouse(BWImageButton* button, BWMouseState state, int mouse_button, Vector2 mouse_pos);

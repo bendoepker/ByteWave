@@ -3,9 +3,20 @@
 /* For assert() */
 #include <assert.h>
 
+/* For logging */
+#include <bw-log.h>
+
+/* For xyzHandleMouse() */
 #include "bw-toplevel-ui.h"
 
-BWMouseState _get_mouse_state(int button) {
+#ifdef _WIN32
+#include <win-undef.h>
+#include <windows.h>
+typedef BOOL (WINAPI *GetCursorPos_t)(LPPOINT);
+GetCursorPos_t pGetCursorPos = 0;
+#endif
+
+BWMouseState BWUI_GetMouseState(int button) {
     if(IsMouseButtonPressed(button)) {
         if(IsKeyPressed(KEY_LEFT_CONTROL) ||
            IsKeyPressed(KEY_RIGHT_CONTROL) ||
@@ -32,41 +43,91 @@ BWMouseState _get_mouse_state(int button) {
         return MOUSE_UP;
 }
 
-BWMouseLocale _get_mouse_locale(Vector2 mouse_pos, BWToggleCluster* toggle_cluster, int num_open_effects) {
+BWMouseLocale BWUI_GetMouseLocale(Vector2 mouse_pos, BWToplevelUI* toplevel) {
     if(!IsWindowFocused()) {
         return ML_NONE;
     }
 
-    (void)num_open_effects; //TODO: Implement with effect windows
-
-    if(CheckCollisionPointRec(mouse_pos, BWUI_GetToggleClusterRec(toggle_cluster))) {
+    if(BWUI_CheckWindowFrameCollision(toplevel->window_frame)) {
+        return ML_WINDOW_FRAME;
+    }
+    if(CheckCollisionPointRec(mouse_pos, BWUI_GetTitleBarRec(toplevel->title_bar))) {
+        return ML_TITLE_BAR;
+    }
+    if(CheckCollisionPointRec(mouse_pos, BWUI_GetToggleClusterRec(toplevel->toggle_cluster))) {
         return ML_TOGGLE_CLUSTER;
     }
+    if(toplevel->mixer->is_open) {
+        if(CheckCollisionPointRec(mouse_pos, toplevel->mixer->hitbox)) {
+            return ML_MIXER;
+        }
+    }
+    /*
+    *   TODO:
+    *   if(CheckCollisionPointRec(mouse_pos, BWUI_GetPlaylistRec(toplevel->playlist))) {
+    *       return ML_PLAYLIST;
+    *   }
+    */
 
     return ML_NONE;
 }
 
 void BWUI_HandleMouseByLocale(BWMouseState state, int button, BWMouseLocale locale, Vector2 mouse_pos, BWToplevelUI* toplevel) {
     switch(locale) {
+        //The first two are special cases which need to see the mouse from outside of the
+        //window, so they resolve the mouse position from GetMousePositionAbsolute()
+        case ML_WINDOW_FRAME:
+            BWUI_WindowFrameHandleMouse(toplevel->window_frame, state, button);
+            return;
+        case ML_TITLE_BAR:
+            BWUI_TitleBarHandleMouse(toplevel->title_bar, state, button);
         case ML_TOGGLE_CLUSTER:
             BWUI_ToggleClusterHandleMouse(toplevel->toggle_cluster, state, button, mouse_pos);
-            break;
+            return;
         case ML_SYSTEM_INFO:
             assert(1 && "TODO: Implement this");
-            break;
+            return;
         case ML_TOOL_SELECT:
             assert(1 && "TODO: Implement this");
-            break;
+            return;
         case ML_EFFECT_WINDOW:
             assert(1 && "TODO: Implement this");
-            break;
+            return;
         case ML_PLAYLIST:
             assert(1 && "TODO: Implement this");
-            break;
+            return;
         case ML_MIXER:
             assert(1 && "TODO: Implement this");
-            break;
+            return;
         case ML_NONE:
-            break;
+            return;
     }
+}
+
+void BWUI_EnableOSMousePos() {
+#ifdef _WIN32
+    HMODULE hUser32 = LoadLibraryA("user32.dll");
+    if(!hUser32) {
+        BW_PRINT("Could not load User32.dll");
+        return;
+    }
+    pGetCursorPos = (GetCursorPos_t)GetProcAddress(hUser32, "GetCursorPos");
+    if(!pGetCursorPos) {
+        BW_PRINT("Could not load GetCursorPos() from User32.dll");
+        return;
+    }
+#endif //Windows
+}
+
+Vector2 GetMousePositionAbsolute() {
+    if(pGetCursorPos != 0) {
+        POINT mouse_pos;
+        if(pGetCursorPos(&mouse_pos)) {
+            return (Vector2) {
+                .x = (float)mouse_pos.x,
+                .y = (float)mouse_pos.y
+            };
+        }
+    }
+    return (Vector2){0, 0};
 }

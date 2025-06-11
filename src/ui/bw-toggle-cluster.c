@@ -29,24 +29,29 @@ void BWUI_CreateToggleCluster(BWToggleCluster* toggle_cluster, BWMixerUI* mixer_
     toggle_cluster->mixer_ui_ref = mixer_ui;
 
     //Toggle Cluster
+    //Mixer Toggle
     Image mixer_toggle_img = LoadImage("../res/assets/buttons/mixer_toggle.png");
     Image mixer_toggle_clicked_img = LoadImage("../res/assets/buttons/mixer_toggle_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->mixer_toggle, 0, 0, 32, 32, mixer_toggle_img, mixer_toggle_clicked_img, _mt_cb, mixer_ui);
 
+    //Playback Stop
     Image playback_stop_img = LoadImage("../res/assets/buttons/playback_stop.png");
     Image playback_stop_clicked_img = LoadImage("../res/assets/buttons/playback_stop_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->pb_stop, 32, 0, 32, 32, playback_stop_img, playback_stop_clicked_img, _pb_stop_cb, 0);
 
+    //Playback Play
     Image playback_play_img = LoadImage("../res/assets/buttons/playback_play.png");
     Image playback_play_clicked_img = LoadImage("../res/assets/buttons/playback_play_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->pb_play, 64, 0, 32, 32, playback_play_img, playback_play_clicked_img, _pb_play_cb, 0);
 
+    //Playback Pause
     Image playback_pause_img = LoadImage("../res/assets/buttons/playback_pause.png");
     Image playback_pause_clicked_img = LoadImage("../res/assets/buttons/playback_pause_clicked.png");
-    BWUI_CreateImageButton(&toggle_cluster->pb_pause, 96, 0, 32, 32, playback_pause_img, playback_pause_clicked_img, _pb_pause_cb, 0);
+
+    BWUI_CreateImageButton(&toggle_cluster->mixer_toggle, 0, 32, 32, 32, mixer_toggle_img, mixer_toggle_clicked_img, _mt_cb, mixer_ui);
+    BWUI_CreateImageButton(&toggle_cluster->pb_stop, 32, 32, 32, 32, playback_stop_img, playback_stop_clicked_img, _pb_stop_cb, 0);
+    BWUI_CreateImageButton(&toggle_cluster->pb_play, 64, 32, 32, 32, playback_play_img, playback_play_clicked_img, _pb_play_cb, 0);
+    BWUI_CreateImageButton(&toggle_cluster->pb_pause, 96, 32, 32, 32, playback_pause_img, playback_pause_clicked_img, _pb_pause_cb, 0);
 
     toggle_cluster->hitbox.x = 0;
-    toggle_cluster->hitbox.y = 0;
+    toggle_cluster->hitbox.y = 32;
     toggle_cluster->hitbox.width = 128;
     toggle_cluster->hitbox.height = 32;
 
@@ -61,11 +66,18 @@ void BWUI_CreateToggleCluster(BWToggleCluster* toggle_cluster, BWMixerUI* mixer_
     UnloadImage(playback_pause_clicked_img);
 }
 
+void BWUI_DestroyToggleCluster(BWToggleCluster* toggle_cluster) {
+    BWUI_DestroyImageButton(&toggle_cluster->mixer_toggle);
+    BWUI_DestroyImageButton(&toggle_cluster->pb_stop);
+    BWUI_DestroyImageButton(&toggle_cluster->pb_play);
+    BWUI_DestroyImageButton(&toggle_cluster->pb_pause);
+}
+
 void BWUI_UpdateToggleCluster(BWToggleCluster* toggle_cluster) {
     BWUI_UpdateImageButton(&toggle_cluster->mixer_toggle);
-    BWUI_UpdateImageButton(&toggle_cluster->pb_pause);
     BWUI_UpdateImageButton(&toggle_cluster->pb_stop);
     BWUI_UpdateImageButton(&toggle_cluster->pb_play);
+    BWUI_UpdateImageButton(&toggle_cluster->pb_pause);
 }
 
 Rectangle BWUI_GetToggleClusterRec(BWToggleCluster* toggle_cluster) {
