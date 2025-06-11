@@ -28,6 +28,9 @@
 
 void* BWUI_UIMain(void* ui_data) {
 
+    //Should we exit the application:
+    unsigned char exit_requested = 0;
+
     Image bytewave_icon = LoadImage("../res/bytewave-icon.png");
 
     BWUIData* data = (BWUIData*)ui_data;
@@ -36,7 +39,8 @@ void* BWUI_UIMain(void* ui_data) {
     if(data->config_data->window_height < MINIMUM_SCREEN_HEIGHT) data->config_data->window_height = 500;
 
     InitWindow(data->config_data->window_width, data->config_data->window_height, "ByteWave");
-    SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
+
+    SetWindowState(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_RESIZABLE);
 
     SetWindowIcon(bytewave_icon);
 
@@ -50,6 +54,12 @@ void* BWUI_UIMain(void* ui_data) {
     Font fonts[1] = {0};
     fonts[0] = LoadFontEx("../res/Open_Sans/static/OpenSans-Regular.ttf", 48, 0, 400);
     SetTextureFilter(fonts[0].texture, TEXTURE_FILTER_BILINEAR);
+
+    BWTitleBar title_bar;
+    BWUI_CreateTitleBar(&title_bar, &exit_requested);
+
+    BWWindowFrame window_frame;
+    BWUI_CreateWindowFrame(&window_frame);
 
     BWVertSlider vert_slider;
     BWUI_CreateVSlider(&vert_slider, 100, 100, 80);
@@ -66,22 +76,27 @@ void* BWUI_UIMain(void* ui_data) {
     BWToggleCluster toggle_cluster;
     BWUI_CreateToggleCluster(&toggle_cluster, &mixer_ui);
 
+
     BWToplevelUI toplevel;
     toplevel.toggle_cluster = &toggle_cluster;
     toplevel.mixer = &mixer_ui;
+    toplevel.title_bar = &title_bar;
+    toplevel.window_frame = &window_frame;
 
+    BWUI_EnableOSMousePos();
 
     BWMouseState left_mouse_state;
     BWMouseState right_mouse_state;
     BWMouseLocale mouse_locale;
 
     //Main render loop
-    while(!WindowShouldClose()) {
+    while(!exit_requested) {
 
         Vector2 mouse_pos = GetMousePosition();
-        left_mouse_state = _get_mouse_state(MOUSE_BUTTON_LEFT);
-        right_mouse_state = _get_mouse_state(MOUSE_BUTTON_RIGHT);
-        mouse_locale = _get_mouse_locale(mouse_pos, &toggle_cluster, 0);
+        left_mouse_state = BWUI_GetMouseState(MOUSE_BUTTON_LEFT);
+        right_mouse_state = BWUI_GetMouseState(MOUSE_BUTTON_RIGHT);
+        mouse_locale = BWUI_GetMouseLocale(mouse_pos, &toplevel);
+
         if(left_mouse_state != MOUSE_UP) {
             BWUI_HandleMouseByLocale(left_mouse_state, MOUSE_BUTTON_LEFT, mouse_locale, mouse_pos, &toplevel);
         }
@@ -91,6 +106,11 @@ void* BWUI_UIMain(void* ui_data) {
 
         BeginDrawing();
         ClearBackground(LIGHTGRAY);
+
+        BWUI_UpdateTitleBar(&title_bar, mouse_pos, fonts);
+
+        //This function sets the cursor to MOUSE_CURSOR_RESIZE_XXXX or MOUSE_CURSOR_DEFAULT depending on cursor location
+        BWUI_UpdateWindowFrame(&window_frame);
 
         //Vertical Slider Test
         BWUI_UpdateVSlider(&vert_slider);
@@ -114,7 +134,12 @@ void* BWUI_UIMain(void* ui_data) {
         BWUI_UpdateMixer(&mixer_ui);
 
         EndDrawing();
+
+        //If a close request comes from elsewher (Likely a wayland workaround)
+        if(WindowShouldClose()) exit_requested = 1;
     }
+
+    BWUI_DestroyToggleCluster(&toggle_cluster);
 
     return 0;
 }

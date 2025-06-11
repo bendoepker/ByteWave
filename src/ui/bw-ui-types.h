@@ -14,6 +14,8 @@ typedef enum {
 } BWMouseState;
 
 typedef enum {
+    ML_WINDOW_FRAME,
+    ML_TITLE_BAR,
     ML_TOGGLE_CLUSTER,
     ML_SYSTEM_INFO, //Temp name for proposed diagnostics block
     ML_TOOL_SELECT, //Temp name for proposed tool selection
@@ -82,8 +84,25 @@ typedef struct {
 } BWImageButton;
 
 typedef struct {
+    Rectangle ns_frame;
+    Rectangle ew_frame;
+    Vector2 prev_mouse_pos;
+    bool clicked;
+} BWWindowFrame;
+
+typedef struct {
     Rectangle hitbox;
-    Rectangle sb_thumb; //Scroll bar thumb
+    char title[9];
+    BWImageButton minimize_button;
+    BWImageButton maximize_button;
+    BWImageButton close_button;
+} BWTitleBar;
+
+typedef struct {
+    Rectangle hitbox;
+
+    //TODO: Replace this with a scrollbar object
+    /*Rectangle sb_thumb; //Scroll bar thumb */ 
 
     bool is_open;
 
@@ -134,6 +153,8 @@ typedef struct {
 
 //This struct should generally adhere to the above template
 typedef struct {
+    BWWindowFrame* window_frame;
+    BWTitleBar* title_bar;
     BWToggleCluster* toggle_cluster;
 
     //TODO:
@@ -143,5 +164,40 @@ typedef struct {
 
     BWMixerUI* mixer;
 } BWToplevelUI;
+
+/*
+*   UI Hierarchy (Tree)
+*
+*   BWToplevelUI
+*   |
+*   +--BWWindowFrame
+*   |
+*   +--BWTitleBar
+*   |  +--BWImageButton minimize_button
+*   |  +--BWImageButton maximize_button
+*   |  +--BWImageButton close_button
+*   |
+*   +--BWToggleCluster
+*   |  +--BWImageButton mixer_toggle
+*   |  +--BwImageButton playback_pause (pb_pause)
+*   |  +--BwImageButton playback_play (pb_play)
+*   |  +--BwImageButton playback_stop (pb_stop)
+*   |
+*   +--BWSystemInfo
+*   |
+*   +--BWToolSelect
+*   |
+*   +--BWPlaylist
+*   |
+*   +--BWMixer
+*      +--BWVertSlider gain_slider
+*      +--BWRingSlider pan_slider
+*      +--BWImageButton mute_button
+*      +--BWImageButton solo_button
+*      +--BWImageButton routing_button
+*
+*
+*
+*/
 
 #endif //BW_UI_TYPES_H

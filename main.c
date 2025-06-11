@@ -36,7 +36,6 @@ int main(void) {
     BWThread ui_thread = BWUtil_CreateThread(&func_data, BW_NORMAL_PRIORITY);
     thread_pool[0] = ui_thread;
 
-    BW_PRINT("TEST");
     BWError_Handle(BWHostApi_Initialize(conf_data));
     BWError_Handle(BWHostApi_Activate());
 
