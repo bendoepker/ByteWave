@@ -87,6 +87,17 @@ typedef struct {
     Rectangle ns_frame;
     Rectangle ew_frame;
     Vector2 prev_mouse_pos;
+    Vector2 min_window_size;
+    enum ResizeDirection {
+        NE,
+        N,
+        NW,
+        W,
+        SW,
+        S,
+        SE,
+        E,
+    } resize_direction;
     bool clicked;
 } BWWindowFrame;
 

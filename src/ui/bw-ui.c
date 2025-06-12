@@ -31,20 +31,21 @@ void* BWUI_UIMain(void* ui_data) {
     //Should we exit the application:
     unsigned char exit_requested = 0;
 
-    Image bytewave_icon = LoadImage("../res/bytewave-icon.png");
 
     BWUIData* data = (BWUIData*)ui_data;
 
-    if(data->config_data->window_width < MINIMUM_SCREEN_WIDTH) data->config_data->window_width = 800;
-    if(data->config_data->window_height < MINIMUM_SCREEN_HEIGHT) data->config_data->window_height = 500;
+    if(data->config_data->window_width < MINIMUM_SCREEN_WIDTH) data->config_data->window_width = MINIMUM_SCREEN_WIDTH;
+    if(data->config_data->window_height < MINIMUM_SCREEN_HEIGHT) data->config_data->window_height = MINIMUM_SCREEN_HEIGHT;
 
     InitWindow(data->config_data->window_width, data->config_data->window_height, "ByteWave");
 
     SetWindowState(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_RESIZABLE);
 
+    Image bytewave_icon = LoadImage("../res/bytewave-icon.png");
     SetWindowIcon(bytewave_icon);
+    UnloadImage(bytewave_icon);
 
-    SetWindowMinSize(1200, 800);
+    SetWindowMinSize(MINIMUM_SCREEN_WIDTH, MINIMUM_SCREEN_HEIGHT);
     SetWindowMaxSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
 
     SetTargetFPS(60);
@@ -59,7 +60,7 @@ void* BWUI_UIMain(void* ui_data) {
     BWUI_CreateTitleBar(&title_bar, &exit_requested);
 
     BWWindowFrame window_frame;
-    BWUI_CreateWindowFrame(&window_frame);
+    BWUI_CreateWindowFrame(&window_frame, (Vector2){.x = MINIMUM_SCREEN_WIDTH, .y = MINIMUM_SCREEN_HEIGHT});
 
     BWVertSlider vert_slider;
     BWUI_CreateVSlider(&vert_slider, 100, 100, 80);
@@ -107,10 +108,10 @@ void* BWUI_UIMain(void* ui_data) {
         BeginDrawing();
         ClearBackground(LIGHTGRAY);
 
-        BWUI_UpdateTitleBar(&title_bar, mouse_pos, fonts);
-
         //This function sets the cursor to MOUSE_CURSOR_RESIZE_XXXX or MOUSE_CURSOR_DEFAULT depending on cursor location
         BWUI_UpdateWindowFrame(&window_frame);
+
+        BWUI_UpdateTitleBar(&title_bar, mouse_pos, fonts);
 
         //Vertical Slider Test
         BWUI_UpdateVSlider(&vert_slider);
@@ -139,6 +140,7 @@ void* BWUI_UIMain(void* ui_data) {
         if(WindowShouldClose()) exit_requested = 1;
     }
 
+    BWUI_DestroyTitleBar(&title_bar);
     BWUI_DestroyToggleCluster(&toggle_cluster);
 
     return 0;
