@@ -28,8 +28,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="3.4795546"
-     inkscape:cx="69.549131"
-     inkscape:cy="61.933214"
+     inkscape:cx="51.874455"
+     inkscape:cy="91.534704"
      inkscape:window-width="2560"
      inkscape:window-height="1377"
      inkscape:window-x="-8"
@@ -115,13 +115,11 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#000000;stroke-width:0.721648"
+       style="fill:#ffffff;stroke-width:0.510282"
        id="rect4"
        width="75"
-       height="20"
+       height="10"
        x="22.5"
-       y="50"
-       rx="3.4090908"
-       ry="5" />
+       y="55" />
   </g>
 </svg>
