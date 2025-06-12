@@ -398,7 +398,7 @@ void BWUI_UpdateImageButton(BWImageButton* button) {
     }
 
     //Draw button
-    if(button->clicked)
+    if(button->clicked && CheckCollisionPointRec(GetMousePosition(), button->hitbox))
         DrawTextureEx(button->texture_clicked,
                       (Vector2){button->hitbox.x + button->texture_offset.x, button->hitbox.y + button->texture_offset.y},
                       0, button->scale_factor, WHITE);
