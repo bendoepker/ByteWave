@@ -10,7 +10,7 @@
 */
 
 void BWUI_CreateTitleBar(BWTitleBar* title_bar, void* exit_request);
-void BWUI_UpdateTitleBar(BWTitleBar* title_bar, Vector2 mouse_pos, Font* font);
+void BWUI_UpdateTitleBar(BWTitleBar* title_bar, Font* font);
 Rectangle BWUI_GetTitleBarRec(BWTitleBar* title_bar);
 void BWUI_TitleBarHandleMouse(BWTitleBar* title_bar, BWMouseState state, int button);
 void BWUI_DestroyTitleBar(BWTitleBar* title_bar);

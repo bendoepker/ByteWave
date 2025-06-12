@@ -103,10 +103,17 @@ typedef struct {
 
 typedef struct {
     Rectangle hitbox;
+    Rectangle render_box;
+
     char title[9];
     BWImageButton minimize_button;
     BWImageButton maximize_button;
     BWImageButton close_button;
+
+    Vector2 prev_mouse_pos;
+    bool clicked;
+    bool double_clicked;
+    int frames_since_click;
 } BWTitleBar;
 
 typedef struct {

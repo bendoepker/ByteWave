@@ -4,6 +4,12 @@
 /* For config data type */
 #include <bw-types.h>
 
+/* For trig funcs */
+#include <math.h>
+
+/* For colors */
+#include "bw-colors.h"
+
 /* For keybind handling */
 #include "bw-kb.h"
 
@@ -108,10 +114,16 @@ void* BWUI_UIMain(void* ui_data) {
         BeginDrawing();
         ClearBackground(LIGHTGRAY);
 
+        //Background
+        float width = GetScreenWidth();
+        float height = GetScreenHeight();
+        float hypotenuse = ceilf(sqrt(width * width + height * height));
+        DrawCircleGradient(width / 2.0, height / 2.0, hypotenuse, GRAY5, GRAY0);
+
         //This function sets the cursor to MOUSE_CURSOR_RESIZE_XXXX or MOUSE_CURSOR_DEFAULT depending on cursor location
         BWUI_UpdateWindowFrame(&window_frame);
 
-        BWUI_UpdateTitleBar(&title_bar, mouse_pos, fonts);
+        BWUI_UpdateTitleBar(&title_bar, fonts);
 
         //Vertical Slider Test
         BWUI_UpdateVSlider(&vert_slider);

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "bw-ui-components.h"
 #include "bw-mouse.h"
+#include "bw-colors.h"
 
 #include <bw-log.h>
 
@@ -29,10 +30,21 @@ void _minimize_button_callback(void* params) {
 void BWUI_CreateTitleBar(BWTitleBar* title_bar, void* exit_request) {
     memset(title_bar, 0, sizeof(*title_bar));
     memcpy(title_bar->title, "ByteWave", 8);
-    title_bar->hitbox.height = 32;
-    title_bar->hitbox.x = 0;
-    title_bar->hitbox.y = 0;
-    title_bar->hitbox.width = GetScreenWidth();
+
+    title_bar->frames_since_click = 30; //Don't want to start doule clicking
+    title_bar->double_clicked = false;
+    title_bar->clicked = false;
+
+    title_bar->render_box.height = 32;
+    title_bar->render_box.x = 0;
+    title_bar->render_box.y = 0;
+    title_bar->render_box.width = GetScreenWidth();
+
+    //Hitbox is inset by 5 pixels so that it doesn't overlap with the window frame hitbox
+    title_bar->hitbox.height = 27;
+    title_bar->hitbox.x = 5;
+    title_bar->hitbox.y = 5;
+    title_bar->hitbox.width = title_bar->render_box.width - 10;
 
     Image titlebar_close_img = LoadImage("../res/assets/buttons/titlebar_close.png");
     Image titlebar_close_clicked_img = LoadImage("../res/assets/buttons/titlebar_close_clicked.png");
@@ -44,9 +56,12 @@ void BWUI_CreateTitleBar(BWTitleBar* title_bar, void* exit_request) {
     Image titlebar_minimize_clicked_img = LoadImage("../res/assets/buttons/titlebar_minimize_clicked.png");
 
     //Buttons are inset 5 pixels from the border
-    BWUI_CreateImageButton(&title_bar->close_button, GetScreenWidth() - 32, 3, 27, 27, titlebar_close_img, titlebar_close_clicked_img, _close_button_callback, exit_request);
-    BWUI_CreateImageButton(&title_bar->maximize_button, GetScreenWidth() - 64, 3, 27, 27, titlebar_maximize_img, titlebar_maximize_clicked_img, _maximize_button_callback, 0);
-    BWUI_CreateImageButton(&title_bar->minimize_button, GetScreenWidth() - 96, 3, 27, 27, titlebar_minimize_img, titlebar_minimize_clicked_img, _minimize_button_callback, 0);
+    BWUI_CreateImageButton(&title_bar->close_button, GetScreenWidth() - 32, 3, 27, 27,
+                           titlebar_close_img, titlebar_close_clicked_img, _close_button_callback, exit_request);
+    BWUI_CreateImageButton(&title_bar->maximize_button, GetScreenWidth() - 64, 3, 27, 27,
+                           titlebar_maximize_img, titlebar_maximize_clicked_img, _maximize_button_callback, 0);
+    BWUI_CreateImageButton(&title_bar->minimize_button, GetScreenWidth() - 96, 3, 27, 27,
+                           titlebar_minimize_img, titlebar_minimize_clicked_img, _minimize_button_callback, 0);
 
     //Unload images from ram
     UnloadImage(titlebar_close_img);
@@ -59,17 +74,56 @@ void BWUI_CreateTitleBar(BWTitleBar* title_bar, void* exit_request) {
     UnloadImage(titlebar_minimize_clicked_img);
 }
 
-void BWUI_UpdateTitleBar(BWTitleBar* title_bar, Vector2 mouse_pos, Font* font) {
+void BWUI_UpdateTitleBar(BWTitleBar* title_bar, Font* font) {
+    if(title_bar->double_clicked) {
+        Vector2 cur_mouse_pos = GetMousePositionAbsolute();
+        if(cur_mouse_pos.x == title_bar->prev_mouse_pos.x &&
+            cur_mouse_pos.y == title_bar->prev_mouse_pos.y)
+            _maximize_button_callback(0);
+        else
+            title_bar->frames_since_click = 0;
+        title_bar->double_clicked = false;
+    }
+
+    if(title_bar->clicked) {
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            //We're moving
+            Vector2 cur_mouse_pos = GetMousePositionAbsolute();
+            if(cur_mouse_pos.x != title_bar->prev_mouse_pos.x ||
+                cur_mouse_pos.y != title_bar->prev_mouse_pos.y) {
+                if(IsWindowMaximized()) {
+                    RestoreWindow();
+                    int midpoint = GetScreenWidth() / 2;
+                    SetWindowPosition(cur_mouse_pos.x - midpoint, cur_mouse_pos.y - 16);
+                } else {
+                    Vector2 window_pos = GetWindowPosition();
+                    Vector2 mouse_dif = {.x = cur_mouse_pos.x - title_bar->prev_mouse_pos.x,
+                        .y = cur_mouse_pos.y - title_bar->prev_mouse_pos.y};
+                    SetWindowPosition(window_pos.x + mouse_dif.x, window_pos.y + mouse_dif.y);
+                }
+                title_bar->prev_mouse_pos = cur_mouse_pos;
+            }
+        }
+    }
+    if(title_bar->frames_since_click < 30)
+        title_bar->frames_since_click++;
 
     //Draw the titlebar
-    DrawRectangleRec(title_bar->hitbox, DARKGRAY);
-    DrawTextEx(*font, title_bar->title, (Vector2){6, 6}, 20, 4, BLACK);
-    if(GetScreenWidth() != title_bar->hitbox.width) {
-        //Window has been horizontally resized, move the buttons (Inset by 5 pixels)
-        title_bar->hitbox.width = GetScreenWidth();
-        title_bar->minimize_button.hitbox.x = title_bar->hitbox.width - 96;
-        title_bar->maximize_button.hitbox.x = title_bar->hitbox.width - 64;
-        title_bar->close_button.hitbox.x = title_bar->hitbox.width - 32;
+    DrawRectangleGradientV(title_bar->render_box.x, title_bar->render_box.y,
+                           title_bar->render_box.width, title_bar->render_box.height, GRAY5, GRAY3);
+    DrawTextEx(*font, title_bar->title, (Vector2){10, 0}, 32, 4, WHITE);
+    if(GetScreenWidth() != title_bar->render_box.width) {
+        //Window has been horizontally resized
+        if(IsWindowMaximized()) {
+            title_bar->render_box.width = GetScreenWidth();
+            title_bar->hitbox = (Rectangle){.x = 0, .y = 0, .height = 32, .width = title_bar->render_box.width};
+        } else {
+            title_bar->render_box.width = GetScreenWidth();
+            title_bar->hitbox = (Rectangle){.x = 5, .y = 5, .height = 27, .width = title_bar->render_box.width - 10};
+        }
+        title_bar->minimize_button.hitbox.x = title_bar->render_box.width - 96;
+        title_bar->maximize_button.hitbox.x = title_bar->render_box.width - 64;
+        title_bar->close_button.hitbox.x = title_bar->render_box.width - 32;
     }
     BWUI_UpdateImageButton(&title_bar->close_button);
     BWUI_UpdateImageButton(&title_bar->maximize_button);
@@ -87,7 +141,44 @@ Rectangle BWUI_GetTitleBarRec(BWTitleBar* title_bar) {
 }
 
 void BWUI_TitleBarHandleMouse(BWTitleBar* title_bar, BWMouseState state, int button) {
-    //TODO: THIS
+    Vector2 mp_local = GetMousePosition();
+    if(CheckCollisionPointRec(mp_local, title_bar->close_button.hitbox))
+        BWUI_ImageButtonHandleMouse(&title_bar->close_button, state, button, mp_local);
+    else if(CheckCollisionPointRec(mp_local, title_bar->maximize_button.hitbox))
+        BWUI_ImageButtonHandleMouse(&title_bar->maximize_button, state, button, mp_local);
+    else if(CheckCollisionPointRec(mp_local, title_bar->minimize_button.hitbox))
+        BWUI_ImageButtonHandleMouse(&title_bar->minimize_button, state, button, mp_local);
+    else {
+        //None of the buttons are pressed, we're moving the window
+        if(button == MOUSE_BUTTON_LEFT) {
+            switch(state) {
+                case MOUSE_PRESSED:
+                case MOUSE_ALT_PRESSED:
+                case MOUSE_CTRL_PRESSED:
+                    if(title_bar->frames_since_click < 30) {
+                        title_bar->double_clicked = true;
+                        title_bar->frames_since_click = 30; //Prevent triple click disaster
+                        break;
+                    }
+                    title_bar->frames_since_click = 0;
+                    title_bar->prev_mouse_pos = GetMousePositionAbsolute();
+                    title_bar->clicked = true;
+                    break;
+                case MOUSE_DOWN:
+                    break;
+                case MOUSE_RELEASED:
+                    Vector2 cur_mouse_pos = GetMousePositionAbsolute();
+                    //HACK: This is buggy with multiple monitors
+                    if(cur_mouse_pos.y == GetMonitorPosition(GetCurrentMonitor()).y) {
+                        title_bar->frames_since_click = 30; //Prevent double click overriding this
+                        MaximizeWindow();
+                    }
+                    //Intentional fallthrough...
+                default:
+                    title_bar->clicked = false;
+            }
+        }
+    }
 }
 
 /*
@@ -328,23 +419,23 @@ void BWUI_UpdateWindowFrame(BWWindowFrame* frame) {
                     break;
             }
             frame->prev_mouse_pos = new_mouse_pos;
-
-            //Recalculate frame hitbox
-            window_pos = GetWindowPosition();
-            window_size = new_window_size;
-
-            const float half_frame_size = 5.0;
-
-            frame->ns_frame.x = window_pos.x + half_frame_size;
-            frame->ns_frame.width = window_size.x - half_frame_size * 2.0;
-            frame->ns_frame.y = window_pos.y - half_frame_size;
-            frame->ns_frame.height = window_size.y + half_frame_size * 2.0;
-
-            frame->ew_frame.x = window_pos.x - half_frame_size;
-            frame->ew_frame.width = window_size.x + half_frame_size * 2.0;
-            frame->ew_frame.y = window_pos.y + half_frame_size;
-            frame->ew_frame.height = window_size.y - half_frame_size * 2.0;
         }
+
+        //Recalculate frame hitbox
+        Vector2 wp = GetWindowPosition();
+        Vector2 ws = {.x = GetScreenWidth(), .y = GetScreenHeight()};
+
+        const float half_frame_size = 5.0;
+
+        frame->ns_frame.x = wp.x + half_frame_size;
+        frame->ns_frame.width = ws.x - half_frame_size * 2.0;
+        frame->ns_frame.y = wp.y - half_frame_size;
+        frame->ns_frame.height = ws.y + half_frame_size * 2.0;
+
+        frame->ew_frame.x = wp.x - half_frame_size;
+        frame->ew_frame.width = ws.x + half_frame_size * 2.0;
+        frame->ew_frame.y = wp.y + half_frame_size;
+        frame->ew_frame.height = ws.y - half_frame_size * 2.0;
     }
 }
 
