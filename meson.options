@@ -6,3 +6,5 @@ option('BW_LOG', type: 'boolean', value: true, description: 'Log all debug state
 option('BW_LOG_FUNCTIONS', type: 'boolean', value: false, description: 'Log debug function statements')
 option('BW_LOG_ERRORS', type: 'boolean', value: true, description: 'Log debug errors')
 option('BW_LOG_GEN', type: 'boolean', value: true, description: 'Log general debug statements')
+
+option('BW_CUSTOM_WINDOW', type: 'boolean', value: true, description: 'Use a custom window frame and title bar')

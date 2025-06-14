@@ -155,6 +155,10 @@ bw_src_files += ['src/util/bw-threads.c',
                  'src/util/bw-schedule.c',]
 
 #UI
+if get_option('BW_CUSTOM_WINDOW')
+  bw_c_compiler_args += ['-DBW_CUSTOM_WINDOW']
+endif
+
 bw_ui_src_files = [
   'src/ui/bw-ui.c',
   'src/ui/bw-kb.c',

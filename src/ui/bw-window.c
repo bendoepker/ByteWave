@@ -1,4 +1,7 @@
 #include "bw-window.h"
+
+#ifdef BW_CUSTOM_WINDOW
+
 #include <string.h>
 #include "bw-ui-components.h"
 #include "bw-mouse.h"
@@ -497,3 +500,17 @@ void BWUI_WindowFrameHandleMouse(BWWindowFrame* window_frame, BWMouseState state
         }
     }
 }
+#else //BW_CUSTOM_WINOW
+
+void BWUI_CreateTitleBar(BWTitleBar* title_bar, void* exit_request) { return; }
+void BWUI_UpdateTitleBar(BWTitleBar* title_bar, Font* font) { return; }
+Rectangle BWUI_GetTitleBarRec(BWTitleBar* title_bar) { return (Rectangle){0}; }
+void BWUI_TitleBarHandleMouse(BWTitleBar* title_bar, BWMouseState state, int button) { return; }
+void BWUI_DestroyTitleBar(BWTitleBar* title_bar) { return; }
+
+void BWUI_CreateWindowFrame(BWWindowFrame* frame, Vector2 min_window_size) { return; }
+void BWUI_UpdateWindowFrame(BWWindowFrame* frame) { return; }
+bool BWUI_CheckWindowFrameCollision(BWWindowFrame* frame) { return false; }
+void BWUI_WindowFrameHandleMouse(BWWindowFrame* window_frame, BWMouseState state, int button) { return; }
+
+#endif //BW_CUSTOM_WINDOW

@@ -45,7 +45,7 @@ void* BWUI_UIMain(void* ui_data) {
 
     InitWindow(data->config_data->window_width, data->config_data->window_height, "ByteWave");
 
-    SetWindowState(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_RESIZABLE);
+    SetWindowState(BW_WINDOW_DECORATED | FLAG_WINDOW_RESIZABLE);
 
     Image bytewave_icon = LoadImage("../res/bytewave-icon.png");
     SetWindowIcon(bytewave_icon);

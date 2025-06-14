@@ -9,6 +9,12 @@
 *
 */
 
+#ifdef BW_CUSTOM_WINDOW
+#   define BW_WINDOW_DECORATED FLAG_WINDOW_UNDECORATED
+#else
+#   define BW_WINDOW_DECORATED 0
+#endif
+
 void BWUI_CreateTitleBar(BWTitleBar* title_bar, void* exit_request);
 void BWUI_UpdateTitleBar(BWTitleBar* title_bar, Font* font);
 Rectangle BWUI_GetTitleBarRec(BWTitleBar* title_bar);
