@@ -59,11 +59,13 @@ void BWUI_CreateTitleBar(BWTitleBar* title_bar, void* exit_request) {
     Image titlebar_minimize_clicked_img = LoadImage("../res/assets/buttons/titlebar_minimize_clicked.png");
 
     //Buttons are inset 5 pixels from the border
-    BWUI_CreateImageButton(&title_bar->close_button, GetScreenWidth() - 32, 3, 27, 27,
+    int button_y = (IsWindowMaximized()) ? 0 : 5;
+    int button_side = (IsWindowMaximized()) ? 32 : 27;
+    BWUI_CreateImageButton(&title_bar->close_button, GetScreenWidth() - 32, button_y, button_side, button_side,
                            titlebar_close_img, titlebar_close_clicked_img, _close_button_callback, exit_request);
-    BWUI_CreateImageButton(&title_bar->maximize_button, GetScreenWidth() - 64, 3, 27, 27,
+    BWUI_CreateImageButton(&title_bar->maximize_button, GetScreenWidth() - 64, button_y, button_side, button_side,
                            titlebar_maximize_img, titlebar_maximize_clicked_img, _maximize_button_callback, 0);
-    BWUI_CreateImageButton(&title_bar->minimize_button, GetScreenWidth() - 96, 3, 27, 27,
+    BWUI_CreateImageButton(&title_bar->minimize_button, GetScreenWidth() - 96, button_y, button_side, button_side,
                            titlebar_minimize_img, titlebar_minimize_clicked_img, _minimize_button_callback, 0);
 
     //Unload images from ram
@@ -124,9 +126,27 @@ void BWUI_UpdateTitleBar(BWTitleBar* title_bar, Font* font) {
             title_bar->render_box.width = GetScreenWidth();
             title_bar->hitbox = (Rectangle){.x = 5, .y = 5, .height = 27, .width = title_bar->render_box.width - 10};
         }
+
+        //FIX: This will set the button texture off center for whichever position the
+        //     window is not initialized into, to fix this the texture scale needs to be
+        //     recomputed on each resize / realignment
+        //TODO: ^
+        int button_y = (IsWindowMaximized()) ? 0 : 5;
+        int button_side = (IsWindowMaximized()) ? 32 : 27;
         title_bar->minimize_button.hitbox.x = title_bar->render_box.width - 96;
+        title_bar->minimize_button.hitbox.y = button_y;
+        title_bar->minimize_button.hitbox.width = button_side;
+        title_bar->minimize_button.hitbox.height = button_side;
+
         title_bar->maximize_button.hitbox.x = title_bar->render_box.width - 64;
+        title_bar->maximize_button.hitbox.y = button_y;
+        title_bar->maximize_button.hitbox.width = button_side;
+        title_bar->maximize_button.hitbox.height = button_side;
+
         title_bar->close_button.hitbox.x = title_bar->render_box.width - 32;
+        title_bar->close_button.hitbox.y = button_y;
+        title_bar->close_button.hitbox.width = button_side;
+        title_bar->close_button.hitbox.height = button_side;
     }
     BWUI_UpdateImageButton(&title_bar->close_button);
     BWUI_UpdateImageButton(&title_bar->maximize_button);
