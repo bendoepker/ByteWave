@@ -173,8 +173,11 @@ void BWUI_TitleBarHandleMouse(BWTitleBar* title_bar, BWMouseState state, int but
                     Vector2 cur_mouse_pos = GetMousePositionAbsolute();
                     //HACK: This is buggy with multiple monitors
                     if(cur_mouse_pos.y == GetMonitorPosition(GetCurrentMonitor()).y) {
-                        title_bar->frames_since_click = 30; //Prevent double click overriding this
-                        MaximizeWindow();
+                        if((cur_mouse_pos.x >= (float)GetMonitorPosition(GetCurrentMonitor()).x) &&
+                            (cur_mouse_pos.x <= GetMonitorPosition(GetCurrentMonitor()).x + (float)GetMonitorWidth(GetCurrentMonitor()))) {
+                            title_bar->frames_since_click = 30; //Prevent double click overriding this
+                            MaximizeWindow();
+                        }
                     }
                     //Intentional fallthrough...
                 default:
