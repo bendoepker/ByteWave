@@ -232,7 +232,7 @@ void BWUI_CreateWindowFrame(BWWindowFrame* frame, Vector2 min_window_size) {
 
 void BWUI_UpdateWindowFrame(BWWindowFrame* frame) {
     //No need to process zeros
-    if(IsWindowFocused() && !IsWindowMaximized()) {
+    if(!IsWindowMinimized() && !IsWindowMaximized()) {
         if(frame->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
             frame->clicked = false;
         //Check for collision if the frame is not currently being clicked (resized)
@@ -316,8 +316,7 @@ void BWUI_UpdateWindowFrame(BWWindowFrame* frame) {
                         //Only allow increase in height
                         if(new_mouse_pos.y < window_pos.y) {
                             new_window_size.y -= (new_mouse_pos.y - window_pos.y);
-                            SetWindowPosition(window_pos.x, new_mouse_pos.y);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
+                            window_pos.y = new_mouse_pos.y;
                         }
                     } else {
                         if(mouse_diff.y > 0) {
@@ -326,26 +325,40 @@ void BWUI_UpdateWindowFrame(BWWindowFrame* frame) {
                             if(mouse_diff.y > max_difference)
                                 mouse_diff.y = max_difference;
                             new_window_size.y -= mouse_diff.y;
-                            SetWindowPosition(window_pos.x, window_pos.y + mouse_diff.y);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         } else {
                             new_window_size.y -= mouse_diff.y;
-                            SetWindowPosition(window_pos.x, window_pos.y + mouse_diff.y);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         }
+                        window_pos.y += mouse_diff.y;
                     }
+                    SetWindowPosition(window_pos.x, window_pos.y);
+                    SetWindowSize(new_window_size.x, new_window_size.y);
                     break;
                 case NE:
                     //Moving the top and right of window
-                    //TODO:
-                    break;
-                case E:
-                    //Moving the right of window
+                    //Calculate the top
+                    if(window_size.y == frame->min_window_size.y) {
+                        //Only allow increase in height
+                        if(new_mouse_pos.y < window_pos.y) {
+                            new_window_size.y -= (new_mouse_pos.y - window_pos.y);
+                            window_pos.y = new_mouse_pos.y;
+                        }
+                    } else {
+                        if(mouse_diff.y > 0) {
+                            //Shrinking window
+                            float max_difference = window_size.y - frame->min_window_size.y;
+                            if(mouse_diff.y > max_difference)
+                                mouse_diff.y = max_difference;
+                            new_window_size.y -= mouse_diff.y;
+                        } else {
+                            new_window_size.y -= mouse_diff.y;
+                        }
+                        window_pos.y += mouse_diff.y;
+                    }
+                    //Calculate the right
                     if(window_size.x == frame->min_window_size.x) {
                         //Only allow increase in width
                         if(new_mouse_pos.x > window_pos.x + window_size.x) {
                             new_window_size.x = (new_mouse_pos.x - window_pos.x);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         }
                     } else {
                         if(mouse_diff.x < 0) {
@@ -354,24 +367,40 @@ void BWUI_UpdateWindowFrame(BWWindowFrame* frame) {
                             if(mouse_diff.x < -max_difference)
                                 mouse_diff.x = -max_difference;
                             new_window_size.x += mouse_diff.x;
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         } else {
                             new_window_size.x += mouse_diff.x;
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         }
                     }
+                    SetWindowPosition(window_pos.x, window_pos.y);
+                    SetWindowSize(new_window_size.x, new_window_size.y);
+                    break;
+                case E:
+                    //Moving the right of window
+                    if(window_size.x == frame->min_window_size.x) {
+                        //Only allow increase in width
+                        if(new_mouse_pos.x > window_pos.x + window_size.x) {
+                            new_window_size.x = (new_mouse_pos.x - window_pos.x);
+                        }
+                    } else {
+                        if(mouse_diff.x < 0) {
+                            //Shrinking window
+                            float max_difference = window_size.x - frame->min_window_size.x;
+                            if(mouse_diff.x < -max_difference)
+                                mouse_diff.x = -max_difference;
+                            new_window_size.x += mouse_diff.x;
+                        } else {
+                            new_window_size.x += mouse_diff.x;
+                        }
+                    }
+                    SetWindowSize(new_window_size.x, new_window_size.y);
                     break;
                 case SE:
                     //Moving the bottom and right of window
-                    //TODO:
-                    break;
-                case S:
-                    //Moving the bottom of window
+                    //Calculate the bottom
                     if(window_size.y == frame->min_window_size.y) {
                         //Only allow increase in height
                         if(new_mouse_pos.y > window_pos.y + window_size.y) {
                             new_window_size.y = (new_mouse_pos.y - window_pos.y);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         }
                     } else {
                         if(mouse_diff.y < 0) {
@@ -380,25 +409,75 @@ void BWUI_UpdateWindowFrame(BWWindowFrame* frame) {
                             if(mouse_diff.y < -max_difference)
                                 mouse_diff.y = -max_difference;
                             new_window_size.y += mouse_diff.y;
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         } else {
                             new_window_size.y += mouse_diff.y;
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         }
                     }
+                    //Calculate the right
+                    if(window_size.x == frame->min_window_size.x) {
+                        //Only allow increase in width
+                        if(new_mouse_pos.x > window_pos.x + window_size.x) {
+                            new_window_size.x = (new_mouse_pos.x - window_pos.x);
+                        }
+                    } else {
+                        if(mouse_diff.x < 0) {
+                            //Shrinking window
+                            float max_difference = window_size.x - frame->min_window_size.x;
+                            if(mouse_diff.x < -max_difference)
+                                mouse_diff.x = -max_difference;
+                            new_window_size.x += mouse_diff.x;
+                        } else {
+                            new_window_size.x += mouse_diff.x;
+                        }
+                    }
+                    SetWindowPosition(window_pos.x, window_pos.y);
+                    SetWindowSize(new_window_size.x, new_window_size.y);
+                    break;
+                case S:
+                    //Moving the bottom of window
+                    if(window_size.y == frame->min_window_size.y) {
+                        //Only allow increase in height
+                        if(new_mouse_pos.y > window_pos.y + window_size.y) {
+                            new_window_size.y = (new_mouse_pos.y - window_pos.y);
+                        }
+                    } else {
+                        if(mouse_diff.y < 0) {
+                            //Shrinking window
+                            float max_difference = window_size.y - frame->min_window_size.y;
+                            if(mouse_diff.y < -max_difference)
+                                mouse_diff.y = -max_difference;
+                            new_window_size.y += mouse_diff.y;
+                        } else {
+                            new_window_size.y += mouse_diff.y;
+                        }
+                    }
+                    SetWindowSize(new_window_size.x, new_window_size.y);
                     break;
                 case SW:
                     //Moving the bottom and left of window
-                    //TODO:
-                    break;
-                case W:
-                    //Moving the left of window
+                    //Calculate the bottom
+                    if(window_size.y == frame->min_window_size.y) {
+                        //Only allow increase in height
+                        if(new_mouse_pos.y > window_pos.y + window_size.y) {
+                            new_window_size.y = (new_mouse_pos.y - window_pos.y);
+                        }
+                    } else {
+                        if(mouse_diff.y < 0) {
+                            //Shrinking window
+                            float max_difference = window_size.y - frame->min_window_size.y;
+                            if(mouse_diff.y < -max_difference)
+                                mouse_diff.y = -max_difference;
+                            new_window_size.y += mouse_diff.y;
+                        } else {
+                            new_window_size.y += mouse_diff.y;
+                        }
+                    }
+                    //Calculate the left
                     if(window_size.x == frame->min_window_size.x) {
                         //Only allow increase in width
                         if(new_mouse_pos.x < window_pos.x) {
                             new_window_size.x -= (new_mouse_pos.x - window_pos.x);
-                            SetWindowPosition(new_mouse_pos.x, window_pos.y);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
+                            window_pos.x = new_mouse_pos.x;
                         }
                     } else {
                         if(mouse_diff.x > 0) {
@@ -407,18 +486,79 @@ void BWUI_UpdateWindowFrame(BWWindowFrame* frame) {
                             if(mouse_diff.x > max_difference)
                                 mouse_diff.x = max_difference;
                             new_window_size.x -= mouse_diff.x;
-                            SetWindowPosition(window_pos.x + mouse_diff.x, window_pos.y);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         } else {
                             new_window_size.x -= mouse_diff.x;
-                            SetWindowPosition(window_pos.x + mouse_diff.x, window_pos.y);
-                            SetWindowSize(new_window_size.x, new_window_size.y);
                         }
+                        window_pos.x += mouse_diff.x;
                     }
+                    SetWindowPosition(window_pos.x, window_pos.y);
+                    SetWindowSize(new_window_size.x, new_window_size.y);
+                    break;
+                case W:
+                    //Moving the left of window
+                    if(window_size.x == frame->min_window_size.x) {
+                        //Only allow increase in width
+                        if(new_mouse_pos.x < window_pos.x) {
+                            new_window_size.x -= (new_mouse_pos.x - window_pos.x);
+                            window_pos.x = new_mouse_pos.x;
+                        }
+                    } else {
+                        if(mouse_diff.x > 0) {
+                            //Shrinking window
+                            float max_difference = window_size.x - frame->min_window_size.x;
+                            if(mouse_diff.x > max_difference)
+                                mouse_diff.x = max_difference;
+                            new_window_size.x -= mouse_diff.x;
+                        } else {
+                            new_window_size.x -= mouse_diff.x;
+                        }
+                        window_pos.x += mouse_diff.x;
+                    }
+                    SetWindowPosition(window_pos.x, window_pos.y);
+                    SetWindowSize(new_window_size.x, new_window_size.y);
                     break;
                 case NW:
                     //Moving the top and left of window
-                    //TODO:
+                    //Calculate the top
+                    if(window_size.y == frame->min_window_size.y) {
+                        //Only allow increase in height
+                        if(new_mouse_pos.y < window_pos.y) {
+                            new_window_size.y -= (new_mouse_pos.y - window_pos.y);
+                            window_pos.y = new_mouse_pos.y;
+                        }
+                    } else {
+                        if(mouse_diff.y > 0) {
+                            //Shrinking window
+                            float max_difference = window_size.y - frame->min_window_size.y;
+                            if(mouse_diff.y > max_difference)
+                                mouse_diff.y = max_difference;
+                            new_window_size.y -= mouse_diff.y;
+                        } else {
+                            new_window_size.y -= mouse_diff.y;
+                        }
+                        window_pos.y += mouse_diff.y;
+                    }
+                    //Calculate the left
+                    if(window_size.x == frame->min_window_size.x) {
+                        //Only allow increase in width
+                        if(new_mouse_pos.x < window_pos.x) {
+                            new_window_size.x -= (new_mouse_pos.x - window_pos.x);
+                            window_pos.x = new_mouse_pos.x;
+                        }
+                    } else {
+                        if(mouse_diff.x > 0) {
+                            //Shrinking window
+                            float max_difference = window_size.x - frame->min_window_size.x;
+                            if(mouse_diff.x > max_difference)
+                                mouse_diff.x = max_difference;
+                            new_window_size.x -= mouse_diff.x;
+                        } else {
+                            new_window_size.x -= mouse_diff.x;
+                        }
+                        window_pos.x += mouse_diff.x;
+                    }
+                    SetWindowPosition(window_pos.x, window_pos.y);
+                    SetWindowSize(new_window_size.x, new_window_size.y);
                     break;
             }
             frame->prev_mouse_pos = new_mouse_pos;
