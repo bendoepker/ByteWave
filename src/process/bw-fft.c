@@ -1,9 +1,7 @@
 #include "bw-fft.h"
 #include <math.h>
-#include <complex.h>
 
 #ifdef _MSC_VER
-#define ComplexFloat _Fcomplex
 #define ComplexFloatMult(x, y) _FCmulcc((x), (y))
 #define ComplexFloatAdd(x, y) _FCbuild(crealf((x)) + crealf((y)), cimagf((x)) + cimagf((y)))
 #define ComplexFloatSub(x, y) _FCbuild(crealf((x)) - crealf((y)), cimagf((x)) - cimagf((y)))
@@ -11,7 +9,6 @@
 #define ComplexFloatFromImag(x) _FCbuild(0, (x))
 #define ComplexFloatFromBoth(x, y) _FCbuild((x), (y))
 #else
-#define ComplexFloat float complex
 #define ComplexFloatMult(x, y) ((x) * (y))
 #define ComplexFloatAdd(x, y) ((x) + (y))
 #define ComplexFloatSub(x, y) ((x) - (y))
@@ -87,12 +84,62 @@ void __impl_fft(ComplexFloat* buf, int n){
     }
 }
 
-void fft(float* input_buffer, float* output_buffer, int num_elements) {
-    ComplexFloat internal_buffer[num_elements];
+/*
+*   Iterative version of the Cooley-Tukey FFT
+*   Benchmarks show ~= 1.5x speed up for n = 32 <=> 8192 compared to recursive version
+*/
+
+/* Bit reverse from https://cp-algorithms.com/algebra/fft.html */
+static inline void bit_reverse_swap(ComplexFloat* buf, int n) {
+    for (int i = 1, j = 0; i < n; i++) {
+        int bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i < j) {
+            ComplexFloat tmp = buf[j];
+            buf[j] = buf[i];
+            buf[i] = tmp;
+        }
+    };
+}
+
+/* From Introduction to Algoritms, Third Edition : Cormen */
+void __impl_fft_iter(ComplexFloat* buf, int n) {
+    //Put the elements into their order as they would be by recursive calls
+    bit_reverse_swap(buf, n);
+
+    //Iteratively walk up the tree as would be done from unwinding recursive calls
+    for(int s = 2; s <= n; s <<= 1) {
+        /* e^(2 * π * I / m) */
+
+        //float im = 1.0 / m;
+        //ComplexFloat omega_m = cexpf(ComplexFloatMult(TWO_PI_I, ComplexFloatFromReal(im)));
+        float theta = 2.0f * PI / (float)s;
+        ComplexFloat omega_m = ComplexFloatFromBoth(cos(theta), sin(theta));
+
+        int half_s = s / 2;
+        for(int k = 0; k < n; k += s) {
+            ComplexFloat omega = ComplexFloatFromReal(1);
+            for(int j = 0; j < half_s; j++) {
+                ComplexFloat u = buf[k + j];
+                ComplexFloat t = ComplexFloatMult(omega, buf[k + j + half_s]);
+
+                buf[k + j] = ComplexFloatAdd(u, t);
+                buf[k + j + half_s] = ComplexFloatSub(u, t);
+
+                omega = ComplexFloatMult(omega, omega_m);
+            }
+        }
+    }
+}
+
+void fft(float* input_buffer, float* output_buffer, int num_elements, ComplexFloat* internal_buffer) {
     for(int i = 0; i < num_elements; i++) {
         internal_buffer[i] = ComplexFloatFromReal(input_buffer[i]);
     }
-    __impl_fft(internal_buffer, num_elements);
+    __impl_fft_iter(internal_buffer, num_elements);
     for(int i = 0; i < num_elements; i++) {
         output_buffer[i] = crealf(internal_buffer[i]);
     }
