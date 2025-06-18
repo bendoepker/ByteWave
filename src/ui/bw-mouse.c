@@ -120,6 +120,7 @@ void BWUI_EnableOSMousePos() {
 }
 
 Vector2 GetMousePositionAbsolute() {
+#ifdef _WIN32
     if(pGetCursorPos != 0) {
         POINT mouse_pos;
         if(pGetCursorPos(&mouse_pos)) {
@@ -130,4 +131,5 @@ Vector2 GetMousePositionAbsolute() {
         }
     }
     return (Vector2){0, 0};
+#endif //Windows
 }

@@ -1,6 +1,8 @@
 #include <bw-ui.h>
 #include <stdio.h>
 
+#include "bw-popup.h"
+
 /* For config data type */
 #include <bw-types.h>
 
@@ -36,7 +38,7 @@ void* BWUI_UIMain(void* ui_data) {
 
     //Should we exit the application:
     unsigned char exit_requested = 0;
-
+    unsigned char exit_confirmed = 0;
 
     BWUIData* data = (BWUIData*)ui_data;
 
@@ -97,7 +99,7 @@ void* BWUI_UIMain(void* ui_data) {
     BWMouseLocale mouse_locale;
 
     //Main render loop
-    while(!exit_requested) {
+    while(!exit_confirmed) {
 
         Vector2 mouse_pos = GetMousePosition();
         left_mouse_state = BWUI_GetMouseState(MOUSE_BUTTON_LEFT);
@@ -106,7 +108,17 @@ void* BWUI_UIMain(void* ui_data) {
 
         if(left_mouse_state != MOUSE_UP) {
             BWUI_HandleMouseByLocale(left_mouse_state, MOUSE_BUTTON_LEFT, mouse_locale, mouse_pos, &toplevel);
+            if(mouse_locale == ML_NONE) {
+                if(CheckCollisionPointRec(mouse_pos, BWUI_GetVSliderRec(&vert_slider)))
+                    BWUI_VSliderHandleMouse(&vert_slider, left_mouse_state, MOUSE_BUTTON_LEFT, mouse_pos);
+                if(CheckCollisionPointRec(mouse_pos, BWUI_GetHSliderRec(&horiz_slider)))
+                    BWUI_HSliderHandleMouse(&horiz_slider, left_mouse_state, MOUSE_BUTTON_LEFT, mouse_pos);
+                if(CheckCollisionPointRec(mouse_pos, BWUI_GetRSliderRec(&ring_slider))) {
+                    BWUI_RSliderHandleMouse(&ring_slider, left_mouse_state, MOUSE_BUTTON_LEFT, mouse_pos);
+                }
+            }
         }
+
         if(right_mouse_state != MOUSE_UP) {
             BWUI_HandleMouseByLocale(left_mouse_state, MOUSE_BUTTON_RIGHT, mouse_locale, mouse_pos, &toplevel);
         }
@@ -127,21 +139,12 @@ void* BWUI_UIMain(void* ui_data) {
 
         //Vertical Slider Test
         BWUI_UpdateVSlider(&vert_slider);
-        char arr[32];
-        sprintf(arr, "%f", vert_slider.value);
-        DrawText(arr, 150, 100, 40, BLACK);
 
         //Horizontal Slider Test
         BWUI_UpdateHSlider(&horiz_slider);
-        char arr2[32];
-        sprintf(arr2, "%f", horiz_slider.value);
-        DrawText(arr2, 250, 200, 40, BLACK);
 
         //Ring Slider Test
         BWUI_UpdateRSlider(&ring_slider);
-        char arr3[32];
-        sprintf(arr3, "%f", ring_slider.value);
-        DrawText(arr3, 150, 275, 40, BLACK);
 
         BWUI_UpdateToggleCluster(&toggle_cluster);
         BWUI_UpdateMixer(&mixer_ui);
@@ -150,6 +153,14 @@ void* BWUI_UIMain(void* ui_data) {
 
         //If a close request comes from elsewher (Likely a wayland workaround)
         if(WindowShouldClose()) exit_requested = 1;
+        if(exit_requested) {
+            //Confirm close
+            //TODO: Open a popup confirming close if needed
+            //      For now we will just close
+            //BWUI_ClosePopup(GetWindowHandle(), &exit_confirmed);
+            exit_confirmed = 1;
+            exit_requested = 0; //Disables infinite looping close box
+        }
     }
 
     BWUI_DestroyTitleBar(&title_bar);

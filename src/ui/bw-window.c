@@ -164,13 +164,13 @@ Rectangle BWUI_GetTitleBarRec(BWTitleBar* title_bar) {
 }
 
 void BWUI_TitleBarHandleMouse(BWTitleBar* title_bar, BWMouseState state, int button) {
-    Vector2 mp_local = GetMousePosition();
-    if(CheckCollisionPointRec(mp_local, title_bar->close_button.hitbox))
-        BWUI_ImageButtonHandleMouse(&title_bar->close_button, state, button, mp_local);
-    else if(CheckCollisionPointRec(mp_local, title_bar->maximize_button.hitbox))
-        BWUI_ImageButtonHandleMouse(&title_bar->maximize_button, state, button, mp_local);
-    else if(CheckCollisionPointRec(mp_local, title_bar->minimize_button.hitbox))
-        BWUI_ImageButtonHandleMouse(&title_bar->minimize_button, state, button, mp_local);
+    Vector2 mouse_pos = GetMousePosition();
+    if(CheckCollisionPointRec(mouse_pos, title_bar->close_button.hitbox))
+        BWUI_ImageButtonHandleMouse(&title_bar->close_button, state, button, mouse_pos);
+    else if(CheckCollisionPointRec(mouse_pos, title_bar->maximize_button.hitbox))
+        BWUI_ImageButtonHandleMouse(&title_bar->maximize_button, state, button, mouse_pos);
+    else if(CheckCollisionPointRec(mouse_pos, title_bar->minimize_button.hitbox))
+        BWUI_ImageButtonHandleMouse(&title_bar->minimize_button, state, button, mouse_pos);
     else {
         //None of the buttons are pressed, we're moving the window
         if(button == MOUSE_BUTTON_LEFT) {

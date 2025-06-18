@@ -24,12 +24,7 @@ void BWUI_CreateVSlider(BWVertSlider* slider, int pos_x, int pos_y, int bar_leng
 
 void BWUI_UpdateVSlider(BWVertSlider* slider) {
     //Update the slider
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !slider->clicked){
-        Vector2 mouse_pos = GetMousePosition();
-        if(mouse_pos.x >= slider->bar.x && mouse_pos.x <= slider->bar.x + slider->bar.width &&
-           mouse_pos.y >= slider->bar.y && mouse_pos.y <= slider->bar.y + slider->bar.height)
-            slider->clicked = true;
-    } else if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && slider->clicked) {
+    if(slider->clicked && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         //Holding down and moving the slider
         Vector2 mouse_pos = GetMousePosition();
         if(mouse_pos.y >= slider->track.y + slider->track.height) {
@@ -42,21 +37,7 @@ void BWUI_UpdateVSlider(BWVertSlider* slider) {
             //Mouse moved within the slider range
             slider->value = 1.0f - ((float)(mouse_pos.y - slider->track.y) / (float) slider->track.height);
         }
-    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && slider->clicked) {
-        // mouse released after hold
-#if 0
-        Vector2 mouse_pos = GetMousePosition();
-        if(mouse_pos.y >= slider->track.y + slider->track.height) {
-            //Mouse released below the slider
-            slider->value = 0.0f;
-        } else if(mouse_pos.y <= slider->track.y) {
-            //Mouse releaseed above the slider
-            slider->value = 1.0f;
-        } else {
-            //Mouse released within the slider range
-            slider->value = 1.0f - ((float)(mouse_pos.y - slider->track.y) / (float) slider->track.height);
-        }
-#endif //This extra bit of processing seems unnecessary
+    } else if(slider->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         slider->clicked = false;
     }
 
@@ -79,7 +60,17 @@ Rectangle BWUI_GetVSliderRec(BWVertSlider* slider) {
 }
 
 void BWUI_VSliderHandleMouse(BWVertSlider* slider, BWMouseState state, int button, Vector2 mouse_pos) {
-    
+    if(button == MOUSE_BUTTON_LEFT) {
+        switch(state) {
+            case MOUSE_PRESSED:
+                if(!slider->clicked && CheckCollisionPointRec(mouse_pos, slider->bar)) {
+                    slider->clicked = true;
+                }
+                return;
+            default:
+                return;
+        }
+    }
 }
 
 void BWUI_CreateHSlider(BWHorizSlider* slider, int pos_x, int pos_y, int bar_length) {
@@ -97,12 +88,7 @@ void BWUI_CreateHSlider(BWHorizSlider* slider, int pos_x, int pos_y, int bar_len
 
 void BWUI_UpdateHSlider(BWHorizSlider* slider) {
     //Update the slider
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !slider->clicked){
-        Vector2 mouse_pos = GetMousePosition();
-        if(mouse_pos.x >= slider->bar.x && mouse_pos.x <= slider->bar.x + slider->bar.width &&
-           mouse_pos.y >= slider->bar.y && mouse_pos.y <= slider->bar.y + slider->bar.height)
-            slider->clicked = true;
-    } else if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && slider->clicked) {
+    if(slider->clicked && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         //Holding down and moving the slider
         Vector2 mouse_pos = GetMousePosition();
         if(mouse_pos.x <= slider->track.x) {
@@ -115,21 +101,7 @@ void BWUI_UpdateHSlider(BWHorizSlider* slider) {
             //Mouse moved within the slider range
             slider->value = (float)((mouse_pos.x - slider->track.x) / slider->track.width);
         }
-    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && slider->clicked) {
-        // mouse released after hold
-#if 0 //This extra bit of processing seems unnecessary
-        Vector2 mouse_pos = GetMousePosition();
-        if(mouse_pos.x <= slider->track.x) {
-            //Mouse released to the left of the slider
-            slider->value = 0.0f;
-        } else if(mouse_pos.x >= slider->track.x + slider->track.width) {
-            //Mouse released to the right of the slider
-            slider->value = 1.0f;
-        } else {
-            //Mouse released within the slider range
-            slider->value = (float)((mouse_pos.x - slider->track.x) / slider->track.width);
-        }
-#endif
+    } else if(slider->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         slider->clicked = false;
     }
 
@@ -152,7 +124,18 @@ Rectangle BWUI_GetHSliderRec(BWHorizSlider* slider) {
 }
 
 void BWUI_HSliderHandleMouse(BWHorizSlider* slider, BWMouseState state, int button, Vector2 mouse_pos) {
-    
+    if(button == MOUSE_BUTTON_LEFT) {
+        switch(state) {
+            case MOUSE_PRESSED:
+                if(!slider->clicked) {
+                    if(CheckCollisionPointRec(mouse_pos, slider->bar)) {
+                        slider->clicked = true;
+                    }
+                }
+            default:
+                return;
+        }
+    }
 }
 
 void BWUI_CreateRSlider(BWRingSlider* slider, int pos_x, int pos_y, int radius) {
@@ -169,7 +152,7 @@ void BWUI_CreateRSlider(BWRingSlider* slider, int pos_x, int pos_y, int radius) 
     slider->bar_offset.x = ceilf(radius / 2.0);
     slider->bar_offset.y = ceilf(slider->bar.height / 2.0);
 
-    slider->value = 0.0;
+    slider->value = 0.5;
 
     //Set the bar bounding box for use in mouse handling
     //Since the slider is rotationally symmetric for the top 240° the top position is the same as the x pos
@@ -239,12 +222,7 @@ static inline float _get_angle_ring_slider(BWRingSlider* slider, Vector2 pos) {
 
 void BWUI_UpdateRSlider(BWRingSlider* slider) {
 
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !slider->clicked) {
-        Vector2 mouse_pos = GetMousePosition();
-        if(_check_collision_ring_slider(slider, mouse_pos)) {
-            slider->clicked = true;
-        }
-    } else if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && slider->clicked) {
+    if(slider->clicked && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
         //Holding down and moving the slider
         Vector2 mouse_pos = GetMousePosition();
         //Get the angle of the mouse from the center of the ring
@@ -261,7 +239,7 @@ void BWUI_UpdateRSlider(BWRingSlider* slider) {
             else theta += 210;
             slider->value = theta / 240.f;
         }
-    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && slider->clicked) {
+    } else if(slider->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         slider->clicked = false;
     }
 
@@ -278,7 +256,6 @@ void BWUI_UpdateRSlider(BWRingSlider* slider) {
     DrawRing(slider->pos, slider->radius, slider->radius + 3, -208, 28, 32, DARKGRAY);
     if(slider->clicked) DrawRectanglePro(slider->bar, (Vector2){-slider->bar_offset.x, slider->bar_offset.y}, (240 * slider->value + 150), RED);
     else DrawRectanglePro(slider->bar, (Vector2){-slider->bar_offset.x, slider->bar_offset.y}, (240 * slider->value + 150), BLACK);
-    DrawRectangleLinesEx(BWUI_GetRSliderRec(slider), 1, RED);
 }
 
 Rectangle BWUI_GetRSliderRec(BWRingSlider* slider) {
@@ -286,7 +263,17 @@ Rectangle BWUI_GetRSliderRec(BWRingSlider* slider) {
 }
 
 void BWUI_RSliderHandleMouse(BWRingSlider* slider, BWMouseState state, int button, Vector2 mouse_pos) {
-
+    if(button == MOUSE_BUTTON_LEFT) {
+        switch(state) {
+            case MOUSE_PRESSED:
+                if(_check_collision_ring_slider(slider, mouse_pos)) {
+                    slider->clicked = true;
+                }
+                return;
+            default:
+                return;
+        }
+    }
 }
 
 void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width, int height, char* text, void(*callback), void* callback_params) {
@@ -319,12 +306,7 @@ void BWUI_CreateTextButton(BWTextButton* button, int pos_x, int pos_y, int width
 }
 
 void BWUI_UpdateTextButton(BWTextButton* button) {
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Vector2 mouse_pos = GetMousePosition();
-        if(CheckCollisionPointRec(mouse_pos, button->hitbox)) {
-            button->clicked = true;
-        }
-    } else if(button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+    if(button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         Vector2 mouse_pos = GetMousePosition();
         if(button->callback != 0)
             if(CheckCollisionPointRec(mouse_pos, button->hitbox))
@@ -343,7 +325,16 @@ Rectangle BWUI_GetTextButtonRec(BWTextButton* button) {
 }
 
 void BWUI_TextButtonHandleMouse(BWTextButton* button, BWMouseState state, int mouse_button, Vector2 mouse_pos) {
-
+    if(button == MOUSE_BUTTON_LEFT) {
+        switch(state) {
+            case MOUSE_PRESSED:
+                if(!button->clicked && CheckCollisionPointRec(mouse_pos, button->hitbox))
+                    button->clicked = true;
+                return;
+            default:
+                return;
+        }
+    }
 }
 
 void BWUI_CreateImageButton(BWImageButton* button, int pos_x, int pos_y, int width, int height, Image image, Image image_clicked, void(*callback), void* callback_params) {
@@ -385,11 +376,7 @@ void BWUI_DestroyImageButton(BWImageButton* button) {
 }
 
 void BWUI_UpdateImageButton(BWImageButton* button) {
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Vector2 mouse_pos = GetMousePosition();
-        if(CheckCollisionPointRec(mouse_pos, button->hitbox))
-            button->clicked = true;
-    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && button->clicked) {
+    if(button->clicked && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         Vector2 mouse_pos = GetMousePosition();
         if(CheckCollisionPointRec(mouse_pos, button->hitbox))
             if(button->callback != 0)
@@ -413,5 +400,14 @@ Rectangle BWUI_GetImageButtonRec(BWImageButton* button) {
 }
 
 void BWUI_ImageButtonHandleMouse(BWImageButton* button, BWMouseState state, int mouse_button, Vector2 mouse_pos) {
-
+    if(mouse_button == MOUSE_BUTTON_LEFT) {
+        switch(state) {
+            case MOUSE_PRESSED:
+                if(CheckCollisionPointRec(mouse_pos, button->hitbox))
+                    button->clicked = true;
+                return;
+            default:
+                return;
+        }
+    }
 }
