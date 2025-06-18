@@ -1,3 +1,21 @@
+/*
+*	Bytewave: A Lightweight Digital Audio Workstation
+*	Copyright (C) 2025  Ben Doepker
+*
+*	This program is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+*	(at your option) any later version.
+*
+*	This program is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*
+*	You should have received a copy of the GNU General Public License
+*	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #ifndef BW_UI_TYPES_H
 #define BW_UI_TYPES_H
 #include "../../lib/ui/raylib.h"
@@ -141,6 +159,12 @@ typedef struct {
     BWImageButton pb_stop;
 } BWToggleCluster;
 
+typedef struct {
+    Texture spectrum_analyzer;
+    Texture cpu_load_measure;
+    float cpu_load;
+} BWSystemInfo;
+
 /*
 *
 *   Generally how the UI should look:
@@ -174,9 +198,9 @@ typedef struct {
     BWWindowFrame* window_frame;
     BWTitleBar* title_bar;
     BWToggleCluster* toggle_cluster;
+    BWSystemInfo* system_info;
 
     //TODO:
-    //BWSystemInfo* system_info;
     //BWToolSelect* tool_select;
     //BWPlaylist* playlist
 
