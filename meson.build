@@ -19,7 +19,8 @@ c_compiler = meson.get_compiler(
 bw_src_files = []
 
 #ByteWave include directories
-bw_inc_dir = [ 'include' ]
+bw_inc_dir = [ 'include',
+               'src/util/structs', ]
 
 bw_deps = [ ]
 
@@ -150,9 +151,12 @@ endif
 bw_src_files += ['src/util/bw-threads.c',
                  'src/util/bw-config.c',
                  'src/util/bw-types.c',
-                 'src/util/bw-dynamic-array.c',
                  'src/util/bw-conversions.c',
                  'src/util/bw-schedule.c',]
+
+#Data Structures
+bw_src_files += ['src/util/structs/bw-dynamic-array.c',
+                 'src/util/structs/bw-circ-buf.c',]
 
 #UI
 if get_option('BW_CUSTOM_WINDOW')
@@ -167,6 +171,7 @@ bw_ui_src_files = [
   'src/ui/bw-mouse.c',
   'src/ui/bw-mixer-ui.c',
   'src/ui/bw-window.c',
+  'src/ui/bw-popup-win32.c',
 ]
 
 
