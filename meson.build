@@ -27,11 +27,11 @@ bw_deps = [ ]
 bw_linker_args = [ ]
 
 bw_c_compiler_args = [
-  #'-ffast-math', #Increase Floating Point Speed (And break IEEE compliance but thats alright)
-  '-D_CRT_SECURE_NO_WARNINGS', #Suppress warnings from Microsoft
+  '-Wimplicit-fallthrough',
 ]
 
 if build_machine.system() == 'windows'
+  bw_c_compiler_args += '-D_CRT_SECURE_NO_WARNINGS'
   #Windows librarys
   winmm = c_compiler.find_library('winmm')
   ole32 = c_compiler.find_library('ole32')

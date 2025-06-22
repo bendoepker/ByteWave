@@ -150,6 +150,7 @@ void BWUI_HSliderHandleMouse(BWHorizSlider* slider, BWMouseState state, int butt
                         slider->clicked = true;
                     }
                 }
+            [[fallthrough]];
             default:
                 return;
         }

@@ -282,18 +282,20 @@ long asioMessage(long selector, long value, void* message, double* opt) {
 
     switch(selector) {
         case kAsioSelectorSupported:
-			if(value == kAsioResetRequest
-			|| value == kAsioEngineVersion
-			|| value == kAsioResyncRequest
-			|| value == kAsioLatenciesChanged
-			// the following three were added for ASIO 2.0, you don't necessarily have to support them
-			|| value == kAsioSupportsTimeInfo
-			|| value == kAsioSupportsTimeCode
-			|| value == kAsioSupportsInputMonitor)
-				return 1L;
+            if(value == kAsioResetRequest
+                || value == kAsioEngineVersion
+                || value == kAsioResyncRequest
+                || value == kAsioLatenciesChanged
+                // the following three were added for ASIO 2.0, you don't necessarily have to support them
+                || value == kAsioSupportsTimeInfo
+                || value == kAsioSupportsTimeCode
+                || value == kAsioSupportsInputMonitor)
+                return 1L;
+            else return 0;
         case kAsioBufferSizeChange:
             BWAsio_Deactivate();
             BWAsio_Activate(_active_audio_device);
+            return 1L;
         case kAsioResetRequest:
             //TODO: Handle reset request, currently we will just crash
             assert(1 && "ASIO Reset Request was sent");

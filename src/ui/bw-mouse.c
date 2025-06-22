@@ -99,6 +99,7 @@ void BWUI_HandleMouseByLocale(BWMouseState state, int button, BWMouseLocale loca
             return;
         case ML_TITLE_BAR:
             BWUI_TitleBarHandleMouse(toplevel->title_bar, state, button);
+            return;
         case ML_TOGGLE_CLUSTER:
             BWUI_ToggleClusterHandleMouse(toplevel->toggle_cluster, state, button, mouse_pos);
             return;

@@ -217,7 +217,7 @@ void BWUI_TitleBarHandleMouse(BWTitleBar* title_bar, BWMouseState state, int but
                             MaximizeWindow();
                         }
                     }
-                    //Intentional fallthrough...
+                    [[fallthrough]];
                 default:
                     title_bar->clicked = false;
             }
