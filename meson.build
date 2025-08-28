@@ -3,12 +3,11 @@ project(
   'c',
   'cpp',
   default_options : [
-    'c_std=c11', #May change depending on compiler (clang not fully supported yet)
+    'c_std=c11',
     'warning_level=1',
   ],
   meson_version : '>=1.1.0'
 )
-
 
 c_compiler = meson.get_compiler(
   'c',
@@ -29,11 +28,13 @@ bw_linker_args = [ ]
 bw_c_compiler_args = [
   '-Wimplicit-fallthrough',
 ]
+bw_cpp_compiler_args = [
+]
 
 if build_machine.system() == 'windows'
   bw_c_compiler_args += '-D_CRT_SECURE_NO_WARNINGS'
+  bw_cpp_compiler_args += '-D_CRT_SECURE_NO_WARNINGS'
   #Windows librarys
-  winmm = c_compiler.find_library('winmm')
   ole32 = c_compiler.find_library('ole32')
   uuid = c_compiler.find_library('uuid')
   dsound = c_compiler.find_library('dsound')
@@ -53,9 +54,8 @@ if build_machine.system() == 'windows'
   #Windows utils
   bw_inc_dir += ['include/win-utils']
 
-  #HACK: Gets around some compiler errors
-  bw_c_compiler_args += ['-D_MT', '-D_DLL']
-  bw_linker_args += ['-nodefaultlibs', '-lmsvcrtd', '-lucrtd', '-lmsvcprt', '-lvcruntime']
+  #GLFW Build Command
+  glfw_build_command = meson.current_source_dir() + '/lib/ui/glfw/buildglfw.bat'
 endif
 if build_machine.system() == 'linux'
   #GL
@@ -104,7 +104,6 @@ if get_option('BW_USE_ASIO')
     'lib/ASIOSDK/common',
     'lib/ASIOSDK/host/pc',
     'lib/ASIOSDK/host',
-    'src/hostapi/asio',
   ]
   message('Using ASIO API')
   bw_c_compiler_args += ['-DBW_ASIO']
@@ -120,7 +119,7 @@ endif
 
 #WASAPI
 bw_wasapi_src = ['src/hostapi/wasapi/bw-wasapi.c']
-bw_wasapi_inc = ['src/hostapi/wasapi']
+bw_wasapi_inc = []
 if get_option('BW_USE_WASAPI')
   message('Using WASAPI')
   bw_c_compiler_args += ['-DBW_WASAPI']
@@ -136,7 +135,7 @@ endif
 
 #DirectSound
 bw_ds_src = ['src/hostapi/dsound/bw-dsound.c']
-bw_ds_inc = ['src/hostapi/dsound']
+bw_ds_inc = []
 if get_option('BW_USE_DIRECTSOUND')
   message('Using DirectSound API')
   bw_c_compiler_args += ['-DBW_DSOUND']
@@ -159,28 +158,29 @@ bw_src_files += ['src/util/structs/bw-dynamic-array.c',
                  'src/util/structs/bw-circ-buf.c',]
 
 #UI
-if get_option('BW_CUSTOM_WINDOW')
-  bw_c_compiler_args += ['-DBW_CUSTOM_WINDOW']
-endif
-
 bw_ui_src_files = [
-  'src/ui/bw-ui.c',
-  'src/ui/bw-kb.c',
-  'src/ui/bw-ui-components.c',
-  'src/ui/bw-toggle-cluster.c',
-  'src/ui/bw-mouse.c',
-  'src/ui/bw-mixer-ui.c',
-  'src/ui/bw-window.c',
-  'src/ui/bw-popup-win32.c',
+  'src/ui/bw-ui.cpp',
 ]
 
+#GLFW
+glfw_res = run_command(glfw_build_command, get_option('buildtype'), capture: false)
+message(glfw_res.stdout())
 
-#Raylib
-cwd = meson.current_source_dir()
-lib_dir = join_paths(cwd, 'lib/ui')
-raylib = c_compiler.find_library('raylib', dirs: lib_dir)
-bw_deps += raylib
-bw_src_files += bw_ui_src_files
+#ImGui
+imgui_src_files = [
+  'lib/ui/imgui.cpp',
+  'lib/ui/imgui_draw.cpp',
+  'lib/ui/imgui_tables.cpp',
+  'lib/ui/imgui_widgets.cpp',
+  'lib/ui/backend/imgui_impl_glfw.cpp',
+  'lib/ui/backend/imgui_impl_opengl3.cpp',
+]
+imgui_inc_dir = [
+  'lib/ui',
+  'lib/ui/backend',
+]
+bw_src_files += imgui_src_files
+bw_inc_dir += imgui_inc_dir
 
 #Debug Logging
 bw_src_files += ['src/util/bw-log.c']
@@ -218,6 +218,7 @@ executable(
 
   #c compiler args
   c_args : bw_c_compiler_args,
+  cpp_args : bw_cpp_compiler_args,
 
   link_args: bw_linker_args,
 )

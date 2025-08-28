@@ -1,29 +1,12 @@
 #ignore tmp folders and .tmp files
 **/tmp/
 *tmp
+build/
 
 #--------------------------------------#
 #           ASIOSDK Ignored            #
 #--------------------------------------#
 /lib/ASIOSDK
-
-#--------------------------------------#
-#            Raylib Ignored            #
-#--------------------------------------#
-/lib/ui/raylib.h
-/lib/ui/libraylib.a
-/lib/ui/raymath.h
-
-#-----------------------------------------------#
-# Zig build ignores for potential zig additions #
-#-----------------------------------------------#
-.zig-cache/
-zig-out/
-/release/
-/debug/
-/build/
-/build-*/
-/docgen_tmp/
 
 #---------------------------------------------------#
 # C Ignores for compiled libraries, objects, etc... #
