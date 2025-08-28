@@ -1,4 +1,3 @@
-# TODO: Compiler flags, build options, test
 cmake_minimum_required(VERSION 3.29)
 project(ByteWave VERSION 0.1.0 LANGUAGES CXX C)
 
@@ -10,6 +9,11 @@ set(CMAKE_C_STANDARD 23)
 
 # Generates a compile_commands.json in the build directory, used by clangd to resolve errors
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Extra tools for cmake in the root/cmake_tools directory
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_tools)
+include(gitignore)
+ignore_directory(${CMAKE_BINARY_DIR})
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(STATUS "Using 64 Bit Architecture")
@@ -54,10 +58,13 @@ set(bw_src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/bw-ui.cpp
 
     # Library UI Files
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/imgui.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/imgui_draw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/imgui_demo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/imgui_tables.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/imgui_widgets.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/glad/src/gl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/backend/imgui_impl_glfw.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/backend/imgui_impl_opengl3.cpp
 )
@@ -68,6 +75,7 @@ set(bw_inc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/structs # TODO: Move these into the source root include directory
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/glad/include
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/glfw/include
 )
 
