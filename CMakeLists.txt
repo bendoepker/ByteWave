@@ -56,6 +56,10 @@ set(bw_src
 
     # ByteWave UI Files
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/bw-ui.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/bw-style.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/bw-ui-comps.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/application.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/render-frame.cpp
 
     # Library UI Files
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/
@@ -123,6 +127,8 @@ if(USE_WASAPI STREQUAL TRUE)
     set(bw_inc ${bw_inc} ${wasapi_inc})
 endif()
 
+set(deps glfw)
+
 # Direct Sound
 set(dsound_src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/dsound/bw-dsound.c
@@ -155,4 +161,4 @@ target_compile_options(ByteWave PUBLIC
 )
 
 # Build ByteWave
-target_link_libraries(ByteWave glfw)
+target_link_libraries(ByteWave ${deps})

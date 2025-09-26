@@ -6,7 +6,9 @@
 extern "C" {
 #endif
 
+[[gnu::format(printf, 1, 2)]]
 void _bw_log(const char* s, ...);
+[[gnu::format(printf, 1, 2)]]
 void _bw_print(const char* s, ...);
 
 #ifdef __cplusplus
@@ -14,7 +16,7 @@ void _bw_print(const char* s, ...);
 #endif
 
 //Log
-#if defined BW_LOG || defined BW_LOG_GEN
+#if defined BW_LOG
 # define BW_LOG_GEN(fmt, ...) \
     _bw_log("[LOG] " fmt, ##__VA_ARGS__)
 # define BW_LOG_ERR(fmt, ...) \

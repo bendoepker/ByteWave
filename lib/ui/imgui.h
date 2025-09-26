@@ -1801,6 +1801,16 @@ enum ImGuiCol_
     ImGuiCol_CheckMark,             // Checkbox tick and RadioButton circle
     ImGuiCol_SliderGrab,
     ImGuiCol_SliderGrabActive,
+    // Begin ByteWave Created
+    // Warning Buttons (Red usually)
+    BWCol_HazardButton,
+    BWCol_HazardButtonHovered,
+    BWCol_HazardButtonClicked,
+    // Accept Button (Green Usually)
+    BWCol_OkButton,
+    BWCol_OkButtonHovered,
+    BWCol_OkButtonClicked,
+    // End ByteWave Created
     ImGuiCol_Button,
     ImGuiCol_ButtonHovered,
     ImGuiCol_ButtonActive,

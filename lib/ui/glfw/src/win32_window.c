@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <windowsx.h>
 #include <shellapi.h>
+#include <stdio.h>
 
 // Returns the window style for the specified window
 //
@@ -1157,6 +1158,103 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
             break;
         }
+
+        /* WARN: BYTEWAVE SPECIFIC */
+        /*
+        case WM_NCHITTEST:
+        {
+            int xpos = GET_X_LPARAM(lParam);
+            int ypos = GET_Y_LPARAM(lParam);
+            RECT win_rect;
+            if(!GetWindowRect(window->win32.handle, &win_rect))
+                return HTNOWHERE;
+
+            // If we are fullscreen we will return a default value
+            if(window->monitor)
+                return HTCLIENT;
+
+            // Remember that win_rect is in relative screen coordinates to the upper left corner
+            // 32 pixels is the predefined value of the height of the caption area
+            if(xpos < win_rect.right - 5 && xpos > win_rect.left + 5) {
+                if(ypos >= win_rect.top + 32 && ypos < win_rect.bottom - 5) {
+                    return HTCLIENT;
+                } else if(ypos >= win_rect.top + 5 && ypos < win_rect.top + 32) {
+                    return HTCAPTION;
+                } else if(ypos < win_rect.top + 5 && ypos >= win_rect.top) {
+                    return HTTOP;
+                } else if(ypos >= win_rect.bottom - 5 && ypos < win_rect.bottom) {
+                    return HTBOTTOM;
+                } else {
+                    return HTNOWHERE;
+                }
+            } else if(xpos < win_rect.left + 5 && xpos >= win_rect.left) {
+                if(ypos > win_rect.top + 5 && ypos < win_rect.bottom - 5) {
+                    return HTLEFT;
+                } else if(ypos <= win_rect.top + 5 && ypos > win_rect.top) {
+                    return HTTOPLEFT;
+                } else if(ypos >= win_rect.bottom - 5 && ypos < win_rect.bottom) {
+                    return HTBOTTOMLEFT;
+                } else {
+                    return HTNOWHERE;
+                }
+            } else if(xpos > win_rect.right - 5 && xpos < win_rect.right) {
+                if(ypos > win_rect.top + 5 && ypos < win_rect.bottom - 5) {
+                    return HTRIGHT;
+                } else if(ypos < win_rect.top + 5 && ypos >= win_rect.top) {
+                    return HTTOPRIGHT;
+                } else if(ypos >= win_rect.bottom - 5 && ypos < win_rect.bottom) {
+                    return HTBOTTOMRIGHT;
+                } else {
+                    return HTNOWHERE;
+                }
+            } else return HTNOWHERE;
+
+        }
+
+        case WM_NCMOUSEHOVER:
+        {
+            switch(wParam) {
+                DwmDefWindowProc(hWnd, uMsg, wParam, lParam, NULL);
+            }
+        }
+
+        case WM_NCLBUTTONDBLCLK:
+        {
+            switch(wParam) {
+                case HTCAPTION:
+                    if(window->win32.maximized)
+                        _glfwRestoreWindowWin32(window);
+                    else
+                        _glfwMaximizeWindowWin32(window);
+                    return 0;
+                default:
+                    return DefWindowProc(hWnd, uMsg, wParam, lParam);
+            }
+        }
+
+        case WM_NCCALCSIZE:
+        {
+            if(wParam) {
+                NCCALCSIZE_PARAMS* nccp = (NCCALCSIZE_PARAMS*)lParam;
+                RECT* nr = nccp->rgrc;
+                // *nr contains the proposed new position of the window, we need to reply
+                // by putting the new client area of the window in that structure
+                nr->top += 32;
+                nr->right -= 5;
+                nr->left += 5;
+                nr->bottom -= 5;
+                return 0;
+            } else {
+                RECT* rec = (RECT*)lParam;
+                rec->top += 32;
+                rec->bottom -=5;
+                rec->left += 5;
+                rec->right -= 5;
+                return 0;
+            }
+        }
+        */
+        /*WARN: END BYTEWAVE SPECIFIC */
 
         case WM_DWMCOMPOSITIONCHANGED:
         case WM_DWMCOLORIZATIONCOLORCHANGED:
