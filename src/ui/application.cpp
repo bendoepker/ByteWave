@@ -1,6 +1,7 @@
 #include "application.h"
 #include "bw-style.h"
 #include "render-frame.h"
+#include "windows/mixer.cpp"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -79,6 +80,10 @@ void Application::Run() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        static bool show_mixer = true;
+        {
+            BWUI::ShowMixer(0, &show_mixer);
+        }
 
         BWUI::RenderFrame(*this);
 
