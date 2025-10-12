@@ -28,6 +28,9 @@
 #ifdef BW_DSOUND
     #include "dsound/bw-dsound.h"
 #endif
+#ifdef BW_JACK
+    #include "jack/bw-jack.h"
+#endif
 #include <bw-types.h>
 
 BWError BWHostApi_Initialize(BWConfigData* conf_data);

@@ -96,6 +96,13 @@ if(WIN32)
     # set(USE_DSOUND TRUE)
 endif(WIN32)
 
+if(LINUX)
+    add_definitions(
+        -DBW_JACK
+    )
+    set(USE_JACK TRUE)
+endif(LINUX)
+
 # ByteWave Audio Backends
 # ASIO
 set(asio_src
@@ -141,12 +148,27 @@ if(USE_DSOUND STREQUAL TRUE)
     set(bw_inc ${bw_inc} ${dsound_inc})
 endif()
 
+#Jack
+set(jack_src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/jack/bw-jack.c
+)
+set(jack_inc
+    #TODO: Add any necessary jack include paths here
+)
+if(USE_JACK STREQUAL TRUE)
+    set(bw_src ${bw_src} ${jack_src})
+    set(bw_inc ${bw_inc} ${jack_inc})
+    set(deps ${deps} jack)
+endif()
+
 # Debug Tools
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     add_definitions(-DBW_LOG)
 else()
-    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -mwindows)
-    set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} -mwindows)
+    if(WIN32)
+        set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -mwindows)
+        set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} -mwindows)
+    endif()
 endif()
 
 # Create ByteWave Target

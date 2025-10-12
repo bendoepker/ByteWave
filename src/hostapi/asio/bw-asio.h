@@ -19,7 +19,6 @@
 #ifndef BW_ASIO_H
 #define BW_ASIO_H
 
-#include "stdint.h"
 #include <bw-types.h>
 
 typedef struct {

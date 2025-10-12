@@ -58,6 +58,15 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     num_devices += num_wasapi_devs;
 #endif
 
+#ifdef BW_JACK
+    //JACK
+    uint32_t num_jack_devs = 0;
+    _jack_device* jack_devs = 0;
+    ret = BWJack_QueryDevices(&jack_devs, &num_jack_devs);
+    if(ret != BW_OK) return ret;
+    num_devices += num_jack_devs;
+#endif
+
     //TODO: Other host api enumerations (WASAPI, JACK, ALSA...)
 
     if(num_devices == 0) return BW_NO_DEVICES;
@@ -88,6 +97,16 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     free(wasapi_devs);
     wasapi_devs = 0;
 #endif //WASAPI Enumeration
+
+#ifdef BW_JACK
+    for(int i = 0; i < num_jack_devs; i++) {
+        memcpy(devices_enumeration[offset + i].device_name, jack_devs[i].name, 128);
+        devices_enumeration[offset + i].host_api = JACK;
+    }
+    offset += num_jack_devs;
+    free(jack_devs);
+    jack_devs = 0;
+#endif //Jack Enumeration
 
     //TODO: Other host api enumerations (WASAPI, JACK, ALSA...)
 
@@ -149,6 +168,10 @@ BWError BWHostApi_Activate() {
             #ifdef BW_WASAPI
             return BWWASAPI_Activate(_active_audio_device);
             #endif //BW_WASAPI
+        case JACK:
+            #ifdef BW_JACK
+            return BWJack_Activate(_active_audio_device);
+            #endif //BW_JACK
         default:
             assert(1 && "Host Api Not Implemented");
             break;
@@ -166,6 +189,10 @@ BWError BWHostApi_Deactivate() {
             #ifdef BW_WASAPI
             return BWWASAPI_Deactivate();
             #endif //BW_WASAPI
+        case JACK:
+            #ifdef BW_JACK
+            return BWJack_Deactivate();
+            #endif //BW_JACK
         default:
             assert(1 && "Host Api Not Implemented");
             break;

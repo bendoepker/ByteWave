@@ -16,30 +16,22 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BW_CIRC_BUF_H
-#define BW_CIRC_BUF_H
+#ifndef BW_JACK_H
+#define BW_JACK_H
 
 #include <bw-types.h>
-#include <stddef.h>
 
 typedef struct {
-    float* array;
-    size_t capacity;
-    size_t write_ptr;
-    size_t read_ptr;
-} BWCircBufFloat;
+    char name[128];
 
-//Allocate the internal buffers
-BWError BWCBF_Create(BWCircBufFloat* circ_buf, size_t capacity);
+    uint32_t input_latency;
+    uint32_t output_latency;
+} _jack_device;
 
-//Deallocate the internal buffers
-void BWCBF_Destroy(BWCircBufFloat* circ_buf);
+BWError BWJack_Activate(BWHostApi_AudioDevice* audio_device);
 
-//Append num items from buf to the circular buffer circ_buf
-void BWCBF_Append(BWCircBufFloat* circ_buf, float* buf, size_t num);
+BWError BWJack_Deactivate();
 
-//Copy the most recently appended
-void BWCBF_GetMostRecent(BWCircBufFloat* circ_buf, float* buf, size_t num);
+BWError BWJack_QueryDevices(_jack_device** devices, uint32_t* num_devices);
 
-
-#endif //BW_CIRC_BUF_H
+#endif //BW_JACK_H
