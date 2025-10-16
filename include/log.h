@@ -1,5 +1,5 @@
-#ifndef BW_LOG_H
-#define BW_LOG_H
+#ifndef LOG_H
+#define LOG_H
 
 #include <stdarg.h>
 #ifdef __cplusplus
@@ -35,4 +35,4 @@ void _bw_print(const char* s, ...);
 # define BW_LOG_CUSTOM(specifier, fmt, ...)
 #endif
 
-#endif //BW_LOG_H
+#endif //LOG_H

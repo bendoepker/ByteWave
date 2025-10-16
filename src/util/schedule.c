@@ -16,7 +16,7 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <bw-schedule.h>
+#include <schedule.h>
 
 #ifdef _WIN32
 #endif //Windows

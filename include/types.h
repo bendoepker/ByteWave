@@ -1,5 +1,5 @@
-#ifndef BW_TYPES_H
-#define BW_TYPES_H
+#ifndef TYPES_H
+#define TYPES_H
 #include <stdint.h>
 
 typedef enum BWError {
@@ -134,4 +134,4 @@ typedef struct {
 
 void BWError_Handle(BWError err);
 
-#endif /* BW_TYPES_H */
+#endif //TYPES_H

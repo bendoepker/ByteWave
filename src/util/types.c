@@ -16,8 +16,8 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <bw-types.h>
-#include <bw-log.h>
+#include <types.h>
+#include <log.h>
 
 const char* _bw_get_error_message(BWError err) {
     switch(err) {

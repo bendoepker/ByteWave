@@ -1,5 +1,5 @@
-#ifndef BW_STYLE_H
-#define BW_STYLE_H
+#ifndef STYLE_H
+#define STYLE_H
 
 #include <stdint.h>
 #include <imgui.h>
@@ -32,4 +32,4 @@ void CreateLightStyle(ImGuiStyle& style, Application& app);
 
 } //namespace BWUI
 
-#endif //BW_STYLE_H
+#endif //STYLE_H

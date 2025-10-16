@@ -1,11 +1,14 @@
+set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_C_COMPILER clang)
+
 cmake_minimum_required(VERSION 3.29)
 project(ByteWave VERSION 0.1.0 LANGUAGES CXX C)
 
-# Avoid function argument expansion
-cmake_policy(SET CMP0054 NEW)
-
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_C_STANDARD 23)
+
+# Avoid function argument expansion
+cmake_policy(SET CMP0054 NEW)
 
 # Generates a compile_commands.json in the build directory, used by clangd to resolve errors
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -27,6 +30,10 @@ if(WIN32)
 endif(WIN32)
 
 # Build GLFW
+if(LINUX)
+    set(GLFW_BUILD_X11 ON)
+    set(GLFW_BUILD_WAYLAND OFF)
+endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/glfw)
 set_target_properties(glfw PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -37,27 +44,26 @@ set_target_properties(glfw PROPERTIES
 # ByteWave Source Files
 set(bw_src
     # Entry Point
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 
     # Generic Audio Backend Wrapper
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/bw-hostapi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/bw-hostapi.cpp
 
     # Utility Code
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/bw-log.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/bw-threads.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/bw-config.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/bw-types.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/bw-conversions.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/bw-schedule.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/log.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/threads.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/config.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/types.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/conversions.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/schedule.c
 
     # Data Structure Variants
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/structs/bw-dynamic-array.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/structs/bw-circ-buf.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/structs/dynamic-array.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/structs/circ-buf.c
 
     # ByteWave UI Files
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/bw-ui.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/bw-style.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/bw-ui-comps.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/style.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/ui-comps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/application.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/render-frame.cpp
 
@@ -150,7 +156,7 @@ endif()
 
 #Jack
 set(jack_src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/jack/bw-jack.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/jack/bw-jack.cpp
 )
 set(jack_inc
     #TODO: Add any necessary jack include paths here
@@ -163,8 +169,10 @@ endif()
 
 # Debug Tools
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    message("Build type is set to Debug")
     add_definitions(-DBW_LOG)
 else()
+    message("Build type is set to '${CMAKE_BUILD_TYPE}'")
     if(WIN32)
         set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -mwindows)
         set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} -mwindows)

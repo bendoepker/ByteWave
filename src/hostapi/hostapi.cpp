@@ -16,7 +16,7 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "bw-hostapi.h"
+#include "hostapi.h"
 
 /* For memcpy() */
 #include <string.h>
@@ -24,11 +24,8 @@
 /* For malloc() and free() */
 #include <stdlib.h>
 
-/* For device enumeration dynamic array */
-#include <bw-dynamic-array.h>
-
 /* Logging */
-#include "bw-log.h"
+#include "log.h"
 
 /* For assert() */
 #include <assert.h>
@@ -39,7 +36,7 @@ BWAudioDeviceEnumeration* devices_enumeration = 0;
 
 BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     //SECTION: Enumerate devices
-    BWError ret = 0;
+    BWError ret = BW_OK;
 #ifdef BW_ASIO
     //ASIO
     uint32_t num_asio_devs = 0;
@@ -71,7 +68,7 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
 
     if(num_devices == 0) return BW_NO_DEVICES;
 
-    devices_enumeration = malloc(sizeof *devices_enumeration * num_devices);
+    devices_enumeration = (BWAudioDeviceEnumeration*)malloc(sizeof *devices_enumeration * num_devices);
     if(devices_enumeration == 0) return BW_FAILED_MALLOC;
 
     //SECTION: Copy names and assign host api identifier
@@ -118,10 +115,12 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
 #endif //Log Device Names
 
     //SECTION: Set the active audio device based on defaults
-    _active_audio_device = malloc(sizeof* _active_audio_device);
+    _active_audio_device = (BWHostApi_AudioDevice*)malloc(sizeof* _active_audio_device);
     if(_active_audio_device == 0) return BW_FAILED_MALLOC;
     memset(_active_audio_device, 0, sizeof* _active_audio_device);
 
+    /*
+     * TODO: Fix this (aka add it back, but better)
     //Search for audio device matching the one in the config data
     for(int i = 0; i < num_devices; i++) {
         if(devices_enumeration[i].host_api == conf_data->host_api) {
@@ -147,6 +146,7 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
         strncpy(conf_data->device_name, _active_audio_device->device_name, 128);
         conf_data->host_api = _active_audio_device->host_api;
     }
+    */
 
     return BW_OK;
 }

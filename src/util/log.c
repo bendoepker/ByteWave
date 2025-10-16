@@ -16,27 +16,24 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BW_PROCESS_H
-#define BW_PROCESS_H
+#include <log.h>
+#include <stdarg.h>
+#include <stdio.h>
 
-/*
-*
-*   ByteWave Processing function
-*
-*   These are the functions responsible for processing the audio,
-*   routing the audio through the mixer tracks, and reporting the outputs
-*   back to the Host APIs as well as any UI functions that will require it
-*
-*
-*/
+void _bw_log(const char* s, ...) {
+    va_list ap;
+    va_start(ap, s);
+    vfprintf(stderr, s, ap);
+    va_end(ap);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+}
 
-#include <stdint.h>
-#include "mixer.h"
-
-//The main processing function, every host api will call this function in their own thread
-//and the audio will be routed through the mixer structures
-void process_buffers(float* input_buffers, float* output_buffers,
-                     uint32_t num_input_buffers, uint32_t num_output_buffers,
-                     uint32_t buffer_size);
-
-#endif //BW_PROCESS_H
+void _bw_print(const char* s, ...) {
+    va_list ap;
+    va_start(ap, s);
+    vfprintf(stdout, s, ap);
+    va_end(ap);
+    fprintf(stdout, "\n");
+    fflush(stdout);
+}

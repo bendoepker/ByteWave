@@ -16,9 +16,9 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BW_DYNAMIC_ARRAY_H
-#define BW_DYNAMIC_ARRAY_H
-#include <bw-types.h>
+#ifndef DYNAMIC_ARRAY_H
+#define DYNAMIC_ARRAY_H
+#include <types.h>
 
 /*
 *   Dynamic Array
@@ -47,4 +47,4 @@ int DArraySearch(d_array* da, void* element);
 //Return the element at the index, if the index is beyond the last index it returns 0
 void* DArrayAt(d_array* da, int index);
 
-#endif //BW_DYNAMIC_ARRAY_H
+#endif //DYNAMIC_ARRAY_H

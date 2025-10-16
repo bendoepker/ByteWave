@@ -16,24 +16,27 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "bw-log.h"
-#include <stdarg.h>
-#include <stdio.h>
+#ifndef HOSTAPI_H
+#define HOSTAPI_H
 
-void _bw_log(const char* s, ...) {
-    va_list ap;
-    va_start(ap, s);
-    vfprintf(stderr, s, ap);
-    va_end(ap);
-    fprintf(stderr, "\n");
-    fflush(stderr);
-}
+#ifdef BW_ASIO
+    #include "asio/bw-asio.h"
+#endif
+#ifdef BW_WASAPI
+    #include "wasapi/bw-wasapi.h"
+#endif
+#ifdef BW_DSOUND
+    #include "dsound/bw-dsound.h"
+#endif
+#ifdef BW_JACK
+    #include "jack/bw-jack.h"
+#endif
+#include <types.h>
 
-void _bw_print(const char* s, ...) {
-    va_list ap;
-    va_start(ap, s);
-    vfprintf(stdout, s, ap);
-    va_end(ap);
-    fprintf(stdout, "\n");
-    fflush(stdout);
-}
+BWError BWHostApi_Initialize(BWConfigData* conf_data);
+BWError BWHostApi_Terminate();
+
+BWError BWHostApi_Activate();
+BWError BWHostApi_Deactivate();
+
+#endif //HOSTAPI_H

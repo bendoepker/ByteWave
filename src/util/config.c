@@ -16,10 +16,10 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <bw-config.h>
+#include <config.h>
 
 /* For Logging */
-#include <bw-log.h>
+#include <log.h>
 
 /* For file I/O */
 #include <stdio.h>

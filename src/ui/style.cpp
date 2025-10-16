@@ -1,5 +1,5 @@
-#include "bw-style.h"
-#include <bw-log.h>
+#include "style.h"
+#include <log.h>
 
 static void CreateStyleBase(ImGuiStyle& s, Application& a) {
     s.FontSizeBase = 16;

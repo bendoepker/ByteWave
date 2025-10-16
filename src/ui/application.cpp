@@ -1,5 +1,5 @@
 #include "application.h"
-#include "bw-style.h"
+#include "style.h"
 #include "render-frame.h"
 #include "windows/mixer.cpp"
 

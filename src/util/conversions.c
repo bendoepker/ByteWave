@@ -16,7 +16,7 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <bw-conversions.h>
+#include <conversions.h>
 #include <string.h>
 #include <assert.h>
 

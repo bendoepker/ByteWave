@@ -16,27 +16,27 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BW_HOSTAPI_H
-#define BW_HOSTAPI_H
+#ifndef PROCESS_H
+#define PROCESS_H
 
-#ifdef BW_ASIO
-    #include "asio/bw-asio.h"
-#endif
-#ifdef BW_WASAPI
-    #include "wasapi/bw-wasapi.h"
-#endif
-#ifdef BW_DSOUND
-    #include "dsound/bw-dsound.h"
-#endif
-#ifdef BW_JACK
-    #include "jack/bw-jack.h"
-#endif
-#include <bw-types.h>
+/*
+*
+*   ByteWave Processing function
+*
+*   These are the functions responsible for processing the audio,
+*   routing the audio through the mixer tracks, and reporting the outputs
+*   back to the Host APIs as well as any UI functions that will require it
+*
+*
+*/
 
-BWError BWHostApi_Initialize(BWConfigData* conf_data);
-BWError BWHostApi_Terminate();
+#include <stdint.h>
+#include "mixer.h"
 
-BWError BWHostApi_Activate();
-BWError BWHostApi_Deactivate();
+//The main processing function, every host api will call this function in their own thread
+//and the audio will be routed through the mixer structures
+void process_buffers(float* input_buffers, float* output_buffers,
+                     uint32_t num_input_buffers, uint32_t num_output_buffers,
+                     uint32_t buffer_size);
 
-#endif // BW_HOSTAPI_H
+#endif //PROCESS_H

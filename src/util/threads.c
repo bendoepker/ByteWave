@@ -16,8 +16,8 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "bw-threads.h"
-#include "bw-log.h"
+#include "threads.h"
+#include "log.h"
 #include <stdio.h>
 
 size_t BWUtil_GetThreadPriority() {

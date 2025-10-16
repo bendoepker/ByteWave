@@ -1,5 +1,5 @@
-#ifndef BW_THREADS_H
-#define BW_THREADS_H
+#ifndef THREADS_H
+#define THREADS_H
 
 #ifdef _WIN32
     #include <windows.h>
@@ -57,4 +57,4 @@ size_t BWUtil_WaitForThreads(BWThread* threads, size_t thread_count);
 //Waits for the thread 'thread' to complete before continuing in the function
 size_t BWUtil_WaitForThread(BWThread thread);
 
-#endif //BW_THREADS_H
+#endif //THREADS_H

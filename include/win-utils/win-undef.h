@@ -1,3 +1,5 @@
+#ifndef WIN_UNDEF_H
+#define WIN_UNDEF_H
 #define NOGDICAPMASKS     // CC_*, LC_*, PC_*, CP_*, TC_*, RC_
 #define NOVIRTUALKEYCODES // VK_*
 #define NOWINMESSAGES     // WM_*, EM_*, LB_*, CB_*
@@ -39,3 +41,4 @@
 #define NOMCX             // Modem Configuration Extensions
 
 typedef struct tagMsg *LPMSG;
+#endif //WIN_UNDEF_H

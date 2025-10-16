@@ -5,7 +5,7 @@
 #include <backend/imgui_impl_glfw.h>
 #include <backend/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
-#include <bw-log.h>
+#include <log.h>
 
 class Application {
     GLFWwindow* window;

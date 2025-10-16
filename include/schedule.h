@@ -1,5 +1,5 @@
-#ifndef BW_SCHEDULE_H
-#define BW_SCHEDULE_H
+#ifndef SCHEDULE_H
+#define SCHEDULE_H
 #include <stdint.h>
 
 /*
@@ -40,4 +40,4 @@ void BWSched_Sleep(unsigned long milliseconds);
 //Real Time Callback
 void BWSched_CreateRTCallback(void (*callback()), void* params);
 
-#endif //BW_SCHEDULE_H
+#endif //SCHEDULE_H

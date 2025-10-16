@@ -16,8 +16,8 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef BW_FFT_H
-#define BW_FFT_H
+#ifndef FFT_H
+#define FFT_H
 
 #include <complex.h>
 
@@ -30,4 +30,4 @@
 //WARN: num_elements must be a power of 2
 void fft(float* input_buffer, float* output_buffer, int num_elements, ComplexFloat* internal_buffer);
 
-#endif //BW_FFT_H
+#endif //FFT_H
