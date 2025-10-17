@@ -5,7 +5,12 @@
 #include <backend/imgui_impl_glfw.h>
 #include <backend/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
+#include <types.h>
 #include <log.h>
+
+typedef struct _UITriggers {
+    bool open_backend_popup = false;
+} UITriggers;
 
 class Application {
     GLFWwindow* window;
@@ -13,7 +18,14 @@ class Application {
     bool enable_vsync = false;
     bool dark_mode = true;
     ImVec4 clear_color = ImVec4(0.f, 0.f, 0.f, 1.f);
+    BWConfigData* bw_config = 0;
+    UITriggers triggers;
+
+    void ConfigStartup();
+    void ConfigShutdown();
+    void RenderFrame();
 public:
+
     void Run();
     Application();
     ~Application();

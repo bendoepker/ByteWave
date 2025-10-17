@@ -33,10 +33,19 @@
 #endif
 #include <types.h>
 
+// Startup the available audio backends, get a list of available devices
 BWError BWHostApi_Initialize(BWConfigData* conf_data);
+
+// Close down the audio subsystem
 BWError BWHostApi_Terminate();
 
-BWError BWHostApi_Activate();
+// Start a specific audio backend
+BWError BWHostApi_Activate(BWHostApi hostapi);
+
+// Close the active audio backend
 BWError BWHostApi_Deactivate();
+
+// Check if any of the specific audio backends have been activated
+bool BWHostApi_IsActivated();
 
 #endif //HOSTAPI_H

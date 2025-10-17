@@ -16,7 +16,7 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <config.h>
+#include <serializer.h>
 
 /* For Logging */
 #include <log.h>
@@ -27,14 +27,14 @@
 /* For strncmp() */
 #include <string.h>
 
+#include <stdlib.h>
+
 /* For File System */
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
-BWError _get_current_directory(char** directory_name);
-
-BWError BWConfig_Write(char* file_name, BWConfigData* data) {
+BWError BWConfig_Write(const char* file_name, BWConfigData* data) {
     uint32_t version = 1; //This is version one of the config file
     FILE* file = fopen(file_name, "w");
     if(file == 0) return BW_FILE_OPEN_ERROR;
@@ -90,7 +90,7 @@ BWError BWConfig_Write(char* file_name, BWConfigData* data) {
     return BW_OK;
 }
 
-BWError BWConfig_Read(char* file_name, BWConfigData* data) {
+BWError BWConfig_Read(const char* file_name, BWConfigData* data) {
     FILE* file = fopen(file_name, "r");
     uint32_t version; //Should be 1
     if(file == 0) return BW_FILE_OPEN_ERROR;
@@ -116,10 +116,10 @@ BWError BWConfig_Read(char* file_name, BWConfigData* data) {
     else if(strncmp(host_api, "ALSA", 4) == 0) data->host_api = ALSA;
     else if(strncmp(host_api, "CORE", 4) == 0) data->host_api = CORE;
     else return BW_FILE_READ_ERROR; //NOTE: Add other hostapis before this line
-
     //SECTION: Device Name Length
     num_read = fread(&data->device_name_length, 4, 1, file);
     if(num_read != 1) return BW_FILE_READ_ERROR;
+
 
     //SECTION: Device Name
     memset(data->device_name, 0, 128); //Ensure a null termination for any 0-127 byte name
@@ -138,20 +138,3 @@ BWError BWConfig_Read(char* file_name, BWConfigData* data) {
 
     return BW_OK;
 }
-
-#ifdef _WIN32
-BWError _get_current_directory(char** directory_name) {
-    int name_length = GetCurrentDirectory(0, 0);
-    if(name_length == 0) return BW_FAILED; //Could not get the directory name
-    *directory_name = malloc(name_length);
-    if(directory_name == 0) return BW_FAILED_MALLOC;
-
-    if(!GetCurrentDirectory(name_length, *directory_name)) return BW_FAILED;
-    return BW_OK;
-}
-#elif defined __linux__
-
-BWError _get_current_directory(char** directory_name) {
-    //TODO: THIS
-}
-#endif //Windows

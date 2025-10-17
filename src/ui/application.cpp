@@ -1,11 +1,34 @@
 #include "application.h"
 #include "style.h"
-#include "render-frame.h"
 #include "windows/mixer.cpp"
+#include <stdlib.h>
+#include <serializer.h>
+#include <hostapi.h>
+
+const char* config_location = "test-config.bwc";
 
 static void glfw_error_callback(int error, const char* description)
 {
     BW_LOG_ERR("GLFW Error %d: %s\n", error, description);
+}
+
+void Application::ConfigStartup() {
+    this->bw_config = (BWConfigData*)malloc(sizeof(*this->bw_config));
+    if(!this->bw_config)
+        (void)0; //TODO: Handle out of memory error
+    BWError ret = BWConfig_Read(config_location, this->bw_config);
+    BWHostApi_Initialize(this->bw_config);
+    if(ret != BW_OK || this->bw_config->host_api == UNKNOWN) {
+        this->triggers.open_backend_popup = true;
+    }
+}
+
+void Application::ConfigShutdown() {
+    if(BWHostApi_IsActivated())
+        BWHostApi_Deactivate();
+    BWHostApi_Terminate();
+    BWConfig_Write(config_location, this->bw_config);
+    free(this->bw_config);
 }
 
 Application::Application() {
@@ -42,7 +65,7 @@ Application::Application() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard |
-                      ImGuiConfigFlags_ViewportsEnable |
+                      //ImGuiConfigFlags_ViewportsEnable |
                       ImGuiConfigFlags_DockingEnable;
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -54,6 +77,12 @@ Application::Application() {
         BWUI::CreateLightStyle(ImGui::GetStyle(), *this);
 
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ConfigStartup();
 }
 
 Application::~Application() {
@@ -65,9 +94,14 @@ Application::~Application() {
     glfwTerminate();
 }
 
+// The Run function should be used to create hooks such as OnUpdate(), OnXYZ(), Render(), etc. there should not be
+// any user facing UI code within this function
 void Application::Run() {
     if(failed_init)
         return;
+
+    ImGui::EndFrame();
+    ImGui::UpdatePlatformWindows();
 
     while(!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -80,12 +114,8 @@ void Application::Run() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        static bool show_mixer = true;
-        {
-            BWUI::ShowMixer(0, &show_mixer);
-        }
-
-        BWUI::RenderFrame(*this);
+        // All of the UI Code should be put inside of this function
+        this->RenderFrame();
 
         ImGui::Render();
         int display_w, display_h;

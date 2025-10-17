@@ -157,9 +157,10 @@ BWError BWHostApi_Terminate() {
     return BW_OK;
 }
 
-BWError BWHostApi_Activate() {
+BWError BWHostApi_Activate(BWHostApi hostapi) {
     //Device selection
-    switch(_active_audio_device->host_api) {
+    _active_audio_device->host_api = hostapi;
+    switch(hostapi) {
         case ASIO:
             #ifdef BW_ASIO
             return BWAsio_Activate(_active_audio_device);
@@ -200,3 +201,10 @@ BWError BWHostApi_Deactivate() {
     return BW_OK;
 }
 
+bool BWHostApi_IsActivated() {
+    if(!_active_audio_device)
+        return false;
+    if(_active_audio_device->host_api == UNKNOWN)
+        return false;
+    return true;
+}

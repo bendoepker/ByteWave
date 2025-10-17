@@ -47,12 +47,12 @@ set(bw_src
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 
     # Generic Audio Backend Wrapper
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/bw-hostapi.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/hostapi.cpp
 
     # Utility Code
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/log.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/threads.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/config.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/serializer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/types.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/conversions.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/schedule.c
@@ -66,6 +66,7 @@ set(bw_src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/ui-comps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/application.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/render-frame.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/prompts.cpp
 
     # Library UI Files
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ui/
