@@ -70,22 +70,6 @@ BWError BWConfig_Write(const char* file_name, BWConfigData* data) {
     }
     if(num_written != 4) return BW_FILE_WRITE_ERROR;
 
-    //SECTION: Device Name Length
-    num_written = fwrite(&data->device_name_length, 4, 1, file);
-    if(num_written != 1) return BW_FILE_WRITE_ERROR;
-
-    //SECTION: Device Name
-    num_written = fwrite(data->device_name, 1, data->device_name_length, file);
-    if(num_written != data->device_name_length) return BW_FILE_WRITE_ERROR;
-
-    //SECTION: Window Width
-    num_written = fwrite(&data->window_width, 4, 1, file);
-    if(num_written != 1) return BW_FILE_WRITE_ERROR;
-
-    //SECTION: Window Height
-    num_written = fwrite(&data->window_height, 4, 1, file);
-    if(num_written != 1) return BW_FILE_WRITE_ERROR;
-
     fclose(file);
     return BW_OK;
 }
@@ -116,23 +100,6 @@ BWError BWConfig_Read(const char* file_name, BWConfigData* data) {
     else if(strncmp(host_api, "ALSA", 4) == 0) data->host_api = ALSA;
     else if(strncmp(host_api, "CORE", 4) == 0) data->host_api = CORE;
     else return BW_FILE_READ_ERROR; //NOTE: Add other hostapis before this line
-    //SECTION: Device Name Length
-    num_read = fread(&data->device_name_length, 4, 1, file);
-    if(num_read != 1) return BW_FILE_READ_ERROR;
-
-
-    //SECTION: Device Name
-    memset(data->device_name, 0, 128); //Ensure a null termination for any 0-127 byte name
-    num_read = fread(data->device_name, 1, data->device_name_length, file);
-    if(num_read != data->device_name_length) return BW_FILE_READ_ERROR;
-
-    //SECTION: Window Width
-    num_read = fread(&data->window_width, 4, 1, file);
-    if(num_read != 1) return BW_FILE_READ_ERROR;
-
-    //SECTION: Window Height
-    num_read = fread(&data->window_height, 4, 1, file);
-    if(num_read != 1) return BW_FILE_READ_ERROR;
 
     fclose(file);
 

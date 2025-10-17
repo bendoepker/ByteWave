@@ -27,16 +27,12 @@
 /* Logging */
 #include "log.h"
 
-/* For assert() */
-#include <assert.h>
+#include <vector>
 
-BWHostApi_AudioDevice* _active_audio_device = 0;
-int num_devices = 0;
-BWAudioDeviceEnumeration* devices_enumeration = 0;
+std::vector<BWAudioDevice> available_devices;
 
 BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     //SECTION: Enumerate devices
-    BWError ret = BW_OK;
 #ifdef BW_ASIO
     //ASIO
     uint32_t num_asio_devs = 0;
@@ -56,23 +52,10 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
 #endif
 
 #ifdef BW_JACK
-    //JACK
-    uint32_t num_jack_devs = 0;
-    _jack_device* jack_devs = 0;
-    ret = BWJack_QueryDevices(&jack_devs, &num_jack_devs);
-    if(ret != BW_OK) return ret;
-    num_devices += num_jack_devs;
+    std::vector<BWAudioDevice> jack_devs = BWJack_QueryDevices();
+    available_devices.insert(available_devices.end(), jack_devs.begin(), jack_devs.end());
 #endif
 
-    //TODO: Other host api enumerations (WASAPI, JACK, ALSA...)
-
-    if(num_devices == 0) return BW_NO_DEVICES;
-
-    devices_enumeration = (BWAudioDeviceEnumeration*)malloc(sizeof *devices_enumeration * num_devices);
-    if(devices_enumeration == 0) return BW_FAILED_MALLOC;
-
-    //SECTION: Copy names and assign host api identifier
-    int offset = 0;
 #ifdef BW_ASIO
     //ASIO
     for(int i = 0; i < num_asio_devs; i++) {
@@ -95,71 +78,24 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     wasapi_devs = 0;
 #endif //WASAPI Enumeration
 
-#ifdef BW_JACK
-    for(int i = 0; i < num_jack_devs; i++) {
-        memcpy(devices_enumeration[offset + i].device_name, jack_devs[i].name, 128);
-        devices_enumeration[offset + i].host_api = JACK;
-    }
-    offset += num_jack_devs;
-    free(jack_devs);
-    jack_devs = 0;
-#endif //Jack Enumeration
-
     //TODO: Other host api enumerations (WASAPI, JACK, ALSA...)
 
     //SECTION: LOG All Devices
 #ifdef BW_LOG
-    for(int i = 0; i < num_devices; i++) {
-        BW_LOG_GEN("%s", devices_enumeration[i].device_name);
+    for(auto dev : available_devices) {
+        BW_LOG_GEN("%s:\tInput:%d\tOutput:%d", dev.device_name, dev.is_input, dev.is_output);
     }
 #endif //Log Device Names
-
-    //SECTION: Set the active audio device based on defaults
-    _active_audio_device = (BWHostApi_AudioDevice*)malloc(sizeof* _active_audio_device);
-    if(_active_audio_device == 0) return BW_FAILED_MALLOC;
-    memset(_active_audio_device, 0, sizeof* _active_audio_device);
-
-    /*
-     * TODO: Fix this (aka add it back, but better)
-    //Search for audio device matching the one in the config data
-    for(int i = 0; i < num_devices; i++) {
-        if(devices_enumeration[i].host_api == conf_data->host_api) {
-            if(devices_enumeration[i].host_api == ASIO) {
-                if(strncmp(devices_enumeration[i].device_name, conf_data->device_name, 32) == 0){
-                    strncpy(_active_audio_device->device_name, devices_enumeration[i].device_name, 32);
-                    _active_audio_device->host_api = devices_enumeration[i].host_api;
-                    break;
-                }
-            } else {
-                if(strncmp(devices_enumeration[i].device_name, conf_data->device_name, 128) == 0) {
-                    strncpy(_active_audio_device->device_name, devices_enumeration[i].device_name, 128);
-                    _active_audio_device->host_api = devices_enumeration[i].host_api;
-                    break;
-                }
-            }
-        }
-    }
-    if(_active_audio_device->host_api == UNKNOWN || _active_audio_device->device_name[0] == 0) {
-        //Default to the first device
-        _active_audio_device->host_api = devices_enumeration[0].host_api;
-        strncpy(_active_audio_device->device_name, devices_enumeration[0].device_name, 128);
-        strncpy(conf_data->device_name, _active_audio_device->device_name, 128);
-        conf_data->host_api = _active_audio_device->host_api;
-    }
-    */
 
     return BW_OK;
 }
 
 BWError BWHostApi_Terminate() {
-    free(devices_enumeration);
-    free(_active_audio_device);
     return BW_OK;
 }
 
 BWError BWHostApi_Activate(BWHostApi hostapi) {
     //Device selection
-    _active_audio_device->host_api = hostapi;
     switch(hostapi) {
         case ASIO:
             #ifdef BW_ASIO
@@ -171,17 +107,16 @@ BWError BWHostApi_Activate(BWHostApi hostapi) {
             #endif //BW_WASAPI
         case JACK:
             #ifdef BW_JACK
-            return BWJack_Activate(_active_audio_device);
+            return BWJack_Activate();
             #endif //BW_JACK
         default:
-            assert(1 && "Host Api Not Implemented");
             break;
     }
     return BW_OK;
 }
 
 BWError BWHostApi_Deactivate() {
-    switch(_active_audio_device->host_api) {
+    switch(0) {
         case ASIO:
             #ifdef BW_ASIO
             return BWAsio_Deactivate();
@@ -195,16 +130,12 @@ BWError BWHostApi_Deactivate() {
             return BWJack_Deactivate();
             #endif //BW_JACK
         default:
-            assert(1 && "Host Api Not Implemented");
             break;
     }
     return BW_OK;
 }
 
 bool BWHostApi_IsActivated() {
-    if(!_active_audio_device)
-        return false;
-    if(_active_audio_device->host_api == UNKNOWN)
-        return false;
+    //TODO:
     return true;
 }

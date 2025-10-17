@@ -20,6 +20,7 @@
 #define BW_JACK_H
 
 #include <types.h>
+#include <vector>
 
 typedef struct {
     char name[128];
@@ -28,10 +29,12 @@ typedef struct {
     uint32_t output_latency;
 } _jack_device;
 
-BWError BWJack_Activate(BWHostApi_AudioDevice* audio_device);
+// Initialize Jack Library
+BWError BWJack_Activate();
 
+// Terminate Jack Library
 BWError BWJack_Deactivate();
 
-BWError BWJack_QueryDevices(_jack_device** devices, uint32_t* num_devices);
+std::vector<BWAudioDevice> BWJack_QueryDevices();
 
 #endif //BW_JACK_H

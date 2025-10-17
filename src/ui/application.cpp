@@ -86,6 +86,7 @@ Application::Application() {
 }
 
 Application::~Application() {
+    ConfigShutdown();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
