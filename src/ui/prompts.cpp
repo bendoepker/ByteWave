@@ -36,9 +36,13 @@ void AudioBackendPopup() {
     #endif
 
         if(ImGui::Button("Confirm")) {
-            if(BWHostApi_IsActivated())
-                BWHostApi_Deactivate();
-            BWHostApi_Activate(selected_hostapi);
+            if(BWAudioBackend::GetCurrentApi() != selected_hostapi) {
+                if(BWAudioBackend::IsActivated())
+                    BWAudioBackend::Deactivate();
+                BWAudioBackend::ChangeHostApi(selected_hostapi);
+            } else {
+                BWAudioBackend::Activate();
+            }
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();

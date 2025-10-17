@@ -17,16 +17,16 @@ void Application::ConfigStartup() {
     if(!this->bw_config)
         (void)0; //TODO: Handle out of memory error
     BWError ret = BWConfig_Read(config_location, this->bw_config);
-    BWHostApi_Initialize(this->bw_config);
+    BWAudioBackend::Initialize(this->bw_config);
     if(ret != BW_OK || this->bw_config->host_api == UNKNOWN) {
         this->triggers.open_backend_popup = true;
     }
 }
 
 void Application::ConfigShutdown() {
-    if(BWHostApi_IsActivated())
-        BWHostApi_Deactivate();
-    BWHostApi_Terminate();
+    if(BWAudioBackend::IsActivated())
+        BWAudioBackend::Deactivate();
+    BWAudioBackend::Terminate();
     BWConfig_Write(config_location, this->bw_config);
     free(this->bw_config);
 }

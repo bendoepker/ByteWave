@@ -18,21 +18,17 @@
 
 #include "hostapi.h"
 
-/* For memcpy() */
-#include <string.h>
-
-/* For malloc() and free() */
-#include <stdlib.h>
-
 /* Logging */
 #include "log.h"
 
 #include <vector>
 
+BWHostApi active_backend = UNKNOWN;
 std::vector<BWAudioDevice> available_devices;
 
-BWError BWHostApi_Initialize(BWConfigData* conf_data) {
-    //SECTION: Enumerate devices
+//TODO: Asio / WASPI refactor to use CPP
+BWError BWAudioBackend::Initialize(BWConfigData* conf_data) {
+    active_backend = conf_data->host_api;
 #ifdef BW_ASIO
     //ASIO
     uint32_t num_asio_devs = 0;
@@ -52,35 +48,10 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
 #endif
 
 #ifdef BW_JACK
-    std::vector<BWAudioDevice> jack_devs = BWJack_QueryDevices();
+    std::vector<BWAudioDevice> jack_devs = Jack::QueryDevices();
     available_devices.insert(available_devices.end(), jack_devs.begin(), jack_devs.end());
 #endif
 
-#ifdef BW_ASIO
-    //ASIO
-    for(int i = 0; i < num_asio_devs; i++) {
-        memcpy(devices_enumeration[offset + i].device_name, asio_devs[i].name, 32);
-        devices_enumeration[offset + i].host_api = ASIO;
-    }
-    offset += num_asio_devs;
-    free(asio_devs);
-    asio_devs = 0;
-#endif //ASIO Enumeration
-
-#ifdef BW_WASAPI
-    //WASAPI
-    for(int i = 0; i < num_wasapi_devs; i++) {
-        memcpy(devices_enumeration[offset + i].device_name, wasapi_devs[i].name, 128);
-        devices_enumeration[offset + i].host_api = WASAPI;
-    }
-    offset += num_wasapi_devs;
-    free(wasapi_devs);
-    wasapi_devs = 0;
-#endif //WASAPI Enumeration
-
-    //TODO: Other host api enumerations (WASAPI, JACK, ALSA...)
-
-    //SECTION: LOG All Devices
 #ifdef BW_LOG
     for(auto dev : available_devices) {
         BW_LOG_GEN("%s:\tInput:%d\tOutput:%d", dev.device_name, dev.is_input, dev.is_output);
@@ -90,13 +61,13 @@ BWError BWHostApi_Initialize(BWConfigData* conf_data) {
     return BW_OK;
 }
 
-BWError BWHostApi_Terminate() {
+BWError BWAudioBackend::Terminate() {
     return BW_OK;
 }
 
-BWError BWHostApi_Activate(BWHostApi hostapi) {
+BWError BWAudioBackend::Activate() {
     //Device selection
-    switch(hostapi) {
+    switch(active_backend) {
         case ASIO:
             #ifdef BW_ASIO
             return BWAsio_Activate(_active_audio_device);
@@ -107,7 +78,7 @@ BWError BWHostApi_Activate(BWHostApi hostapi) {
             #endif //BW_WASAPI
         case JACK:
             #ifdef BW_JACK
-            return BWJack_Activate();
+            return Jack::Activate();
             #endif //BW_JACK
         default:
             break;
@@ -115,27 +86,57 @@ BWError BWHostApi_Activate(BWHostApi hostapi) {
     return BW_OK;
 }
 
-BWError BWHostApi_Deactivate() {
-    switch(0) {
+void BWAudioBackend::Deactivate() {
+    switch(active_backend) {
         case ASIO:
             #ifdef BW_ASIO
-            return BWAsio_Deactivate();
+            Asio::Deactivate();
+            return;
             #endif //BW_ASIO
         case WASAPI:
             #ifdef BW_WASAPI
-            return BWWASAPI_Deactivate();
+            WASAPI::Deactivate();
+            return;
             #endif //BW_WASAPI
         case JACK:
             #ifdef BW_JACK
-            return BWJack_Deactivate();
+            Jack::Deactivate();
+            return;
             #endif //BW_JACK
         default:
             break;
     }
-    return BW_OK;
+    active_backend = UNKNOWN;
 }
 
-bool BWHostApi_IsActivated() {
-    //TODO:
+bool BWAudioBackend::IsActivated() {
+    if(active_backend == UNKNOWN) return false;
     return true;
+}
+
+void BWAudioBackend::ChangeHostApi(BWHostApi new_api) {
+    if(active_backend != UNKNOWN) {
+        BWAudioBackend::Deactivate();
+    }
+    active_backend = new_api;
+    BWAudioBackend::Activate();
+}
+
+BWHostApi BWAudioBackend::GetCurrentApi() {
+    return active_backend;
+}
+
+const std::vector<BWAudioDevice> BWAudioBackend::GetAudioDevices(bool is_input) {
+    std::vector<BWAudioDevice> out = {};
+    for(auto dev : available_devices) {
+        if(is_input) {
+            if(dev.is_input) {
+                out.push_back(dev);
+            }
+        } else {
+            if(dev.is_output)
+                out.push_back(dev);
+        }
+    }
+    return out;
 }

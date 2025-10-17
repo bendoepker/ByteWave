@@ -35,7 +35,19 @@
 
 //The main processing function, every host api will call this function in their own thread
 //and the audio will be routed through the mixer structures
-void process_buffers(float* input_buffers, float* output_buffers,
+/*
+*   input_buffers: array of pointers to readable buffers of length buffer_size
+*
+*   output_buffers: array of pointers to writable buffers of length buffer_size
+*
+*   num_input_buffers: the number of valid pointers within input_buffers
+*
+*   num_output_buffers: the number of valid pointers within output_buffers
+*
+*   buffer_size: the number of data points (floats) available within each of the buffers
+*
+*/
+void process_buffers(float** input_buffers, float** output_buffers,
                      uint32_t num_input_buffers, uint32_t num_output_buffers,
                      uint32_t buffer_size);
 

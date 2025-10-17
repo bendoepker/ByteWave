@@ -34,18 +34,26 @@
 #include <types.h>
 
 // Startup the available audio backends, get a list of available devices
-BWError BWHostApi_Initialize(BWConfigData* conf_data);
+namespace BWAudioBackend {
+BWError Initialize(BWConfigData* conf_data);
 
 // Close down the audio subsystem
-BWError BWHostApi_Terminate();
+BWError Terminate();
 
 // Start a specific audio backend
-BWError BWHostApi_Activate(BWHostApi hostapi);
+BWError Activate();
 
 // Close the active audio backend
-BWError BWHostApi_Deactivate();
+void Deactivate();
+
+void ChangeHostApi(BWHostApi new_api);
 
 // Check if any of the specific audio backends have been activated
-bool BWHostApi_IsActivated();
+bool IsActivated();
+
+BWHostApi GetCurrentApi();
+
+const std::vector<BWAudioDevice> GetAudioDevices(bool is_input);
+}
 
 #endif //HOSTAPI_H

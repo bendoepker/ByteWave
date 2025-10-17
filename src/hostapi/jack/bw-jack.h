@@ -22,19 +22,17 @@
 #include <types.h>
 #include <vector>
 
-typedef struct {
-    char name[128];
-
-    uint32_t input_latency;
-    uint32_t output_latency;
-} _jack_device;
-
+namespace BWAudioBackend {
+namespace Jack {
 // Initialize Jack Library
-BWError BWJack_Activate();
+BWError Activate();
 
 // Terminate Jack Library
-BWError BWJack_Deactivate();
+void Deactivate();
 
-std::vector<BWAudioDevice> BWJack_QueryDevices();
+// Get a list of Jack Audio Devices
+std::vector<BWAudioDevice> QueryDevices();
+}
+}
 
 #endif //BW_JACK_H

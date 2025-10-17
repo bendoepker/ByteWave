@@ -49,6 +49,11 @@ set(bw_src
     # Generic Audio Backend Wrapper
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/hostapi.cpp
 
+    # Audio Processing
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/process/process.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/process/fft.c
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/process/mixer.c
+
     # Utility Code
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/log.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/threads.c

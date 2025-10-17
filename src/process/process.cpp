@@ -16,4 +16,14 @@
 *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "bw-process.h"
+#include "process.h"
+#include <string.h>
+
+void process_buffers(float** input_buffers, float** output_buffers,
+                uint32_t num_input_buffers, uint32_t num_output_buffers,
+                uint32_t buffer_size) {
+    if(num_input_buffers == 2 && num_output_buffers == 2) {
+        memcpy(output_buffers[0], input_buffers[0], sizeof(float) * buffer_size);
+        memcpy(output_buffers[1], input_buffers[1], sizeof(float) * buffer_size);
+    }
+}
