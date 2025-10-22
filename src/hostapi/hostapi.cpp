@@ -30,12 +30,8 @@ std::vector<BWAudioDevice> available_devices;
 BWError BWAudioBackend::Initialize(BWConfigData* conf_data) {
     active_backend = conf_data->host_api;
 #ifdef BW_ASIO
-    //ASIO
-    uint32_t num_asio_devs = 0;
-    _asio_device* asio_devs = 0;
-    ret = BWAsio_QueryDevices(&asio_devs, &num_asio_devs);
-    if(ret != BW_OK) return ret;
-    num_devices += num_asio_devs;
+    std::vector<BWAudioDevice> asio_devs = Asio::QueryDevices();
+    available_devices.insert(available_devices.end(), asio_devs.begin(), asio_devs.end());
 #endif
 
 #ifdef BW_WASAPI
@@ -70,7 +66,11 @@ BWError BWAudioBackend::Activate() {
     switch(active_backend) {
         case ASIO:
             #ifdef BW_ASIO
-            return BWAsio_Activate(_active_audio_device);
+        {
+            auto ret = Asio::Activate(0);
+            BW_PRINT("RET: %d", ret);
+            return ret;
+        }
             #endif //BW_ASIO
         case WASAPI:
             #ifdef BW_WASAPI

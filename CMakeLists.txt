@@ -121,7 +121,7 @@ set(asio_src
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ASIOSDK/common/asio.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ASIOSDK/host/pc/asiolist.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/ASIOSDK/host/asiodrivers.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/asio/bw-asio.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/asio/bw-asio.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hostapi/asio/bw-asio-il.cpp
 )
 set(asio_inc

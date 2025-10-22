@@ -99,6 +99,8 @@ void BWUtil_ConvertToFloat(void* input_buffer, float* output_buffer,
         case FLOAT_32_BIT:
             memcpy(output_buffer, input_buffer, buffer_size * sizeof(float));
             return;
+        default:
+            assert(1 && "Sample type not implemented yet");
     }
 }
 
@@ -117,5 +119,7 @@ void BWUtil_ConvertFromFloat(float* input_buffer, void* output_buffer,
         case FLOAT_32_BIT:
             memcpy(output_buffer, input_buffer, buffer_size * sizeof(float));
             return;
+        default:
+            assert(1 && "Sample type not implemented yet");
     }
 }
