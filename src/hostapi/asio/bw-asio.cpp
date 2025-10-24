@@ -38,6 +38,8 @@ typedef struct {
     BWSampleTypes sample_format;
 
     ASIODriverInfo driver_info;
+    float* internal_input_bufs[ASIO_MAX_INPUT_CHANNELS];
+    float* internal_output_bufs[ASIO_MAX_OUTPUT_CHANNELS];
 } BWAsioDevice;
 
 BWAsioDevice active_device = {};
@@ -195,16 +197,42 @@ BWError BWAudioBackend::Asio::Activate(const char* driver_name) {
 
     active_device.post_output ? BW_PRINT("Supports Post Output") : BW_PRINT("Does not support Post Output");
 
+    active_device.internal_input_bufs[0] = (float*)malloc(active_device.preferred_buffer_size * ASIO_MAX_INPUT_CHANNELS);
+    if(!active_device.internal_input_bufs[0]) {
+        ASIODisposeBuffers();
+        ASIOExit();
+        TerminateAsioEnv();
+        return BW_FAILED;
+    }
+    for(int i = 0; i < ASIO_MAX_INPUT_CHANNELS; i++)
+        active_device.internal_input_bufs[i] = active_device.internal_input_bufs[0] + (i*active_device.preferred_buffer_size);
+
+    active_device.internal_output_bufs[0] = (float*)malloc(active_device.preferred_buffer_size * ASIO_MAX_OUTPUT_CHANNELS);
+    if(!active_device.internal_output_bufs[0]) {
+        free(active_device.internal_input_bufs[0]);
+        ASIODisposeBuffers();
+        ASIOExit();
+        TerminateAsioEnv();
+        return BW_FAILED;
+    }
+    for(int i = 0; i < ASIO_MAX_OUTPUT_CHANNELS; i++)
+        active_device.internal_output_bufs[i] = active_device.internal_output_bufs[0] + (i*active_device.preferred_buffer_size);
+
     if(ASIOStart() != ASE_OK) {
         ASIODisposeBuffers();
         ASIOExit();
         TerminateAsioEnv();
+        return BW_FAILED;
     }
 
     return BW_OK;
 }
 
 void BWAudioBackend::Asio::Deactivate() {
+    if(active_device.internal_input_bufs[0])
+        free(active_device.internal_input_bufs[0]);
+    if(active_device.internal_output_bufs[0])
+        free(active_device.internal_output_bufs[0]);
     if(asioDrivers) {
         ASIOStop();
         ASIODisposeBuffers();

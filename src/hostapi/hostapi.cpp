@@ -68,7 +68,6 @@ BWError BWAudioBackend::Activate() {
             #ifdef BW_ASIO
         {
             auto ret = Asio::Activate(0);
-            BW_PRINT("RET: %d", ret);
             return ret;
         }
             #endif //BW_ASIO

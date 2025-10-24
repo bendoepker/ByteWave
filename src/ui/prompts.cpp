@@ -3,6 +3,12 @@
 #include <log.h>
 #include <hostapi.h>
 
+void ProcessPopups(BWConfigData* config_data, UITriggers* triggers) {
+    if(triggers->open_backend_popup)
+        PromptForAudioBackend(config_data, triggers);
+    AudioBackendPopup();
+}
+
 void PromptForAudioBackend(BWConfigData* config_data, UITriggers* triggers) {
     ImGui::OpenPopup("backend_select_popup");
     triggers->open_backend_popup = false;
@@ -37,8 +43,6 @@ void AudioBackendPopup() {
 
         if(ImGui::Button("Confirm")) {
             if(BWAudioBackend::GetCurrentApi() != selected_hostapi) {
-                if(BWAudioBackend::IsActivated())
-                    BWAudioBackend::Deactivate();
                 BWAudioBackend::ChangeHostApi(selected_hostapi);
             } else {
                 BWAudioBackend::Activate();
