@@ -5,6 +5,7 @@
 #include <log.h>
 #include <assert.h>
 #include <conversions.h>
+#include "../process/process.h"
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -111,7 +112,7 @@ BWError BWAudioBackend::Asio::Activate(const char* driver_name) {
     }
     for(int i = 0; i < active_device.num_output_channels; i++) {
         const long nic = active_device.num_input_channels;
-        active_device.buffer_infos[i + nic].isInput = ASIOTrue;
+        active_device.buffer_infos[i + nic].isInput = ASIOFalse;
         active_device.buffer_infos[i + nic].channelNum = i;
         active_device.buffer_infos[i + nic].buffers[0] = 0;
         active_device.buffer_infos[i + nic].buffers[1] = 0;
@@ -197,17 +198,19 @@ BWError BWAudioBackend::Asio::Activate(const char* driver_name) {
 
     active_device.post_output ? BW_PRINT("Supports Post Output") : BW_PRINT("Does not support Post Output");
 
-    active_device.internal_input_bufs[0] = (float*)malloc(active_device.preferred_buffer_size * ASIO_MAX_INPUT_CHANNELS);
+    active_device.internal_input_bufs[0] = (float*)malloc(active_device.preferred_buffer_size * ASIO_MAX_INPUT_CHANNELS * sizeof(float));
     if(!active_device.internal_input_bufs[0]) {
         ASIODisposeBuffers();
         ASIOExit();
         TerminateAsioEnv();
         return BW_FAILED;
     }
-    for(int i = 0; i < ASIO_MAX_INPUT_CHANNELS; i++)
+    for(int i = 0; i < ASIO_MAX_INPUT_CHANNELS; i++) {
         active_device.internal_input_bufs[i] = active_device.internal_input_bufs[0] + (i*active_device.preferred_buffer_size);
+        BW_PRINT("%p", active_device.internal_input_bufs[i]);
+    }
 
-    active_device.internal_output_bufs[0] = (float*)malloc(active_device.preferred_buffer_size * ASIO_MAX_OUTPUT_CHANNELS);
+    active_device.internal_output_bufs[0] = (float*)malloc(active_device.preferred_buffer_size * ASIO_MAX_OUTPUT_CHANNELS * sizeof(float));
     if(!active_device.internal_output_bufs[0]) {
         free(active_device.internal_input_bufs[0]);
         ASIODisposeBuffers();
@@ -215,8 +218,10 @@ BWError BWAudioBackend::Asio::Activate(const char* driver_name) {
         TerminateAsioEnv();
         return BW_FAILED;
     }
-    for(int i = 0; i < ASIO_MAX_OUTPUT_CHANNELS; i++)
+    for(int i = 0; i < ASIO_MAX_OUTPUT_CHANNELS; i++) {
         active_device.internal_output_bufs[i] = active_device.internal_output_bufs[0] + (i*active_device.preferred_buffer_size);
+        BW_PRINT("%p", active_device.internal_output_bufs[i]);
+    }
 
     if(ASIOStart() != ASE_OK) {
         ASIODisposeBuffers();
@@ -277,7 +282,7 @@ void bufferSwitch(long doubleBufferIndex, ASIOBool directProcess) {
     //Backdoor into the actual audio callback (bufferSwitchTimeInfo)
 
     //Taken from the ASIO2 SDK, explanation in ASIOSDK/host/sample/hostsample.cpp
-    ASIOTime timeInfo = {0};
+    ASIOTime timeInfo = {};
 
 	if(ASIOGetSamplePosition(&timeInfo.timeInfo.samplePosition, &timeInfo.timeInfo.systemTime) == BW_OK)
 		timeInfo.timeInfo.flags = kSystemTimeValid | kSamplePositionValid;
@@ -342,14 +347,9 @@ ASIOTime* bufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBoo
     BWSampleTypes native_format = active_device.sample_format;
     ASIOBufferInfo* infos = active_device.buffer_infos;
 
-    //Internal buffer declaration
-    //FIX: Make these two buffers into a constant storage size
-    float input_bufs[num_inputs][buf_size];
-    float output_bufs[num_outputs][buf_size];
-
     //Convert the input buffers into floats
     for(int i = 0; i < num_inputs; i++, infos++) {
-        BWUtil_ConvertToFloat(infos->buffers[doubleBufferIndex], input_bufs[i], native_format, buf_size);
+        BWUtil_ConvertToFloat(infos->buffers[doubleBufferIndex], active_device.internal_input_bufs[i], native_format, buf_size);
     }
 
     //Processing
@@ -362,22 +362,11 @@ ASIOTime* bufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBoo
     *   process_buffers(input_bufs, output_bufs, num_inputs, num_outputs, buf_size);
     */
     //Zero Initialize all of the output buffers
-    for(int i = 0; i < num_outputs; i++) {
-        memset(output_bufs[i], 0, buf_size * sizeof(float));
-
-        //Add the inputs to the outputs
-        for(int j = 0; j < num_inputs; j++) {
-            for(int k = 0; k < buf_size; k++) {
-                output_bufs[i][k] += input_bufs[j][k];
-                if(output_bufs[i][k] > 1.0) output_bufs[i][k] = 1.0;
-                if(output_bufs[i][k] < -1.0) output_bufs[i][k] = -1.0;
-            }
-        }
-    }
+    process_buffers(active_device.internal_input_bufs, active_device.internal_output_bufs, num_inputs, num_outputs, buf_size);
 
     //Convert the output buffers to the native format
     for(int i = 0; i < num_outputs; i++, infos++) {
-        BWUtil_ConvertFromFloat(output_bufs[i], infos->buffers[doubleBufferIndex], native_format, buf_size);
+        BWUtil_ConvertFromFloat(active_device.internal_output_bufs[i], infos->buffers[doubleBufferIndex], native_format, buf_size);
     }
 
     if(active_device.post_output)

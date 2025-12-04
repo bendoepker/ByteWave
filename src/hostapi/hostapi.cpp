@@ -58,6 +58,7 @@ BWError BWAudioBackend::Initialize(BWConfigData* conf_data) {
 }
 
 BWError BWAudioBackend::Terminate() {
+    active_backend = UNKNOWN;
     return BW_OK;
 }
 
