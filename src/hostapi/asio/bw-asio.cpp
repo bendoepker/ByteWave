@@ -207,7 +207,6 @@ BWError BWAudioBackend::Asio::Activate(const char* driver_name) {
     }
     for(int i = 0; i < ASIO_MAX_INPUT_CHANNELS; i++) {
         active_device.internal_input_bufs[i] = active_device.internal_input_bufs[0] + (i*active_device.preferred_buffer_size);
-        BW_PRINT("%p", active_device.internal_input_bufs[i]);
     }
 
     active_device.internal_output_bufs[0] = (float*)malloc(active_device.preferred_buffer_size * ASIO_MAX_OUTPUT_CHANNELS * sizeof(float));
@@ -220,7 +219,6 @@ BWError BWAudioBackend::Asio::Activate(const char* driver_name) {
     }
     for(int i = 0; i < ASIO_MAX_OUTPUT_CHANNELS; i++) {
         active_device.internal_output_bufs[i] = active_device.internal_output_bufs[0] + (i*active_device.preferred_buffer_size);
-        BW_PRINT("%p", active_device.internal_output_bufs[i]);
     }
 
     if(ASIOStart() != ASE_OK) {

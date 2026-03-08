@@ -35,12 +35,7 @@ BWError BWAudioBackend::Initialize(BWConfigData* conf_data) {
 #endif
 
 #ifdef BW_WASAPI
-    //WASAPI
-    uint32_t num_wasapi_devs = 0;
-    _wasapi_device* wasapi_devs = 0;
-    ret = BWWASAPI_QueryDevices(&wasapi_devs, &num_wasapi_devs);
-    if(ret != BW_OK) return ret;
-    num_devices += num_wasapi_devs;
+    //TODO:
 #endif
 
 #ifdef BW_JACK

@@ -18,6 +18,7 @@
 
 #include "process.h"
 #include <string.h>
+#include <log.h>
 
 void process_buffers(float** input_buffers, float** output_buffers,
                 uint32_t num_input_buffers, uint32_t num_output_buffers,
@@ -25,5 +26,7 @@ void process_buffers(float** input_buffers, float** output_buffers,
     if(num_input_buffers == 2 && num_output_buffers == 2) {
         memcpy(output_buffers[0], input_buffers[0], sizeof(float) * buffer_size);
         memcpy(output_buffers[1], input_buffers[1], sizeof(float) * buffer_size);
+    } else {
+        BW_PRINT("ERROR: process_buffers not the right number of inputs or outputs, Inputs: %d, Outputs: %d", num_input_buffers, num_output_buffers);
     }
 }
